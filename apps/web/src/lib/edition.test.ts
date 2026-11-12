@@ -59,6 +59,12 @@ describe("the Edition form", () => {
     expect(result.success).toBeFalsy();
   });
 
+  it("reports a missing date as a validation error instead of throwing", () => {
+    const result = editionInput.safeParse({ ...form, proposalsOpenAt: "" });
+
+    expect(result.success).toBeFalsy();
+  });
+
   it("refuses dates out of order", () => {
     const result = editionInput.safeParse({
       ...form,

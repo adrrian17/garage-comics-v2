@@ -48,9 +48,10 @@ const editionDatesInOrder = (windows: EditionWindows) =>
 const isRealDateTime = (value: string) => {
   const [year, month, day, hour, minute] = value.split(/[-T:]/u).map(Number);
 
-  return new Date(Date.UTC(year, month - 1, day, hour, minute))
-    .toISOString()
-    .startsWith(value);
+  const date = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+  // Zod still runs this refine after the regex fails, so a malformed value can reach it.
+  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
 };
 
 const mexicoCityDateTime = z
