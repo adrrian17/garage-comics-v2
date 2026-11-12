@@ -6,6 +6,7 @@ import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { magicLink } from "better-auth/plugins/magic-link";
 import type { MagicLinkOptions } from "better-auth/plugins/magic-link";
+import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 
@@ -19,7 +20,7 @@ const magicLinkBody = z.object({ email: z.email() });
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
-// The seed promotes before the link is opened, so a session held by an older non-Admin account must not inherit the role.
+// Promotion happens before the link is opened, so a session held by an older non-Admin account must not inherit the role.
 const revokeNonAdminSessions = async (database: Database, email: string) => {
   const holder = await database
     .select({ id: schema.user.id })
@@ -44,6 +45,7 @@ export const upsertAdmin = async (database: Database, email: string) => {
   const normalized = normalizeEmail(email);
   const [localPart = normalized] = normalized.split("@");
 
+  await revokeNonAdminSessions(database, normalized);
   await database
     .insert(schema.user)
     .values({
@@ -90,12 +92,15 @@ export const createAuth = (
           body.success &&
           normalizeEmail(body.data.email) === normalizeEmail(env.ADMIN_EMAIL)
         ) {
-          await revokeNonAdminSessions(database, body.data.email);
           await upsertAdmin(database, body.data.email);
         }
       }),
     },
-    plugins: [magicLink({ disableSignUp: true, sendMagicLink })],
+    // tanstackStartCookies must stay last so it forwards the cookies set by the plugins before it.
+    plugins: [
+      magicLink({ disableSignUp: true, sendMagicLink }),
+      tanstackStartCookies(),
+    ],
   });
 
 export type Session = ReturnType<typeof createAuth>["$Infer"]["Session"];

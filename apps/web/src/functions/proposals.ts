@@ -1,8 +1,5 @@
-import {
-  edition,
-  proposal,
-  proposalStatuses,
-} from "@garage-comics/db/schema/editions";
+import type { edition } from "@garage-comics/db/schema/editions";
+import { proposal, proposalStatuses } from "@garage-comics/db/schema/editions";
 import { createServerFn } from "@tanstack/react-start";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
@@ -123,7 +120,13 @@ export const decideProposal = createServerFn({ method: "POST" })
 
     await expireStaleAcceptances(db, now);
 
-    // Matching on the `from` status makes the change atomic: a Proposal decided elsewhere is left alone.
+    const active = await findActiveEdition(db);
+
+    if (active === undefined) {
+      return { status: "stale" as const };
+    }
+
+    // Matching on the `from` status and the active Edition makes the change atomic: a Proposal decided elsewhere, or left over from an older Edition, is left alone.
     const [decided] = await db
       .update(proposal)
       .set({
@@ -131,25 +134,23 @@ export const decideProposal = createServerFn({ method: "POST" })
         decidedAt: now,
         acceptedAt: data.decision === "accept" ? now : null,
       })
-      .where(and(eq(proposal.id, data.id), eq(proposal.status, from)))
+      .where(
+        and(
+          eq(proposal.id, data.id),
+          eq(proposal.status, from),
+          eq(proposal.editionId, active.id)
+        )
+      )
       .returning();
 
     if (decided === undefined) {
       return { status: "stale" as const };
     }
 
-    const decidedEdition = await db
-      .select()
-      .from(edition)
-      .where(eq(edition.id, decided.editionId))
-      .get();
-
-    const notified =
-      decidedEdition !== undefined &&
-      (await sendNotification({
-        to: decided.email,
-        ...decisionEmails[data.decision](decidedEdition, now),
-      }));
+    const notified = await sendNotification({
+      to: decided.email,
+      ...decisionEmails[data.decision](active, now),
+    });
 
     return { status: "decided" as const, notified, email: decided.email };
   });
