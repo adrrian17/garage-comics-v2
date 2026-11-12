@@ -67,5 +67,5 @@ export const proposalInput = z.object({
       ABOUT_MIN_LENGTH,
       `Cuéntanos un poco más (mínimo ${ABOUT_MIN_LENGTH} caracteres).`
     )
-    .max(ABOUT_MAX_LENGTH),
+    .max(ABOUT_MAX_LENGTH, `Usa como máximo ${ABOUT_MAX_LENGTH} caracteres.`),
 });

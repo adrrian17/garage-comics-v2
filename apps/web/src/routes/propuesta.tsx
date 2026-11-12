@@ -181,8 +181,7 @@ const Sent = ({ email }: { email: string }) => (
       </h1>
     </CardTitle>
     <CardDescription>
-      Te mandamos una confirmación a <strong>{email}</strong>. Cuando la
-      revisemos te escribiremos a ese mismo correo.
+      Cuando la revisemos te escribiremos a <strong>{email}</strong>.
     </CardDescription>
   </CardHeader>
 );

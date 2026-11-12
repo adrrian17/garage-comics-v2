@@ -237,11 +237,11 @@ const EditionsTable = ({ editions }: { editions: Edition[] }) => (
         <TableRow key={edition.id}>
           <TableCell>{edition.name}</TableCell>
           <TableCell>{editionPhaseLabels[edition.phase]}</TableCell>
-          <TableCell>
+          <TableCell className="whitespace-nowrap">
             {formatShortDateTime(edition.proposalsOpenAt)} –{" "}
             {formatShortDateTime(edition.proposalsCloseAt)}
           </TableCell>
-          <TableCell>
+          <TableCell className="whitespace-nowrap">
             {formatShortDateTime(edition.salesOpenAt)} –{" "}
             {formatShortDateTime(edition.salesCloseAt)}
           </TableCell>
