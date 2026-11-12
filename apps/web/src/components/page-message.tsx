@@ -19,7 +19,11 @@ const PageMessage = ({
   const Wrapper = isAdminArea ? "div" : "main";
 
   return (
-    <Wrapper className="mx-auto w-full max-w-2xl px-6 py-12">
+    <Wrapper
+      className={
+        isAdminArea ? "max-w-2xl" : "mx-auto w-full max-w-2xl px-6 py-12"
+      }
+    >
       <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
       <p className="text-muted-foreground mt-2">{description}</p>
       <div className="mt-8 flex flex-wrap gap-2">

@@ -22,9 +22,9 @@ const Hero = ({
       <img
         src="/logo.webp"
         alt=""
-        width={181}
-        height={78}
-        className="h-[78px] w-auto self-start"
+        width={130}
+        height={56}
+        className="h-14 w-auto self-start"
       />
       <p className="text-muted-foreground text-sm font-medium">{kicker}</p>
       <h1 className="text-4xl leading-tight font-bold tracking-tight text-balance sm:text-5xl">
