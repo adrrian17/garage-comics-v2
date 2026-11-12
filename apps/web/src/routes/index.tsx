@@ -20,9 +20,9 @@ const Hero = ({
   <section className="grid items-center gap-12 lg:grid-cols-2">
     <div className="flex flex-col gap-6">
       <img
-        src="/logo.png"
-        alt="Garage Cómics"
-        width={129}
+        src="/logo.webp"
+        alt=""
+        width={181}
         height={78}
         className="h-[78px] w-auto self-start"
       />

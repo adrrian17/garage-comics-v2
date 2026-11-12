@@ -1,5 +1,5 @@
 import { Button, buttonVariants } from "@garage-comics/ui/components/button";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link, useLocation, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 const PageMessage = ({
@@ -10,18 +10,30 @@ const PageMessage = ({
   title: string;
   description: string;
   action?: ReactNode;
-}) => (
-  <main className="mx-auto w-full max-w-2xl px-6 py-12">
-    <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-    <p className="text-muted-foreground mt-2">{description}</p>
-    <div className="mt-8 flex flex-wrap gap-2">
-      {action}
-      <Link to="/" className={buttonVariants({ variant: "outline" })}>
-        Volver al inicio
-      </Link>
-    </div>
-  </main>
-);
+}) => {
+  // The Admin layout already renders a main landmark and has its own home.
+  const isAdminArea = useLocation({
+    select: (location) => location.pathname.startsWith("/admin"),
+  });
+
+  const Wrapper = isAdminArea ? "div" : "main";
+
+  return (
+    <Wrapper className="mx-auto w-full max-w-2xl px-6 py-12">
+      <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+      <p className="text-muted-foreground mt-2">{description}</p>
+      <div className="mt-8 flex flex-wrap gap-2">
+        {action}
+        <Link
+          to={isAdminArea ? "/admin" : "/"}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          Volver al inicio
+        </Link>
+      </div>
+    </Wrapper>
+  );
+};
 
 export const NotFound = () => (
   <PageMessage

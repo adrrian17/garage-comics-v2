@@ -186,7 +186,7 @@ const ClosedNotice = ({
   edition: Awaited<ReturnType<typeof getActiveEdition>>;
 }) => (
   <>
-    <h1 className={headingClass}>Manda tu propuesta</h1>
+    <h1 className={headingClass}>Participa con tu cómic</h1>
     <p className="text-muted-foreground mt-2">
       No necesitas cuenta y no cuesta nada.
     </p>
@@ -225,7 +225,7 @@ const ProposalPage = () => {
 
     return (
       <>
-        <h1 className={headingClass}>Manda tu propuesta</h1>
+        <h1 className={headingClass}>Participa con tu cómic</h1>
         <p className="text-muted-foreground mt-2">
           Para {edition.name}. No necesitas cuenta y no cuesta nada. Recibimos
           propuestas hasta el {formatDateTime(edition.proposalsCloseAt)}.

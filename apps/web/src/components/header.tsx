@@ -17,14 +17,14 @@ const Header = () => (
         className="focus-visible:ring-ring/50 w-fit rounded-md outline-none focus-visible:ring-3"
       >
         <img
-          src="/logo.png"
+          src="/logo.webp"
           alt="Garage Cómics"
-          width={60}
-          height={36}
-          className="h-9 w-auto"
+          width={93}
+          height={40}
+          className="h-10 w-auto"
         />
       </Link>
-      <nav aria-label="Principal" className="hidden items-center gap-6 sm:flex">
+      <nav aria-label="Principal" className="flex items-center gap-4 sm:gap-6">
         {publicLinks.map((link) => (
           <Link
             key={link.to}

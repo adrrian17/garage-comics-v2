@@ -112,7 +112,12 @@ const AdminTitle = () => {
   const pathname = useLocation({ select: (location) => location.pathname });
   const current = sections.find((section) => isCurrent(pathname, section.to));
 
-  return <h1 className="text-base font-semibold">{current?.label}</h1>;
+  // A not-found or error page inside the Admin area brings its own h1.
+  return (
+    <h1 hidden={current === undefined} className="text-base font-semibold">
+      {current?.label}
+    </h1>
+  );
 };
 
 const AdminLayout = () => (

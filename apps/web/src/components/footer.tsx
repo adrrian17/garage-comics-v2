@@ -10,14 +10,14 @@ const Footer = () => (
     <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-8">
       <div className="flex items-center gap-3">
         <img
-          src="/logo.png"
+          src="/logo.webp"
           alt="Garage Cómics"
-          width={40}
+          width={56}
           height={24}
           className="h-6 w-auto"
         />
         <p className="text-muted-foreground text-sm">
-          © {currentYear} Garage Comics
+          © {currentYear} Garage Cómics
         </p>
       </div>
       <nav aria-label="Pie de página" className="flex items-center gap-6">
