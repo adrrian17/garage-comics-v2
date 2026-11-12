@@ -1,13 +1,6 @@
 import { Alert, AlertDescription } from "@garage-comics/ui/components/alert";
 import { Button, buttonVariants } from "@garage-comics/ui/components/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@garage-comics/ui/components/card";
-import {
   Field,
   FieldDescription,
   FieldGroup,
@@ -168,80 +161,84 @@ const ProposalForm = ({
   );
 };
 
+const headingClass = "text-3xl font-bold tracking-tight";
+
 const Sent = ({ email }: { email: string }) => (
-  <CardHeader>
-    <PartyPopper aria-hidden className="text-primary mb-2 size-8" />
-    <CardTitle>
-      <h1
-        ref={focusOnMount}
-        tabIndex={-1}
-        className="text-2xl font-extrabold outline-none"
-      >
-        ¡Recibimos tu propuesta!
-      </h1>
-    </CardTitle>
-    <CardDescription>
-      Cuando la revisemos te escribiremos a <strong>{email}</strong>.
-    </CardDescription>
-  </CardHeader>
+  <>
+    <PartyPopper aria-hidden className="mb-4 size-8" />
+    <h1
+      ref={focusOnMount}
+      tabIndex={-1}
+      className={`${headingClass} outline-none`}
+    >
+      ¡Recibimos tu propuesta!
+    </h1>
+    <p className="text-muted-foreground mt-2">
+      Cuando la revisemos te escribiremos a{" "}
+      <strong className="text-foreground">{email}</strong>.
+    </p>
+  </>
+);
+
+const ClosedNotice = ({
+  edition,
+}: {
+  edition: Awaited<ReturnType<typeof getActiveEdition>>;
+}) => (
+  <>
+    <h1 className={headingClass}>Manda tu propuesta</h1>
+    <p className="text-muted-foreground mt-2">
+      No necesitas cuenta y no cuesta nada.
+    </p>
+    <div className="mt-8 flex flex-col items-center gap-4 rounded-xl border border-dashed p-8 text-center">
+      <div className="flex flex-col gap-1">
+        <h2 className="font-medium">
+          {edition?.phase === "upcoming"
+            ? "Las propuestas todavía no abren"
+            : "Las propuestas están cerradas"}
+        </h2>
+        <p className="text-muted-foreground text-sm">
+          {edition?.phase === "upcoming"
+            ? `Las propuestas para ${edition.name} abren el ${formatDateTime(edition.proposalsOpenAt)}.`
+            : "Anunciaremos la próxima convocatoria en la página de inicio."}
+        </p>
+      </div>
+      <Link to="/" className={buttonVariants({ variant: "outline" })}>
+        Volver al inicio
+      </Link>
+    </div>
+  </>
 );
 
 const ProposalPage = () => {
   const edition = Route.useLoaderData();
   const [sentTo, setSentTo] = useState<string>();
 
-  if (edition?.phase !== "proposals") {
+  const content = () => {
+    if (edition?.phase !== "proposals") {
+      return <ClosedNotice edition={edition} />;
+    }
+
+    if (sentTo !== undefined) {
+      return <Sent email={sentTo} />;
+    }
+
     return (
-      <main className="mx-auto w-full max-w-xl px-4 py-12 sm:py-20">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <h1 className="text-2xl font-extrabold">
-                {edition?.phase === "upcoming"
-                  ? "Las propuestas todavía no abren"
-                  : "Las propuestas están cerradas"}
-              </h1>
-            </CardTitle>
-            <CardDescription>
-              {edition?.phase === "upcoming"
-                ? `Las propuestas para ${edition.name} abren el ${formatDateTime(edition.proposalsOpenAt)}.`
-                : "Anunciaremos la próxima convocatoria en la página de inicio."}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Link to="/" className={buttonVariants({ variant: "outline" })}>
-              Volver al inicio
-            </Link>
-          </CardContent>
-        </Card>
-      </main>
+      <>
+        <h1 className={headingClass}>Manda tu propuesta</h1>
+        <p className="text-muted-foreground mt-2">
+          Para {edition.name}. No necesitas cuenta y no cuesta nada. Recibimos
+          propuestas hasta el {formatDateTime(edition.proposalsCloseAt)}.
+        </p>
+        <div className="mt-8">
+          <ProposalForm editionName={edition.name} onSent={setSentTo} />
+        </div>
+      </>
     );
-  }
+  };
 
   return (
-    <main className="mx-auto w-full max-w-xl px-4 py-12 sm:py-20">
-      <Card>
-        {sentTo === undefined ? (
-          <>
-            <CardHeader>
-              <CardTitle>
-                <h1 className="text-2xl font-extrabold">Manda tu propuesta</h1>
-              </CardTitle>
-              <CardDescription>
-                Para {edition.name}. No necesitas cuenta y no cuesta nada.
-                Recibimos propuestas hasta el{" "}
-                {formatDateTime(edition.proposalsCloseAt)}.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ProposalForm editionName={edition.name} onSent={setSentTo} />
-            </CardContent>
-          </>
-        ) : (
-          <Sent email={sentTo} />
-        )}
-      </Card>
-    </main>
+    <main className="mx-auto w-full max-w-2xl px-6 py-12">{content()}</main>
   );
 };
 

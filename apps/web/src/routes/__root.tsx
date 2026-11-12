@@ -4,10 +4,12 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
+  useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
 
+import Footer from "@/components/footer";
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSession } from "@/functions/session";
@@ -26,23 +28,35 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
   </html>
 );
 
-const RootComponent = () => (
-  <>
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
-      disableTransitionOnChange
-      storageKey="vite-ui-theme"
-    >
-      <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr]">
-        <Header />
-        <Outlet />
-      </div>
-      <Toaster richColors />
-    </ThemeProvider>
-    <TanStackRouterDevtools position="bottom-left" />
-  </>
-);
+const RootComponent = () => {
+  // The Admin area brings its own sidebar layout instead of the public chrome.
+  const isAdminArea = useLocation({
+    select: (location) => location.pathname.startsWith("/admin"),
+  });
+
+  return (
+    <>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        disableTransitionOnChange
+        storageKey="vite-ui-theme"
+      >
+        {isAdminArea ? (
+          <Outlet />
+        ) : (
+          <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto]">
+            <Header />
+            <Outlet />
+            <Footer />
+          </div>
+        )}
+        <Toaster richColors />
+      </ThemeProvider>
+      <TanStackRouterDevtools position="bottom-left" />
+    </>
+  );
+};
 
 export const Route = createRootRoute({
   shellComponent: RootDocument,

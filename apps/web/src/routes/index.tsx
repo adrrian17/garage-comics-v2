@@ -1,6 +1,6 @@
 import { buttonVariants } from "@garage-comics/ui/components/button";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { SquarePen } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { getActiveEdition } from "@/functions/editions";
@@ -17,38 +17,46 @@ const Hero = ({
   title: string;
   children: ReactNode;
 }) => (
-  <section className="panel bg-card relative overflow-hidden px-5 py-10 sm:px-10 sm:py-16">
-    {/* Decorative only, faded away from the text so it never sits behind copy. */}
-    <div
-      aria-hidden
-      className="halftone pointer-events-none absolute inset-y-0 right-0 hidden w-1/4 [mask-image:linear-gradient(to_left,black,transparent)] md:block"
-    />
-    <div className="relative">
-      <p className="text-primary text-sm font-bold tracking-widest uppercase">
-        {kicker}
-      </p>
-      <h1 className="mt-3 text-4xl leading-none font-extrabold tracking-tight text-balance sm:text-6xl">
+  <section className="grid items-center gap-12 lg:grid-cols-2">
+    <div className="flex flex-col gap-6">
+      <img
+        src="/logo.png"
+        alt="Garage Cómics"
+        width={129}
+        height={78}
+        className="h-[78px] w-auto self-start"
+      />
+      <p className="text-muted-foreground text-sm font-medium">{kicker}</p>
+      <h1 className="text-4xl leading-tight font-bold tracking-tight text-balance sm:text-5xl">
         {title}
       </h1>
-      <div className="mt-6 flex max-w-prose flex-col gap-4 text-lg">
+      <div className="text-muted-foreground flex max-w-prose flex-col gap-6 text-base">
         {children}
       </div>
     </div>
+    <img
+      src="/poster.webp"
+      alt="Ilustración de un puesto de cómics en la calle, atendido por criaturas fantásticas y rodeado de lectores"
+      width={791}
+      height={1222}
+      fetchPriority="high"
+      className="mx-auto h-auto w-full max-w-md rounded-3xl shadow-xl lg:mr-0 lg:ml-auto"
+    />
   </section>
 );
 
 const EditionDates = ({ edition }: { edition: NonNullable<ActiveEdition> }) => (
   <dl className="grid gap-4 sm:grid-cols-2">
-    <div className="panel bg-background p-4">
+    <div className="rounded-xl border p-4">
       <dt className="text-muted-foreground text-sm">Propuestas</dt>
-      <dd className="font-heading text-xl font-bold">
+      <dd className="text-foreground text-base font-semibold">
         {formatDate(edition.proposalsOpenAt)} al{" "}
         {formatDate(edition.proposalsCloseAt)}
       </dd>
     </div>
-    <div className="panel bg-background p-4">
+    <div className="rounded-xl border p-4">
       <dt className="text-muted-foreground text-sm">Venta</dt>
-      <dd className="font-heading text-xl font-bold">
+      <dd className="text-foreground text-base font-semibold">
         {formatDate(edition.salesOpenAt)} al {formatDate(edition.salesCloseAt)}
       </dd>
     </div>
@@ -74,14 +82,17 @@ const Landing = ({ edition }: { edition: ActiveEdition }) => {
           <p>
             ¿Haces cómics? Manda tu propuesta para vender tu trabajo en esta
             Edición. Mandarla no cuesta nada y recibimos propuestas hasta el{" "}
-            <strong>{formatDateTime(edition.proposalsCloseAt)}</strong>.
+            <strong className="text-foreground">
+              {formatDateTime(edition.proposalsCloseAt)}
+            </strong>
+            .
           </p>
           <Link
             to="/propuesta"
-            className={buttonVariants({ size: "lg", className: "w-fit" })}
+            className={buttonVariants({ className: "w-fit" })}
           >
+            <SquarePen data-icon="inline-start" />
             Manda tu propuesta
-            <ArrowRight data-icon="inline-end" />
           </Link>
           <EditionDates edition={edition} />
         </Hero>
@@ -93,7 +104,10 @@ const Landing = ({ edition }: { edition: ActiveEdition }) => {
         <Hero kicker="Próxima Edición" title={edition.name}>
           <p>
             Las propuestas abren el{" "}
-            <strong>{formatDateTime(edition.proposalsOpenAt)}</strong>.
+            <strong className="text-foreground">
+              {formatDateTime(edition.proposalsOpenAt)}
+            </strong>
+            .
           </p>
           <EditionDates edition={edition} />
         </Hero>
@@ -105,7 +119,11 @@ const Landing = ({ edition }: { edition: ActiveEdition }) => {
         <Hero kicker="Ya casi" title={edition.name}>
           <p>
             Las propuestas cerraron y los autores preparan sus cómics. La venta
-            abre el <strong>{formatDateTime(edition.salesOpenAt)}</strong>.
+            abre el{" "}
+            <strong className="text-foreground">
+              {formatDateTime(edition.salesOpenAt)}
+            </strong>
+            .
           </p>
           <EditionDates edition={edition} />
         </Hero>
@@ -117,7 +135,11 @@ const Landing = ({ edition }: { edition: ActiveEdition }) => {
         <Hero kicker="A la venta" title={edition.name}>
           <p>
             Aquí vas a encontrar el catálogo de esta Edición, a la venta hasta
-            el <strong>{formatDateTime(edition.salesCloseAt)}</strong>.
+            el{" "}
+            <strong className="text-foreground">
+              {formatDateTime(edition.salesCloseAt)}
+            </strong>
+            .
           </p>
         </Hero>
       );
@@ -130,7 +152,7 @@ const Landing = ({ edition }: { edition: ActiveEdition }) => {
 };
 
 const HomePage = () => (
-  <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-14">
+  <main className="mx-auto w-full max-w-6xl px-6 py-12 lg:py-20">
     <Landing edition={Route.useLoaderData()} />
   </main>
 );

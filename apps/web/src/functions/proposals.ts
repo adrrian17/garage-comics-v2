@@ -1,7 +1,7 @@
 import type { edition } from "@garage-comics/db/schema/editions";
 import { proposal, proposalStatuses } from "@garage-comics/db/schema/editions";
 import { createServerFn } from "@tanstack/react-start";
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { adminMiddleware } from "@/functions/admin-middleware";
@@ -93,6 +93,26 @@ export const listProposals = createServerFn({ method: "GET" })
       edition: { ...active, phase: editionPhase(active, now) },
       proposals,
     };
+  });
+
+export const countPendingProposals = createServerFn({ method: "GET" })
+  .middleware([adminMiddleware])
+  .handler(async () => {
+    const db = createDatabase();
+    const active = await findActiveEdition(db);
+
+    if (active === undefined) {
+      return 0;
+    }
+
+    const [row] = await db
+      .select({ total: count() })
+      .from(proposal)
+      .where(
+        and(eq(proposal.editionId, active.id), eq(proposal.status, "pending"))
+      );
+
+    return row?.total ?? 0;
   });
 
 type DecidedEdition = typeof edition.$inferSelect;

@@ -260,7 +260,7 @@ const ProposalsPage = () => {
       <Empty>
         <EmptyHeader>
           <EmptyTitle>
-            <h1>No hay una Edición activa</h1>
+            <h2>No hay una Edición activa</h2>
           </EmptyTitle>
           <EmptyDescription>
             Activa una Edición para ver sus propuestas.{" "}
@@ -273,12 +273,9 @@ const ProposalsPage = () => {
 
   return (
     <section className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-3xl font-extrabold">Propuestas</h1>
-        <p className="text-muted-foreground">
-          {data.edition.name} · {editionPhaseLabels[data.edition.phase]}
-        </p>
-      </header>
+      <p className="text-muted-foreground text-sm">
+        {data.edition.name} · {editionPhaseLabels[data.edition.phase]}
+      </p>
       <StatusFilter current={estado} />
       {data.proposals.length === 0 ? (
         <Empty>

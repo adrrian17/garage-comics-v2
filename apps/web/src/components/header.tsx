@@ -3,31 +3,40 @@ import { Link } from "@tanstack/react-router";
 import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
 
+export const publicLinks = [
+  { to: "/", label: "Inicio" },
+  { to: "/propuesta", label: "Participa" },
+] as const;
+
 const Header = () => (
-  <header className="bg-background border-foreground border-b-2">
-    <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
+  <header className="bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
+    <div className="mx-auto grid h-16 w-full max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-4 px-6">
       <Link
         to="/"
-        className="font-heading flex items-center gap-2 text-lg font-extrabold tracking-tight sm:text-xl"
+        aria-label="Garage Cómics, inicio"
+        className="focus-visible:ring-ring/50 w-fit rounded-md outline-none focus-visible:ring-3"
       >
-        <span
-          aria-hidden
-          className="panel bg-secondary text-secondary-foreground grid size-8 place-items-center text-sm"
-        >
-          GC
-        </span>
-        Garage Cómics
+        <img
+          src="/logo.png"
+          alt="Garage Cómics"
+          width={60}
+          height={36}
+          className="h-9 w-auto"
+        />
       </Link>
-      <div className="flex items-center gap-2">
-        {/* The landing page carries the same call to action on narrow screens. */}
-        <nav aria-label="Principal" className="hidden sm:block">
+      <nav aria-label="Principal" className="hidden items-center gap-6 sm:flex">
+        {publicLinks.map((link) => (
           <Link
-            to="/propuesta"
-            className="hover:text-primary data-[status=active]:text-primary focus-visible:ring-ring/50 rounded-sm px-2 text-sm font-semibold outline-none focus-visible:ring-3"
+            key={link.to}
+            to={link.to}
+            activeOptions={{ exact: true }}
+            className="text-muted-foreground hover:text-foreground data-[status=active]:text-foreground focus-visible:ring-ring/50 rounded-sm text-sm font-medium outline-none focus-visible:ring-3"
           >
-            Manda tu propuesta
+            {link.label}
           </Link>
-        </nav>
+        ))}
+      </nav>
+      <div className="col-start-3 flex items-center justify-end gap-2">
         <ModeToggle />
         <UserMenu />
       </div>

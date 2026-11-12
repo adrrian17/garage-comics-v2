@@ -8,14 +8,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@garage-comics/ui/components/dropdown-menu";
-import { Link, useRouteContext, useRouter } from "@tanstack/react-router";
+import { Link, useRouteContext } from "@tanstack/react-router";
 import { LayoutDashboard, LogOut, UserRound } from "lucide-react";
-import { toast } from "sonner";
 
-import { authClient } from "@/lib/auth-client";
+import { useSignOut } from "@/lib/use-sign-out";
 
 const UserMenu = () => {
-  const router = useRouter();
+  const signOut = useSignOut();
   const { session } = useRouteContext({ from: "__root__" });
 
   if (!session) {
@@ -25,19 +24,6 @@ const UserMenu = () => {
       </Link>
     );
   }
-
-  const signOut = async () => {
-    const { error } = await authClient.signOut();
-
-    if (error) {
-      toast.error("No pudimos cerrar tu sesión. Intenta de nuevo.");
-
-      return;
-    }
-
-    await router.invalidate();
-    await router.navigate({ to: "/" });
-  };
 
   return (
     <DropdownMenu>

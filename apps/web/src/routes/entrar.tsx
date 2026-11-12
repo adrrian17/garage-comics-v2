@@ -1,13 +1,6 @@
 import { Alert, AlertDescription } from "@garage-comics/ui/components/alert";
 import { Button } from "@garage-comics/ui/components/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@garage-comics/ui/components/card";
-import {
   Field,
   FieldGroup,
   FieldLabel,
@@ -33,6 +26,8 @@ const linkErrorMessage = (code: string) =>
     ? "Ese correo no tiene cuenta en Garage Cómics."
     : "Ese link ya venció o ya se usó. Pide uno nuevo.";
 
+const headingClass = "text-3xl font-bold tracking-tight";
+
 const CheckEmail = ({
   email,
   onRetry,
@@ -41,27 +36,21 @@ const CheckEmail = ({
   onRetry: () => void;
 }) => (
   <>
-    <CardHeader>
-      <MailCheck aria-hidden className="text-primary mb-2 size-8" />
-      <CardTitle>
-        <h1
-          ref={focusOnMount}
-          tabIndex={-1}
-          className="text-2xl font-extrabold outline-none"
-        >
-          Revisa tu correo
-        </h1>
-      </CardTitle>
-      <CardDescription>
-        Te mandamos un link a <strong>{email}</strong>. Ábrelo en este
-        dispositivo para entrar. Vence en 5 minutos.
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      <Button variant="outline" className="w-full" onClick={onRetry}>
-        Usar otro correo
-      </Button>
-    </CardContent>
+    <MailCheck aria-hidden className="mb-4 size-8" />
+    <h1
+      ref={focusOnMount}
+      tabIndex={-1}
+      className={`${headingClass} outline-none`}
+    >
+      Revisa tu correo
+    </h1>
+    <p className="text-muted-foreground mt-2">
+      Te mandamos un link a <strong className="text-foreground">{email}</strong>
+      . Ábrelo en este dispositivo para entrar. Vence en 5 minutos.
+    </p>
+    <Button variant="outline" className="mt-8 w-full" onClick={onRetry}>
+      Usar otro correo
+    </Button>
   </>
 );
 
@@ -96,61 +85,52 @@ const SignInPage = () => {
   };
 
   return (
-    <main className="flex justify-center px-4 py-12 sm:py-20">
-      <Card className="w-full max-w-sm">
-        {sentTo === undefined ? (
-          <>
-            <CardHeader>
-              <CardTitle>
-                <h1 className="text-2xl font-extrabold">Entrar</h1>
-              </CardTitle>
-              <CardDescription>
-                Sin contraseñas: te mandamos un link a tu correo.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form
-                onSubmit={(event) => {
-                  void handleSubmit(event);
-                }}
-              >
-                <FieldGroup>
-                  {error === undefined ? null : (
-                    <Alert variant="destructive">
-                      <AlertDescription>
-                        {linkErrorMessage(error)}
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  <Field>
-                    <FieldLabel htmlFor="email">Correo</FieldLabel>
-                    <Input
-                      id="email"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      value={email}
-                      onChange={(event) => {
-                        setEmail(event.target.value);
-                      }}
-                    />
-                  </Field>
-                  <Button type="submit" disabled={isPending}>
-                    {isPending ? "Mandando…" : "Mandarme el link"}
-                  </Button>
-                </FieldGroup>
-              </form>
-            </CardContent>
-          </>
-        ) : (
-          <CheckEmail
-            email={sentTo}
-            onRetry={() => {
-              setSentTo(undefined);
+    <main className="mx-auto w-full max-w-md px-6 py-12">
+      {sentTo === undefined ? (
+        <>
+          <h1 className={headingClass}>Entrar</h1>
+          <p className="text-muted-foreground mt-2">
+            Sin contraseñas: te mandamos un link a tu correo.
+          </p>
+          <form
+            className="mt-8"
+            onSubmit={(event) => {
+              void handleSubmit(event);
             }}
-          />
-        )}
-      </Card>
+          >
+            <FieldGroup>
+              {error === undefined ? null : (
+                <Alert variant="destructive">
+                  <AlertDescription>{linkErrorMessage(error)}</AlertDescription>
+                </Alert>
+              )}
+              <Field>
+                <FieldLabel htmlFor="email">Correo</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(event) => {
+                    setEmail(event.target.value);
+                  }}
+                />
+              </Field>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Mandando…" : "Mandarme el link"}
+              </Button>
+            </FieldGroup>
+          </form>
+        </>
+      ) : (
+        <CheckEmail
+          email={sentTo}
+          onRetry={() => {
+            setSentTo(undefined);
+          }}
+        />
+      )}
     </main>
   );
 };
