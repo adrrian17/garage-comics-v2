@@ -7,6 +7,8 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
+import { user } from "./auth";
+
 const createdAt = () =>
   integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
@@ -45,6 +47,7 @@ export const proposalStatuses = [
   "accepted",
   "rejected",
   "expired",
+  "registered",
 ] as const;
 
 export type ProposalStatus = (typeof proposalStatuses)[number];
@@ -74,6 +77,38 @@ export const proposal = sqliteTable(
     // One open Proposal per email and Edition; rejected or expired ones free the email again.
     uniqueIndex("proposal_one_open_per_email_idx")
       .on(table.editionId, table.email)
-      .where(sql`status in ('pending', 'accepted')`),
+      .where(sql`status in ('pending', 'accepted', 'registered')`),
+  ]
+);
+
+// The record of which Editions an Author can sell in. `proposalId` is unique so a replayed payment webhook cannot register twice.
+export const registration = sqliteTable(
+  "registration",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    editionId: text("edition_id")
+      .notNull()
+      .references(() => edition.id),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id),
+    proposalId: text("proposal_id")
+      .notNull()
+      .unique()
+      .references(() => proposal.id),
+    amountMxn: integer("amount_mxn").notNull(),
+    stripeCheckoutSessionId: text("stripe_checkout_session_id")
+      .notNull()
+      .unique(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    uniqueIndex("registration_edition_user_idx").on(
+      table.editionId,
+      table.userId
+    ),
+    index("registration_userId_idx").on(table.userId),
   ]
 );

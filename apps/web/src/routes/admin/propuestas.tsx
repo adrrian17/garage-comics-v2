@@ -53,6 +53,7 @@ const statusSlug = z.enum([
   "aceptadas",
   "no-aceptadas",
   "vencidas",
+  "inscritas",
 ]);
 
 type StatusSlug = z.infer<typeof statusSlug>;
@@ -62,6 +63,7 @@ const statusFilters = {
   aceptadas: { status: "accepted", label: "Aceptadas" },
   "no-aceptadas": { status: "rejected", label: "No aceptadas" },
   vencidas: { status: "expired", label: "Vencidas" },
+  inscritas: { status: "registered", label: "Inscritas" },
 } as const satisfies Record<
   StatusSlug,
   { status: ProposalStatus; label: string }
@@ -72,6 +74,7 @@ const statusBadge = {
   accepted: "default",
   rejected: "outline",
   expired: "outline",
+  registered: "default",
 } as const satisfies Record<
   ProposalStatus,
   NonNullable<Parameters<typeof badgeVariants>[0]>["variant"]
