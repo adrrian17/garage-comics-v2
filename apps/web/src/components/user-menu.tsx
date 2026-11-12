@@ -10,6 +10,7 @@ import {
 } from "@garage-comics/ui/components/dropdown-menu";
 import { Link, useRouteContext, useRouter } from "@tanstack/react-router";
 import { LayoutDashboard, LogOut, UserRound } from "lucide-react";
+import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -26,7 +27,14 @@ const UserMenu = () => {
   }
 
   const signOut = async () => {
-    await authClient.signOut();
+    const { error } = await authClient.signOut();
+
+    if (error) {
+      toast.error("No pudimos cerrar tu sesión. Intenta de nuevo.");
+
+      return;
+    }
+
     await router.invalidate();
     await router.navigate({ to: "/" });
   };

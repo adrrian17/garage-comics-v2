@@ -22,12 +22,16 @@ export const sendEmail = async ({ to, subject, text }: Email) => {
 export const sendNotification = async (email: Email) => {
   try {
     await sendEmail(email);
+
+    return true;
   } catch (error) {
     log.error({
       action: "send_notification",
       subject: email.subject,
       error: error instanceof Error ? error.message : String(error),
     });
+
+    return false;
   }
 };
 

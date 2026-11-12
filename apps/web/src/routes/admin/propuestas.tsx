@@ -122,8 +122,12 @@ const ConfirmDecision = ({
       toast.error("No pudimos guardar tu decisión. Intenta de nuevo.");
     } else if (result.status === "stale") {
       toast.error("Esta propuesta ya había cambiado. Actualizamos la lista.");
-    } else {
+    } else if (result.notified) {
       toast.success(copy.done);
+    } else {
+      toast.warning(
+        `Guardamos tu decisión, pero no pudimos mandar el correo. Escríbele a ${result.email}.`
+      );
     }
 
     await router.invalidate();

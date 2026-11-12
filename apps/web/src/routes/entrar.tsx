@@ -75,15 +75,18 @@ const SignInPage = () => {
     event.preventDefault();
     setIsPending(true);
 
-    const result = await authClient.signIn.magicLink({
-      email,
-      callbackURL: "/admin",
-      errorCallbackURL: "/entrar",
-    });
+    const sent = await authClient.signIn
+      .magicLink({
+        email,
+        callbackURL: "/admin",
+        errorCallbackURL: "/entrar",
+      })
+      .then((result) => result.error === null)
+      .catch(() => false);
 
     setIsPending(false);
 
-    if (result.error) {
+    if (!sent) {
       toast.error("No pudimos mandar el link. Intenta de nuevo en un momento.");
 
       return;

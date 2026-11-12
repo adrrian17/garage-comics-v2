@@ -56,7 +56,8 @@ export const proposalInput = z.object({
       z
         .url({
           protocol: /^https?$/u,
-          error: "El portafolio debe ser un link que empiece con https://",
+          error:
+            "El portafolio debe ser un link que empiece con http:// o https://",
         })
         .nullable()
     ),

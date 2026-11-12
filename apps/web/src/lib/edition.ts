@@ -44,9 +44,19 @@ const editionDatesInOrder = (windows: EditionWindows) =>
   windows.salesOpenAt < windows.salesCloseAt;
 
 // shortcut: Mexico City has used a fixed UTC-06:00 since it dropped DST in 2022; switch to Temporal once Workers ship it.
+// `new Date` rolls an impossible day such as February 30 into March, so check the parts round-trip.
+const isRealDateTime = (value: string) => {
+  const [year, month, day, hour, minute] = value.split(/[-T:]/u).map(Number);
+
+  return new Date(Date.UTC(year, month - 1, day, hour, minute))
+    .toISOString()
+    .startsWith(value);
+};
+
 const mexicoCityDateTime = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/u, "Falta una fecha.")
+  .refine(isRealDateTime, "Esa fecha no existe.")
   .transform((value) => new Date(`${value}:00-06:00`));
 
 export const EDITION_NAME_MAX_LENGTH = 80;

@@ -6,6 +6,7 @@ import { betterAuth } from "better-auth";
 import { createAuthMiddleware } from "better-auth/api";
 import { magicLink } from "better-auth/plugins/magic-link";
 import type { MagicLinkOptions } from "better-auth/plugins/magic-link";
+import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 
 export interface AuthConfig {
@@ -17,6 +18,26 @@ export interface AuthConfig {
 const magicLinkBody = z.object({ email: z.email() });
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
+// The seed promotes before the link is opened, so a session held by an older non-Admin account must not inherit the role.
+const revokeNonAdminSessions = async (database: Database, email: string) => {
+  const holder = await database
+    .select({ id: schema.user.id })
+    .from(schema.user)
+    .where(
+      and(
+        eq(schema.user.email, normalizeEmail(email)),
+        ne(schema.user.role, "admin")
+      )
+    )
+    .get();
+
+  if (holder !== undefined) {
+    await database
+      .delete(schema.session)
+      .where(eq(schema.session.userId, holder.id));
+  }
+};
 
 /** Makes the account for `email` exist with the Admin role; safe to repeat. */
 export const upsertAdmin = async (database: Database, email: string) => {
@@ -69,6 +90,7 @@ export const createAuth = (
           body.success &&
           normalizeEmail(body.data.email) === normalizeEmail(env.ADMIN_EMAIL)
         ) {
+          await revokeNonAdminSessions(database, body.data.email);
           await upsertAdmin(database, body.data.email);
         }
       }),

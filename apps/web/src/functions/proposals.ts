@@ -144,12 +144,12 @@ export const decideProposal = createServerFn({ method: "POST" })
       .where(eq(edition.id, decided.editionId))
       .get();
 
-    if (decidedEdition !== undefined) {
-      await sendNotification({
+    const notified =
+      decidedEdition !== undefined &&
+      (await sendNotification({
         to: decided.email,
         ...decisionEmails[data.decision](decidedEdition, now),
-      });
-    }
+      }));
 
-    return { status: "decided" as const };
+    return { status: "decided" as const, notified, email: decided.email };
   });

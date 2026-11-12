@@ -50,6 +50,15 @@ describe("the Edition form", () => {
     expect(parsed.registrationPriceMxn).toBe(500);
   });
 
+  it("refuses a day that does not exist instead of rolling it into the next month", () => {
+    const result = editionInput.safeParse({
+      ...form,
+      proposalsCloseAt: "2027-02-30T09:00",
+    });
+
+    expect(result.success).toBeFalsy();
+  });
+
   it("refuses dates out of order", () => {
     const result = editionInput.safeParse({
       ...form,
