@@ -22,6 +22,11 @@ import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
 
+// Moves focus to the confirmation heading so screen readers announce it.
+const focusOnMount = (element: HTMLElement | null) => {
+  element?.focus();
+};
+
 // Better Auth appends `?error=<code>` when a magic link fails.
 const linkErrorMessage = (code: string) =>
   code === "new_user_signup_disabled"
@@ -39,7 +44,13 @@ const CheckEmail = ({
     <CardHeader>
       <MailCheck aria-hidden className="text-primary mb-2 size-8" />
       <CardTitle>
-        <h1>Revisa tu correo</h1>
+        <h1
+          ref={focusOnMount}
+          tabIndex={-1}
+          className="text-2xl font-extrabold outline-none"
+        >
+          Revisa tu correo
+        </h1>
       </CardTitle>
       <CardDescription>
         Te mandamos un link a <strong>{email}</strong>. Ábrelo en este
@@ -88,7 +99,7 @@ const SignInPage = () => {
           <>
             <CardHeader>
               <CardTitle>
-                <h1>Entrar</h1>
+                <h1 className="text-2xl font-extrabold">Entrar</h1>
               </CardTitle>
               <CardDescription>
                 Sin contraseñas: te mandamos un link a tu correo.

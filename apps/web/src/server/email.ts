@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import { log } from "evlog";
 
 interface Email {
   to: string;
@@ -17,6 +18,19 @@ export const sendEmail = async ({ to, subject, text }: Email) => {
   });
 };
 
+// The change it reports is already saved, so a failed send is logged instead of shown as a failed save.
+export const sendNotification = async (email: Email) => {
+  try {
+    await sendEmail(email);
+  } catch (error) {
+    log.error({
+      action: "send_notification",
+      subject: email.subject,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+};
+
 export const magicLinkEmail = (url: string) => ({
   subject: "Tu link para entrar a Garage Cómics",
   text: `Entra a Garage Cómics con este link:\n\n${url}\n\nFunciona una sola vez y vence en 5 minutos. Si no lo pediste, ignora este correo.`,
@@ -29,7 +43,7 @@ export const proposalReceivedEmail = (editionName: string) => ({
 
 export const proposalNotAcceptedEmail = (editionName: string) => ({
   subject: `Tu propuesta para ${editionName}`,
-  text: `Gracias por mandar tu propuesta para ${editionName}. Esta vez no fue aceptada.\n\nPuedes volver a intentarlo en la próxima Edición.`,
+  text: `Gracias por mandar tu propuesta para ${editionName}. Esta vez no fue aceptada.\n\nSi quieres, puedes mandar una nueva propuesta mientras la convocatoria siga abierta.`,
 });
 
 export const proposalAcceptedEmail = ({

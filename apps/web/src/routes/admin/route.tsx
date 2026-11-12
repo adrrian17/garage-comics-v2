@@ -21,7 +21,7 @@ const AdminLayout = () => (
         <Link
           key={section.to}
           to={section.to}
-          className="text-muted-foreground hover:text-foreground data-[status=active]:border-primary data-[status=active]:text-foreground -mb-0.5 border-b-4 border-transparent px-3 py-2 text-sm font-semibold whitespace-nowrap"
+          className="text-muted-foreground hover:text-foreground data-[status=active]:border-primary data-[status=active]:text-foreground focus-visible:ring-ring/50 -mb-0.5 rounded-sm border-b-4 border-transparent px-3 py-2 text-sm font-semibold whitespace-nowrap outline-none focus-visible:ring-3"
         >
           {section.label}
         </Link>

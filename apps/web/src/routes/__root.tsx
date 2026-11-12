@@ -34,7 +34,7 @@ const RootComponent = () => (
       disableTransitionOnChange
       storageKey="vite-ui-theme"
     >
-      <div className="grid min-h-svh grid-rows-[auto_1fr]">
+      <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr]">
         <Header />
         <Outlet />
       </div>
@@ -56,7 +56,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Tienda de cómics digitales de autores mexicanos, abierta por temporadas.",
+          "Tienda de cómics digitales de autores mexicanos, abierta por tiempo limitado.",
       },
     ],
     links: [

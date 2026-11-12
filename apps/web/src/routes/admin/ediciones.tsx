@@ -50,8 +50,8 @@ import {
   createEdition,
   listEditions,
 } from "@/functions/editions";
-import { editionPhaseLabels } from "@/lib/edition";
-import { formatDate, formatMxn } from "@/lib/format";
+import { EDITION_NAME_MAX_LENGTH, editionPhaseLabels } from "@/lib/edition";
+import { formatMxn, formatShortDateTime } from "@/lib/format";
 
 type Edition = Awaited<ReturnType<typeof listEditions>>[number];
 
@@ -113,17 +113,13 @@ const CreateEditionForm = () => {
           }}
         >
           <FieldGroup>
-            {failure === undefined ? null : (
-              <Alert variant="destructive">
-                <AlertDescription>{failure}</AlertDescription>
-              </Alert>
-            )}
             <Field>
               <FieldLabel htmlFor="name">Nombre</FieldLabel>
               <Input
                 id="name"
                 name="name"
-                placeholder="Garage Cómics 2027"
+                placeholder="Edición 2027"
+                maxLength={EDITION_NAME_MAX_LENGTH}
                 required
               />
             </Field>
@@ -153,6 +149,11 @@ const CreateEditionForm = () => {
                 Autor.
               </FieldDescription>
             </Field>
+            {failure === undefined ? null : (
+              <Alert variant="destructive">
+                <AlertDescription>{failure}</AlertDescription>
+              </Alert>
+            )}
             <Button type="submit" disabled={isPending} className="w-fit">
               {isPending ? "Creando…" : "Crear Edición"}
             </Button>
@@ -237,12 +238,12 @@ const EditionsTable = ({ editions }: { editions: Edition[] }) => (
           <TableCell>{edition.name}</TableCell>
           <TableCell>{editionPhaseLabels[edition.phase]}</TableCell>
           <TableCell>
-            {formatDate(edition.proposalsOpenAt)} –{" "}
-            {formatDate(edition.proposalsCloseAt)}
+            {formatShortDateTime(edition.proposalsOpenAt)} –{" "}
+            {formatShortDateTime(edition.proposalsCloseAt)}
           </TableCell>
           <TableCell>
-            {formatDate(edition.salesOpenAt)} –{" "}
-            {formatDate(edition.salesCloseAt)}
+            {formatShortDateTime(edition.salesOpenAt)} –{" "}
+            {formatShortDateTime(edition.salesCloseAt)}
           </TableCell>
           <TableCell className="text-right">
             {formatMxn(edition.registrationPriceMxn)}

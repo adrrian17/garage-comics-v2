@@ -23,7 +23,7 @@ const Header = () => (
         <nav aria-label="Principal" className="hidden sm:block">
           <Link
             to="/propuesta"
-            className="hover:text-primary data-[status=active]:text-primary px-2 text-sm font-semibold"
+            className="hover:text-primary data-[status=active]:text-primary focus-visible:ring-ring/50 rounded-sm px-2 text-sm font-semibold outline-none focus-visible:ring-3"
           >
             Manda tu propuesta
           </Link>

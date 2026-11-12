@@ -20,7 +20,7 @@ import {
   proposalAcceptedEmail,
   proposalNotAcceptedEmail,
   proposalReceivedEmail,
-  sendEmail,
+  sendNotification,
 } from "@/server/email";
 import { createDatabase } from "@/server/services";
 
@@ -57,7 +57,7 @@ export const submitProposal = createServerFn({ method: "POST" })
       return { status: "duplicate" as const };
     }
 
-    await sendEmail({
+    await sendNotification({
       to: data.data.email,
       ...proposalReceivedEmail(active.name),
     });
@@ -145,7 +145,7 @@ export const decideProposal = createServerFn({ method: "POST" })
       .get();
 
     if (decidedEdition !== undefined) {
-      await sendEmail({
+      await sendNotification({
         to: decided.email,
         ...decisionEmails[data.decision](decidedEdition, now),
       });

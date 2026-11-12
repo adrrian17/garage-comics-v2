@@ -33,11 +33,16 @@ export const proposalStatusLabels = {
   expired: "Vencida",
 } as const satisfies Record<ProposalStatus, string>;
 
+export const NAME_MAX_LENGTH = 120;
 export const ABOUT_MIN_LENGTH = 20;
 export const ABOUT_MAX_LENGTH = 2000;
 
 export const proposalInput = z.object({
-  name: z.string().trim().min(1, "Escribe tu nombre.").max(120),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Escribe tu nombre.")
+    .max(NAME_MAX_LENGTH, "Tu nombre es demasiado largo."),
   email: z
     .string()
     .trim()

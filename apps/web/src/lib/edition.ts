@@ -49,9 +49,15 @@ const mexicoCityDateTime = z
   .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/u, "Falta una fecha.")
   .transform((value) => new Date(`${value}:00-06:00`));
 
+export const EDITION_NAME_MAX_LENGTH = 80;
+
 export const editionInput = z
   .object({
-    name: z.string().trim().min(1, "Ponle nombre a la Edición.").max(80),
+    name: z
+      .string()
+      .trim()
+      .min(1, "Ponle nombre a la Edición.")
+      .max(EDITION_NAME_MAX_LENGTH, "El nombre es demasiado largo."),
     proposalsOpenAt: mexicoCityDateTime,
     proposalsCloseAt: mexicoCityDateTime,
     salesOpenAt: mexicoCityDateTime,

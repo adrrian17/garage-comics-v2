@@ -1,5 +1,5 @@
 import { Alert, AlertDescription } from "@garage-comics/ui/components/alert";
-import { Button } from "@garage-comics/ui/components/button";
+import { Button, buttonVariants } from "@garage-comics/ui/components/button";
 import {
   Card,
   CardContent,
@@ -15,7 +15,7 @@ import {
 } from "@garage-comics/ui/components/field";
 import { Input } from "@garage-comics/ui/components/input";
 import { Textarea } from "@garage-comics/ui/components/textarea";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { PartyPopper } from "lucide-react";
 import { useState } from "react";
 import type { SubmitEvent } from "react";
@@ -23,7 +23,16 @@ import type { SubmitEvent } from "react";
 import { getActiveEdition } from "@/functions/editions";
 import { submitProposal } from "@/functions/proposals";
 import { formatDateTime } from "@/lib/format";
-import { ABOUT_MAX_LENGTH, ABOUT_MIN_LENGTH } from "@/lib/proposal";
+import {
+  ABOUT_MAX_LENGTH,
+  ABOUT_MIN_LENGTH,
+  NAME_MAX_LENGTH,
+} from "@/lib/proposal";
+
+// Moves focus to the success heading so screen readers announce it.
+const focusOnMount = (element: HTMLElement | null) => {
+  element?.focus();
+};
 
 // A thrown request (offline, server down) becomes a result so the form can say so.
 const failed = { status: "error" } as const;
@@ -95,14 +104,15 @@ const ProposalForm = ({
       }}
     >
       <FieldGroup>
-        {failure === null ? null : (
-          <Alert variant="destructive">
-            <AlertDescription>{failure}</AlertDescription>
-          </Alert>
-        )}
         <Field>
           <FieldLabel htmlFor="name">Nombre</FieldLabel>
-          <Input id="name" name="name" autoComplete="name" required />
+          <Input
+            id="name"
+            name="name"
+            autoComplete="name"
+            maxLength={NAME_MAX_LENGTH}
+            required
+          />
         </Field>
         <Field>
           <FieldLabel htmlFor="email">Correo</FieldLabel>
@@ -145,6 +155,11 @@ const ProposalForm = ({
             saber.
           </FieldDescription>
         </Field>
+        {failure === null ? null : (
+          <Alert variant="destructive">
+            <AlertDescription>{failure}</AlertDescription>
+          </Alert>
+        )}
         <Button type="submit" size="lg" disabled={isPending}>
           {isPending ? "Mandando…" : "Mandar propuesta"}
         </Button>
@@ -157,7 +172,13 @@ const Sent = ({ email }: { email: string }) => (
   <CardHeader>
     <PartyPopper aria-hidden className="text-primary mb-2 size-8" />
     <CardTitle>
-      <h1>¡Recibimos tu propuesta!</h1>
+      <h1
+        ref={focusOnMount}
+        tabIndex={-1}
+        className="text-2xl font-extrabold outline-none"
+      >
+        ¡Recibimos tu propuesta!
+      </h1>
     </CardTitle>
     <CardDescription>
       Te mandamos una confirmación a <strong>{email}</strong>. Cuando la
@@ -176,7 +197,7 @@ const ProposalPage = () => {
         <Card>
           <CardHeader>
             <CardTitle>
-              <h1>
+              <h1 className="text-2xl font-extrabold">
                 {edition?.phase === "upcoming"
                   ? "Las propuestas todavía no abren"
                   : "Las propuestas están cerradas"}
@@ -188,6 +209,11 @@ const ProposalPage = () => {
                 : "Anunciaremos la próxima convocatoria en la página de inicio."}
             </CardDescription>
           </CardHeader>
+          <CardContent>
+            <Link to="/" className={buttonVariants({ variant: "outline" })}>
+              Volver al inicio
+            </Link>
+          </CardContent>
         </Card>
       </main>
     );
@@ -200,7 +226,7 @@ const ProposalPage = () => {
           <>
             <CardHeader>
               <CardTitle>
-                <h1>Manda tu propuesta</h1>
+                <h1 className="text-2xl font-extrabold">Manda tu propuesta</h1>
               </CardTitle>
               <CardDescription>
                 Para {edition.name}. No necesitas cuenta y no cuesta nada.

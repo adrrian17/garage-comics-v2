@@ -17,15 +17,22 @@ const Hero = ({
   title: string;
   children: ReactNode;
 }) => (
-  <section className="panel halftone bg-card px-5 py-10 sm:px-10 sm:py-16">
-    <p className="text-primary text-sm font-bold tracking-widest uppercase">
-      {kicker}
-    </p>
-    <h1 className="mt-3 text-4xl leading-none font-extrabold tracking-tight text-balance sm:text-6xl">
-      {title}
-    </h1>
-    <div className="mt-6 flex max-w-prose flex-col gap-4 text-lg">
-      {children}
+  <section className="panel bg-card relative overflow-hidden px-5 py-10 sm:px-10 sm:py-16">
+    {/* Decorative only, faded away from the text so it never sits behind copy. */}
+    <div
+      aria-hidden
+      className="halftone pointer-events-none absolute inset-y-0 right-0 hidden w-1/4 [mask-image:linear-gradient(to_left,black,transparent)] md:block"
+    />
+    <div className="relative">
+      <p className="text-primary text-sm font-bold tracking-widest uppercase">
+        {kicker}
+      </p>
+      <h1 className="mt-3 text-4xl leading-none font-extrabold tracking-tight text-balance sm:text-6xl">
+        {title}
+      </h1>
+      <div className="mt-6 flex max-w-prose flex-col gap-4 text-lg">
+        {children}
+      </div>
     </div>
   </section>
 );
@@ -53,7 +60,7 @@ const Landing = ({ edition }: { edition: ActiveEdition }) => {
     return (
       <Hero kicker="Garage Cómics" title="La próxima Edición viene en camino">
         <p>
-          Cómics digitales de autores mexicanos, a la venta por temporadas.
+          Cómics digitales de autores mexicanos, a la venta por tiempo limitado.
           Vuelve pronto para conocer las fechas.
         </p>
       </Hero>
@@ -136,7 +143,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Garage Cómics vende cómics digitales de autores mexicanos por temporadas. Consulta las fechas de la próxima Edición o manda tu propuesta.",
+          "Garage Cómics vende cómics digitales de autores mexicanos por tiempo limitado, una Edición a la vez. Consulta las fechas de la próxima Edición o manda tu propuesta.",
       },
     ],
   }),
