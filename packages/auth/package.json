@@ -1,0 +1,21 @@
+{
+  "name": "@garage-comics/auth",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {},
+  "dependencies": {
+    "@better-auth/core": "catalog:",
+    "@better-auth/drizzle-adapter": "catalog:",
+    "@garage-comics/db": "workspace:*",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@garage-comics/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

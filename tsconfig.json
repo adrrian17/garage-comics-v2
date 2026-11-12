@@ -1,0 +1,3 @@
+{
+  "extends": "@garage-comics/config/tsconfig.base.json"
+}
