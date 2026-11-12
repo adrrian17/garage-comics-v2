@@ -10,7 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as PropuestaRouteImport } from './routes/propuesta'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAdministradoresRouteImport } from './routes/admin/administradores'
+import { Route as AdminEdicionesRouteImport } from './routes/admin/ediciones'
+import { Route as AdminPropuestasRouteImport } from './routes/admin/propuestas'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,10 +24,40 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EntrarRoute = EntrarRouteImport.update({
   id: '/entrar',
   path: '/entrar',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PropuestaRoute = PropuestaRouteImport.update({
+  id: '/propuesta',
+  path: '/propuesta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAdministradoresRoute = AdminAdministradoresRouteImport.update({
+  id: '/administradores',
+  path: '/administradores',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminEdicionesRoute = AdminEdicionesRouteImport.update({
+  id: '/ediciones',
+  path: '/ediciones',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminPropuestasRoute = AdminPropuestasRouteImport.update({
+  id: '/propuestas',
+  path: '/propuestas',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -31,31 +67,77 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/entrar': typeof EntrarRoute
+  '/propuesta': typeof PropuestaRoute
+  '/admin/administradores': typeof AdminAdministradoresRoute
+  '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/propuestas': typeof AdminPropuestasRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/entrar': typeof EntrarRoute
+  '/propuesta': typeof PropuestaRoute
+  '/admin/administradores': typeof AdminAdministradoresRoute
+  '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/propuestas': typeof AdminPropuestasRoute
+  '/admin': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
   '/entrar': typeof EntrarRoute
+  '/propuesta': typeof PropuestaRoute
+  '/admin/administradores': typeof AdminAdministradoresRoute
+  '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/propuestas': typeof AdminPropuestasRoute
+  '/admin/': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/entrar' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/entrar'
+    | '/propuesta'
+    | '/admin/administradores'
+    | '/admin/ediciones'
+    | '/admin/propuestas'
+    | '/admin/'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/entrar' | '/api/auth/$'
-  id: '__root__' | '/' | '/entrar' | '/api/auth/$'
+  to:
+    | '/'
+    | '/entrar'
+    | '/propuesta'
+    | '/admin/administradores'
+    | '/admin/ediciones'
+    | '/admin/propuestas'
+    | '/admin'
+    | '/api/auth/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/entrar'
+    | '/propuesta'
+    | '/admin/administradores'
+    | '/admin/ediciones'
+    | '/admin/propuestas'
+    | '/admin/'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   EntrarRoute: typeof EntrarRoute
+  PropuestaRoute: typeof PropuestaRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
@@ -68,12 +150,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/entrar': {
       id: '/entrar'
       path: '/entrar'
       fullPath: '/entrar'
       preLoaderRoute: typeof EntrarRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/propuesta': {
+      id: '/propuesta'
+      path: '/propuesta'
+      fullPath: '/propuesta'
+      preLoaderRoute: typeof PropuestaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/administradores': {
+      id: '/admin/administradores'
+      path: '/administradores'
+      fullPath: '/admin/administradores'
+      preLoaderRoute: typeof AdminAdministradoresRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/ediciones': {
+      id: '/admin/ediciones'
+      path: '/ediciones'
+      fullPath: '/admin/ediciones'
+      preLoaderRoute: typeof AdminEdicionesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/propuestas': {
+      id: '/admin/propuestas'
+      path: '/propuestas'
+      fullPath: '/admin/propuestas'
+      preLoaderRoute: typeof AdminPropuestasRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -85,9 +209,29 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminAdministradoresRoute: typeof AdminAdministradoresRoute
+  AdminEdicionesRoute: typeof AdminEdicionesRoute
+  AdminPropuestasRoute: typeof AdminPropuestasRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminAdministradoresRoute: AdminAdministradoresRoute,
+  AdminEdicionesRoute: AdminEdicionesRoute,
+  AdminPropuestasRoute: AdminPropuestasRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   EntrarRoute: EntrarRoute,
+  PropuestaRoute: PropuestaRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport

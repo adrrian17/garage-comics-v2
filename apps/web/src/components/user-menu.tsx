@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@garage-comics/ui/components/dropdown-menu";
 import { Link, useRouteContext, useRouter } from "@tanstack/react-router";
-import { LogOut, UserRound } from "lucide-react";
+import { LayoutDashboard, LogOut, UserRound } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -45,6 +45,12 @@ const UserMenu = () => {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {session.user.role === "admin" ? (
+            <DropdownMenuItem render={<Link to="/admin" />}>
+              <LayoutDashboard />
+              Administración
+            </DropdownMenuItem>
+          ) : null}
           <DropdownMenuItem
             onClick={() => {
               void signOut();
