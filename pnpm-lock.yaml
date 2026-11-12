@@ -173,6 +173,9 @@ catalogs:
     '@cloudflare/workers-types':
       specifier: ^5.20260906.1
       version: 5.20261109.1
+    '@fontsource-variable/figtree':
+      specifier: ^5.3.0
+      version: 5.3.0
     '@tailwindcss/postcss':
       specifier: ^4.3.3
       version: 4.3.5
@@ -310,9 +313,6 @@ importers:
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.5(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))
-      '@tanstack/react-form':
-        specifier: ^1.33.5
-        version: 1.33.5(@tanstack/react-start@1.169.5(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rolldown@1.2.13)(supports-color@7.2.0))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@tanstack/react-router':
         specifier: ^1.170.46
         version: 1.170.46(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -322,6 +322,9 @@ importers:
       better-auth:
         specifier: 'catalog:'
         version: 1.7.18(@tanstack/react-start@1.169.5(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rolldown@1.2.13)(supports-color@7.2.0))(drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20261109.1)(@effect/sql-d1@4.1.2(effect@4.1.2))(@libsql/client@0.18.0)(effect@4.1.2)(zod@4.6.7)))(drizzle-orm@1.0.0-rc.5(@cloudflare/workers-types@5.20261109.1)(@effect/sql-d1@4.1.2(effect@4.1.2))(@libsql/client@0.18.0)(effect@4.1.2)(zod@4.6.7))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(solid-js@1.9.18)(vitest@5.1.0)
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 1.0.0-rc.5(@cloudflare/workers-types@5.20261109.1)(@effect/sql-d1@4.1.2(effect@4.1.2))(@libsql/client@0.18.0)(effect@4.1.2)(zod@4.6.7)
       evlog:
         specifier: ^2.35.1
         version: 2.35.1(@orpc/server@1.16.2(ws@8.22.2))(@tanstack/start-client-core@1.170.39)(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(effect@4.1.2)(hono@4.13.17)(react@19.3.1)
@@ -459,8 +462,8 @@ importers:
       '@base-ui/react':
         specifier: ^1.8.0
         version: 1.9.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@fontsource-variable/inter':
-        specifier: ^5.3.0
+      '@fontsource-variable/figtree':
+        specifier: 'catalog:'
         version: 5.3.0
       '@shadcn/react':
         specifier: ^0.3.1
@@ -1048,8 +1051,8 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
-  '@fontsource-variable/inter@5.3.0':
-    resolution: {integrity: sha512-OupL48va4JNofb97w6NYeF9S7W/kHNKM0Er8Dem5nqi4jeOLrVJDoE8tZEpnMJmtkvNbB1EIPPwHcdkF6b1oUA==}
+  '@fontsource-variable/figtree@5.3.0':
+    resolution: {integrity: sha512-VRVodD7OiG7apQwE8/2fMjaqpY/a0qRJqL5HtYj8CKIVps+9amaFcdfKmDIf7iqYQx6iPLlArVXAfKeIZmVcNQ==}
 
   '@github/browserslist-config@1.0.0':
     resolution: {integrity: sha512-gIhjdJp/c2beaIWWIlsXdqXVRUz3r2BxBCpfz/F3JXHvSAQ1paMYjLH+maEATtENg+k5eLV7gA+9yPp762ieuw==}
@@ -2640,30 +2643,9 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7 || ^8
 
-  '@tanstack/devtools-event-client@0.4.4':
-    resolution: {integrity: sha512-6T5Yop/793YI+H+5J8Hsyj4kCih9sl4t3ElLgKioW5hk3ocn+ZdSJ94tT7vL7uabxSugWYBZlOTMPzEw2puvQw==}
-    engines: {node: '>=18'}
-    hasBin: true
-
-  '@tanstack/form-core@1.33.5':
-    resolution: {integrity: sha512-3dfx9MBP0aq5sXKteikG629X9oviptrQj0IFRk9YGcb+lB7Kv5x8S17oOSk1wUWgjQZ4xVJEMbKwOAODymocgA==}
-
   '@tanstack/history@1.162.5':
     resolution: {integrity: sha512-w1+YvwmTkwt5n8yUqEH3IWZ9DsmorCZW/EQ3KYHnqEgIkOZpH54NvW6/Epq3Dzb8H0ifIeYX8PExvrNLIH5FIA==}
     engines: {node: '>=20.19'}
-
-  '@tanstack/pacer-lite@0.1.1':
-    resolution: {integrity: sha512-y/xtNPNt/YeyoVxE/JCx+T7yjEzpezmbb+toK8DDD1P4m7Kzs5YR956+7OKexG3f8aXgC3rLZl7b1V+yNUSy5w==}
-    engines: {node: '>=18'}
-
-  '@tanstack/react-form@1.33.5':
-    resolution: {integrity: sha512-LlRB28qJwO/QCGaHvWnbdh4haBgTFiZVmzA2uzxSBS3YA7/IqrQ6HOBK70CkFQ+DbflZ7NawsmSln13h5iIdTA==}
-    peerDependencies:
-      '@tanstack/react-start': '*'
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@tanstack/react-start':
-        optional: true
 
   '@tanstack/react-router-devtools@1.167.3':
     resolution: {integrity: sha512-HwAbCp3eIDHG6DmG9M7U7zBB5V3ybjeBek7Ss1Lz3NO19+qHDCJygdNPJpzdZJqznlnYGwLEoUF9XssUx5p8RQ==}
@@ -6765,7 +6747,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@fontsource-variable/inter@5.3.0': {}
+  '@fontsource-variable/figtree@5.3.0': {}
 
   '@github/browserslist-config@1.0.0': {}
 
@@ -7793,27 +7775,7 @@ snapshots:
       tailwindcss: 4.3.5
       vite: '@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1)'
 
-  '@tanstack/devtools-event-client@0.4.4': {}
-
-  '@tanstack/form-core@1.33.5':
-    dependencies:
-      '@tanstack/devtools-event-client': 0.4.4
-      '@tanstack/pacer-lite': 0.1.1
-      '@tanstack/store': 0.11.2
-
   '@tanstack/history@1.162.5': {}
-
-  '@tanstack/pacer-lite@0.1.1': {}
-
-  '@tanstack/react-form@1.33.5(@tanstack/react-start@1.169.5(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rolldown@1.2.13)(supports-color@7.2.0))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
-    dependencies:
-      '@tanstack/form-core': 1.33.5
-      '@tanstack/react-store': 0.11.2(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      react: 19.3.1
-    optionalDependencies:
-      '@tanstack/react-start': 1.169.5(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rolldown@1.2.13)(supports-color@7.2.0)
-    transitivePeerDependencies:
-      - react-dom
 
   '@tanstack/react-router-devtools@1.167.3(@tanstack/react-router@1.170.46(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@tanstack/router-core@1.171.39)(csstype@3.2.3)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:

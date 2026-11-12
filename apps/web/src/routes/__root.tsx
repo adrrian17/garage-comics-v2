@@ -8,13 +8,15 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
 
-import Header from "@/components/header";
+import Footer from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
+import { getSession } from "@/functions/session";
+import { useIsAdminArea } from "@/lib/use-is-admin-area";
 
 import appCss from "../index.css?url";
 
 const RootDocument = ({ children }: { children: ReactNode }) => (
-  <html lang="en" suppressHydrationWarning>
+  <html lang="es-MX" suppressHydrationWarning>
     <head>
       <HeadContent />
     </head>
@@ -25,35 +27,46 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
   </html>
 );
 
-const RootComponent = () => (
-  <>
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="dark"
-      disableTransitionOnChange
-      storageKey="vite-ui-theme"
-    >
-      <div className="grid h-svh grid-rows-[auto_1fr]">
-        <Header />
-        <Outlet />
-      </div>
-      <Toaster richColors />
-    </ThemeProvider>
-    <TanStackRouterDevtools position="bottom-left" />
-  </>
-);
+const RootComponent = () => {
+  // The Admin area brings its own sidebar layout instead of the public chrome.
+  const isAdminArea = useIsAdminArea();
+
+  return (
+    <>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="light"
+        disableTransitionOnChange
+        storageKey="vite-ui-theme"
+      >
+        {isAdminArea ? (
+          <Outlet />
+        ) : (
+          <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[1fr_auto]">
+            <Outlet />
+            <Footer />
+          </div>
+        )}
+        <Toaster richColors />
+      </ThemeProvider>
+      <TanStackRouterDevtools position="bottom-left" />
+    </>
+  );
+};
 
 export const Route = createRootRoute({
   shellComponent: RootDocument,
   component: RootComponent,
+  beforeLoad: async () => ({ session: await getSession() }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Garage Comics" },
+      { title: "Garage Cómics" },
       {
         name: "description",
-        content: "Garage Comics is a web application",
+        content:
+          "Tienda de cómics digitales de autores mexicanos, abierta por tiempo limitado.",
       },
     ],
     links: [
