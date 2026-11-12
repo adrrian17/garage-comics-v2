@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
 
-import { publicLinks } from "./header";
+const publicLinks = [
+  { to: "/", label: "Inicio" },
+  { to: "/propuesta", label: "Participa" },
+] as const;
 
 // Evaluated once per Worker isolate; the year only lags until the next deploy or restart.
 const currentYear = new Date().getFullYear();

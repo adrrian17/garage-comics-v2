@@ -10,7 +10,6 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
 
 import Footer from "@/components/footer";
-import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSession } from "@/functions/session";
 
@@ -45,8 +44,7 @@ const RootComponent = () => {
         {isAdminArea ? (
           <Outlet />
         ) : (
-          <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto]">
-            <Header />
+          <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[1fr_auto]">
             <Outlet />
             <Footer />
           </div>
