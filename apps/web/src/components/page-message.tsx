@@ -1,6 +1,8 @@
 import { Button, buttonVariants } from "@garage-comics/ui/components/button";
-import { Link, useLocation, useRouter } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+
+import { useIsAdminArea } from "@/lib/use-is-admin-area";
 
 const PageMessage = ({
   title,
@@ -12,9 +14,7 @@ const PageMessage = ({
   action?: ReactNode;
 }) => {
   // The Admin layout already renders a main landmark and has its own home.
-  const isAdminArea = useLocation({
-    select: (location) => location.pathname.startsWith("/admin"),
-  });
+  const isAdminArea = useIsAdminArea();
 
   const Wrapper = isAdminArea ? "div" : "main";
 

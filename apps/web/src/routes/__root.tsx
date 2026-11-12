@@ -4,7 +4,6 @@ import {
   Outlet,
   Scripts,
   createRootRoute,
-  useLocation,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
@@ -12,6 +11,7 @@ import type { ReactNode } from "react";
 import Footer from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSession } from "@/functions/session";
+import { useIsAdminArea } from "@/lib/use-is-admin-area";
 
 import appCss from "../index.css?url";
 
@@ -29,9 +29,7 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
 
 const RootComponent = () => {
   // The Admin area brings its own sidebar layout instead of the public chrome.
-  const isAdminArea = useLocation({
-    select: (location) => location.pathname.startsWith("/admin"),
-  });
+  const isAdminArea = useIsAdminArea();
 
   return (
     <>
