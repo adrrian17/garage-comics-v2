@@ -10,6 +10,9 @@ export const db = Cloudflare.D1.Database("database", {
   migrations: "../../packages/db/src/migrations",
 });
 
+// Under `alchemy dev` this writes each message as an .eml file to .alchemy/local/email.
+const email = Cloudflare.Email.SendEmail("EMAIL");
+
 // Set by portless in `pnpm dev`; unset on deploy.
 const portlessUrl = process.env.PORTLESS_URL;
 
@@ -19,6 +22,9 @@ export const web = Cloudflare.Website.Vite("web", {
     DB: db,
     BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
     BETTER_AUTH_URL: portlessUrl ?? Cloudflare.Worker.URL,
+    ADMIN_EMAIL: Config.String("ADMIN_EMAIL"),
+    EMAIL_FROM: Config.String("EMAIL_FROM"),
+    EMAIL: email,
   },
   dev: {
     // portless assigns the port; see the dev script in package.json.

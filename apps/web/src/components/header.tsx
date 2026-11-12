@@ -3,28 +3,21 @@ import { Link } from "@tanstack/react-router";
 import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
 
-const links = [
-  { to: "/", label: "Home" },
-  { to: "/dashboard", label: "Dashboard" },
-] as const;
-
 const Header = () => (
-  <div>
-    <div className="flex flex-row items-center justify-between px-2 py-1">
-      <nav className="flex gap-4 text-lg">
-        {links.map(({ to, label }) => (
-          <Link key={to} to={to}>
-            {label}
-          </Link>
-        ))}
-      </nav>
+  <header className="border-foreground border-b-2">
+    <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
+      <Link
+        to="/"
+        className="font-heading text-xl font-extrabold tracking-tight"
+      >
+        Garage Cómics
+      </Link>
       <div className="flex items-center gap-2">
         <ModeToggle />
         <UserMenu />
       </div>
     </div>
-    <hr />
-  </div>
+  </header>
 );
 
 export default Header;

@@ -1,4 +1,4 @@
-import { Button } from "@garage-comics/ui/components/button";
+import { Button, buttonVariants } from "@garage-comics/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,52 +8,50 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@garage-comics/ui/components/dropdown-menu";
-import { Skeleton } from "@garage-comics/ui/components/skeleton";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useRouteContext, useRouter } from "@tanstack/react-router";
+import { LogOut, UserRound } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
 
 const UserMenu = () => {
-  const navigate = useNavigate();
-  const { data: session, isPending } = authClient.useSession();
-
-  if (isPending) {
-    return <Skeleton className="h-9 w-24" />;
-  }
+  const router = useRouter();
+  const { session } = useRouteContext({ from: "__root__" });
 
   if (!session) {
     return (
-      <Link to="/login">
-        <Button variant="outline">Sign In</Button>
+      <Link to="/entrar" className={buttonVariants({ variant: "outline" })}>
+        Entrar
       </Link>
     );
   }
 
+  const signOut = async () => {
+    await authClient.signOut();
+    await router.invalidate();
+    await router.navigate({ to: "/" });
+  };
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" />}>
-        {session.user.name}
+      <DropdownMenuTrigger
+        render={<Button variant="outline" size="icon" />}
+        aria-label="Mi cuenta"
+      >
+        <UserRound />
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent align="end">
         <DropdownMenuGroup>
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
+          <DropdownMenuLabel>{session.user.email}</DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
           <DropdownMenuItem
-            variant="destructive"
             onClick={() => {
-              void authClient.signOut({
-                fetchOptions: {
-                  onSuccess: () => {
-                    void navigate({
-                      to: "/",
-                    });
-                  },
-                },
-              });
+              void signOut();
             }}
           >
-            Sign Out
+            <LogOut />
+            Cerrar sesión
           </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>

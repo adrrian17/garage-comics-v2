@@ -10,11 +10,12 @@ import type { ReactNode } from "react";
 
 import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { getSession } from "@/functions/session";
 
 import appCss from "../index.css?url";
 
 const RootDocument = ({ children }: { children: ReactNode }) => (
-  <html lang="en" suppressHydrationWarning>
+  <html lang="es-MX" suppressHydrationWarning>
     <head>
       <HeadContent />
     </head>
@@ -33,7 +34,7 @@ const RootComponent = () => (
       disableTransitionOnChange
       storageKey="vite-ui-theme"
     >
-      <div className="grid h-svh grid-rows-[auto_1fr]">
+      <div className="grid min-h-svh grid-rows-[auto_1fr]">
         <Header />
         <Outlet />
       </div>
@@ -46,14 +47,16 @@ const RootComponent = () => (
 export const Route = createRootRoute({
   shellComponent: RootDocument,
   component: RootComponent,
+  beforeLoad: async () => ({ session: await getSession() }),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Garage Comics" },
+      { title: "Garage Cómics" },
       {
         name: "description",
-        content: "Garage Comics is a web application",
+        content:
+          "Tienda de cómics digitales de autores mexicanos, abierta por temporadas.",
       },
     ],
     links: [
