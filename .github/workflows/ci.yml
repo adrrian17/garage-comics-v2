@@ -35,5 +35,8 @@ jobs:
       - name: Format, lint and typecheck
         run: vp check
 
+      - name: Unit tests
+        run: vp test
+
       - name: Build
         run: vp run -r build

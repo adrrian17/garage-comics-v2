@@ -20,7 +20,8 @@
     "destroy": "vp run --filter @garage-comics/infra destroy",
     "env:generate": "varlock codegen --path ./packages/db/",
     "postinstall": "varlock codegen --path ./packages/db/",
-    "fix": "vp check --fix"
+    "fix": "vp check --fix",
+    "test": "vp test"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
