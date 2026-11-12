@@ -85,7 +85,7 @@ const SignInPage = () => {
   };
 
   return (
-    <main className="mx-auto w-full max-w-md px-6 py-12">
+    <main className="mx-auto w-full max-w-md px-4 py-12 sm:px-6">
       {sentTo === undefined ? (
         <>
           <h1 className={headingClass}>Entrar</h1>

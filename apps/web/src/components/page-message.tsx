@@ -21,7 +21,9 @@ const PageMessage = ({
   return (
     <Wrapper
       className={
-        isAdminArea ? "max-w-2xl" : "mx-auto w-full max-w-2xl px-6 py-12"
+        isAdminArea
+          ? "max-w-2xl"
+          : "mx-auto w-full max-w-2xl px-4 py-12 sm:px-6"
       }
     >
       <h1 className="text-3xl font-bold tracking-tight">{title}</h1>

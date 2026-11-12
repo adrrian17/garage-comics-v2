@@ -7,7 +7,7 @@ const currentYear = new Date().getFullYear();
 
 const Footer = () => (
   <footer className="border-t">
-    <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-8 sm:px-6">
       <div className="flex items-center gap-3">
         <img
           src="/logo.webp"

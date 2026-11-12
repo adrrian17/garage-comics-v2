@@ -238,7 +238,9 @@ const ProposalPage = () => {
   };
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-12">{content()}</main>
+    <main className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
+      {content()}
+    </main>
   );
 };
 

@@ -113,10 +113,19 @@ const AdminTitle = () => {
   const current = sections.find((section) => isCurrent(pathname, section.to));
 
   // A not-found or error page inside the Admin area brings its own h1.
+  const hidden = current === undefined;
+
   return (
-    <h1 hidden={current === undefined} className="text-base font-semibold">
-      {current?.label}
-    </h1>
+    <>
+      <Separator
+        hidden={hidden}
+        orientation="vertical"
+        className="data-vertical:h-4 data-vertical:self-center"
+      />
+      <h1 hidden={hidden} className="text-base font-semibold">
+        {current?.label}
+      </h1>
+    </>
   );
 };
 
@@ -139,10 +148,6 @@ const AdminLayout = () => (
     <SidebarInset className="min-w-0">
       <header className="flex h-14 shrink-0 items-center gap-3 border-b px-4">
         <SidebarTrigger />
-        <Separator
-          orientation="vertical"
-          className="data-vertical:h-4 data-vertical:self-center"
-        />
         <AdminTitle />
       </header>
       <div className="flex flex-col gap-6 p-4">

@@ -152,7 +152,7 @@ const Landing = ({ edition }: { edition: ActiveEdition }) => {
 };
 
 const HomePage = () => (
-  <main className="mx-auto w-full max-w-6xl px-6 py-12 lg:py-20">
+  <main className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:py-20">
     <Landing edition={Route.useLoaderData()} />
   </main>
 );
