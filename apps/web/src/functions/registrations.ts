@@ -1,11 +1,13 @@
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 import {
   createRegistrationCheckout,
   findRegistrationOffer,
+  registerAdminForFree,
 } from "@/server/registrations";
-import { createDatabase } from "@/server/services";
+import { createAuth, createDatabase } from "@/server/services";
 
 const proposalLink = z.object({ proposalId: z.string() });
 
@@ -28,4 +30,25 @@ export const startRegistrationCheckout = createServerFn({ method: "POST" })
     return url === null
       ? { status: "unavailable" as const }
       : { status: "checkout" as const, url };
+  });
+
+export const registerFree = createServerFn({ method: "POST" })
+  .validator(proposalLink)
+  .handler(async ({ data }) => {
+    const session = await createAuth().api.getSession({
+      headers: getRequest().headers,
+    });
+
+    const registered =
+      session !== null &&
+      (await registerAdminForFree(
+        createDatabase(),
+        data.proposalId,
+        session.user,
+        new Date()
+      ));
+
+    return registered
+      ? { status: "registered" as const }
+      : { status: "unavailable" as const };
   });

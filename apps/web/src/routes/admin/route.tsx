@@ -4,10 +4,12 @@ import {
   FileText,
   LayoutDashboard,
   ShieldCheck,
+  UserRound,
 } from "lucide-react";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
 import type { DashboardSection } from "@/components/dashboard-layout";
+import { hasAuthorProfile } from "@/functions/authors";
 
 const sections = [
   { to: "/admin", label: "Inicio", icon: LayoutDashboard },
@@ -16,12 +18,26 @@ const sections = [
   { to: "/admin/administradores", label: "Administradores", icon: ShieldCheck },
 ] as const satisfies readonly [DashboardSection, ...DashboardSection[]];
 
-const AdminLayout = () => (
-  <DashboardLayout groupLabel="Administración" sections={sections} />
-);
+const AdminLayout = () => {
+  const isAuthor = Route.useRouteContext({
+    select: (context) => context.isAuthor,
+  });
+
+  return (
+    <DashboardLayout
+      groupLabel="Administración"
+      sections={sections}
+      switchTo={
+        isAuthor
+          ? { to: "/autor", label: "Mi cuenta de Autor", icon: UserRound }
+          : undefined
+      }
+    />
+  );
+};
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: ({ context }) => {
+  beforeLoad: async ({ context }) => {
     if (context.session === null) {
       // oxlint-disable-next-line typescript/only-throw-error -- TanStack Router redirects by throwing its redirect object.
       throw redirect({ to: "/entrar" });
@@ -31,6 +47,8 @@ export const Route = createFileRoute("/admin")({
       // oxlint-disable-next-line typescript/only-throw-error -- TanStack Router redirects by throwing its redirect object.
       throw redirect({ to: "/autor" });
     }
+
+    return { isAuthor: await hasAuthorProfile() };
   },
   head: () => ({
     meta: [

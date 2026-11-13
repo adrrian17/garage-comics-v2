@@ -1,12 +1,13 @@
 import { authorProfile } from "@garage-comics/db/schema/authors";
 import { edition, registration } from "@garage-comics/db/schema/editions";
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { authorMiddleware } from "@/functions/author-middleware";
 import { authorProfileInput } from "@/lib/author";
-import { createDatabase } from "@/server/services";
+import { createAuth, createDatabase } from "@/server/services";
 
 export const getAuthorHome = createServerFn({ method: "GET" })
   .middleware([authorMiddleware])
@@ -38,6 +39,23 @@ export const getAuthorHome = createServerFn({ method: "GET" })
 
     return { profile: profile ?? null, registrations };
   });
+
+export const hasAuthorProfile = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const session = await createAuth().api.getSession({
+      headers: getRequest().headers,
+    });
+
+    return (
+      session !== null &&
+      (await createDatabase()
+        .select({ userId: authorProfile.userId })
+        .from(authorProfile)
+        .where(eq(authorProfile.userId, session.user.id))
+        .get()) !== undefined
+    );
+  }
+);
 
 export const getAuthorProfile = createServerFn({ method: "GET" })
   .middleware([authorMiddleware])
