@@ -2,7 +2,7 @@ import { Button, buttonVariants } from "@garage-comics/ui/components/button";
 import { Link, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-import { useIsAdminArea } from "@/lib/use-is-admin-area";
+import { useDashboardHome } from "@/lib/use-dashboard-home";
 
 const PageMessage = ({
   title,
@@ -13,17 +13,17 @@ const PageMessage = ({
   description: string;
   action?: ReactNode;
 }) => {
-  // The Admin layout already renders a main landmark and has its own home.
-  const isAdminArea = useIsAdminArea();
+  // A dashboard layout already renders a main landmark and has its own home.
+  const dashboardHome = useDashboardHome();
 
-  const Wrapper = isAdminArea ? "div" : "main";
+  const Wrapper = dashboardHome === undefined ? "main" : "div";
 
   return (
     <Wrapper
       className={
-        isAdminArea
-          ? "max-w-2xl"
-          : "mx-auto w-full max-w-2xl px-4 py-12 sm:px-6"
+        dashboardHome === undefined
+          ? "mx-auto w-full max-w-2xl px-4 py-12 sm:px-6"
+          : "max-w-2xl"
       }
     >
       <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
@@ -31,7 +31,7 @@ const PageMessage = ({
       <div className="mt-8 flex flex-wrap gap-2">
         {action}
         <Link
-          to={isAdminArea ? "/admin" : "/"}
+          to={dashboardHome ?? "/"}
           className={buttonVariants({ variant: "outline" })}
         >
           Volver al inicio

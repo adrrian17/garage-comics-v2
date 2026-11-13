@@ -11,5 +11,9 @@
       // The alchemy CLI loads this file by name.
       "entry": ["alchemy.run.ts"],
     },
+    "packages/stripe-emulator": {
+      // The emulate CLI loads this file by name.
+      "entry": ["emulate.config.ts"],
+    },
   },
 }

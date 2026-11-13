@@ -11,7 +11,7 @@ import type { ReactNode } from "react";
 import Footer from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSession } from "@/functions/session";
-import { useIsAdminArea } from "@/lib/use-is-admin-area";
+import { useDashboardHome } from "@/lib/use-dashboard-home";
 
 import appCss from "../index.css?url";
 
@@ -28,8 +28,8 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
 );
 
 const RootComponent = () => {
-  // The Admin area brings its own sidebar layout instead of the public chrome.
-  const isAdminArea = useIsAdminArea();
+  // The Admin and Author areas bring their own sidebar layout instead of the public chrome.
+  const isDashboard = useDashboardHome() !== undefined;
 
   return (
     <>
@@ -39,7 +39,7 @@ const RootComponent = () => {
         disableTransitionOnChange
         storageKey="vite-ui-theme"
       >
-        {isAdminArea ? (
+        {isDashboard ? (
           <Outlet />
         ) : (
           <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[1fr_auto]">

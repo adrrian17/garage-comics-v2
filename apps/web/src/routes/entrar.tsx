@@ -67,7 +67,7 @@ const SignInPage = () => {
     const sent = await authClient.signIn
       .magicLink({
         email,
-        callbackURL: "/admin",
+        callbackURL: "/autor",
         errorCallbackURL: "/entrar",
       })
       .then((result) => result.error === null)

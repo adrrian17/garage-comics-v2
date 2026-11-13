@@ -54,11 +54,13 @@ export const proposalAcceptedEmail = ({
   editionName,
   registrationPrice,
   deadline,
+  paymentUrl,
 }: {
   editionName: string;
   registrationPrice: string;
   deadline: string;
+  paymentUrl: string;
 }) => ({
   subject: `¡Tu propuesta para ${editionName} fue aceptada!`,
-  text: `¡Felicidades! Tu propuesta para ${editionName} fue aceptada.\n\nPara asegurar tu lugar, paga tu Inscripción de ${registrationPrice} antes del ${deadline}. Te mandaremos el link de pago en otro correo.\n\nSi no pagas antes de esa fecha, tu lugar se libera.`,
+  text: `¡Felicidades! Tu propuesta para ${editionName} fue aceptada.\n\nPara asegurar tu lugar, paga tu Inscripción de ${registrationPrice} antes del ${deadline} en este link:\n\n${paymentUrl}\n\nSi no pagas antes de esa fecha, tu lugar se libera.`,
 });

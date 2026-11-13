@@ -343,6 +343,9 @@ importers:
       sonner:
         specifier: 'catalog:'
         version: 2.0.8(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      stripe:
+        specifier: ^23.1.0
+        version: 23.1.0(@types/node@26.6.6)
       zod:
         specifier: 'catalog:'
         version: 4.6.7
@@ -450,6 +453,27 @@ importers:
       effect:
         specifier: 4.1.2
         version: 4.1.2
+      typescript:
+        specifier: 'catalog:'
+        version: 7.0.2
+      varlock:
+        specifier: 'catalog:'
+        version: 1.24.0
+
+  packages/stripe-emulator:
+    devDependencies:
+      '@garage-comics/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
+      emulate:
+        specifier: 0.13.1
+        version: 0.13.1
+      portless:
+        specifier: 0.17.0
+        version: 0.17.0
       typescript:
         specifier: 'catalog:'
         version: 7.0.2
@@ -4030,6 +4054,10 @@ packages:
     resolution: {integrity: sha512-AnfC1ATldl49/cvZdLPDjBfrRNwbDO05aibiOtzQu3qtlbJtomNLhF30HEtn/7iBz50dlMECqATo3fG0LrdEgw==}
     engines: {node: '>=14'}
 
+  emulate@0.13.1:
+    resolution: {integrity: sha512-J3o83XRyEEm0OvBtGChE3NYLZ8vULg1yD3mnaktrJP2fEoLbdq0dwpUBDu1E6pWqOblrr5u6dMIZJMJNgFDbMQ==}
+    hasBin: true
+
   enhanced-resolve@5.26.1:
     resolution: {integrity: sha512-PPnnSJq3azKOIewXR/uppBV/6h98dprBJ/WaQ9Qgj10xX1lJLNfg+XShpbsrSqcDSy2yYYyhfXM1wWhftqgyzw==}
     engines: {node: '>=10.13.0'}
@@ -5725,6 +5753,15 @@ packages:
   strip-json-comments@5.0.3:
     resolution: {integrity: sha512-1tB5mhVo7U+ETBKNf92xT4hrQa3pm0MZ0PQvuDnWgAAGHDsfp4lPSpiS6psrSiet87wyGPh9ft6wmhOMQ0hDiw==}
     engines: {node: '>=14.16'}
+
+  stripe@23.1.0:
+    resolution: {integrity: sha512-fVUfMSfTPoukfoV//MUKAx2+YxyKmYaYtnAL9VkfnHfaPNQylFdWZMD+zgUFerI8rjbaiER8Vzj2XEUQ2AhAsQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@types/node': '>=20'
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
 
   supports-color@7.2.0:
     resolution: {integrity: sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw==}
@@ -8911,6 +8948,12 @@ snapshots:
 
   empathic@2.1.0: {}
 
+  emulate@0.13.1:
+    dependencies:
+      commander: 14.0.3
+      picocolors: 1.1.1
+      yaml: 2.9.1
+
   enhanced-resolve@5.26.1:
     dependencies:
       graceful-fs: 4.2.11
@@ -10839,6 +10882,10 @@ snapshots:
   strip-json-comments@3.1.1: {}
 
   strip-json-comments@5.0.3: {}
+
+  stripe@23.1.0(@types/node@26.6.6):
+    optionalDependencies:
+      '@types/node': 26.6.6
 
   supports-color@7.2.0:
     dependencies:

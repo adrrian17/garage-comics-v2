@@ -1,0 +1,16 @@
+{
+  "name": "@garage-comics/stripe-emulator",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "NODE_EXTRA_CA_CERTS=\"${PORTLESS_STATE_DIR:-$HOME/.portless}/ca.pem\" emulate start --service stripe"
+  },
+  "devDependencies": {
+    "@garage-comics/config": "workspace:*",
+    "@types/node": "catalog:",
+    "emulate": "0.13.1",
+    "portless": "0.17.0",
+    "typescript": "catalog:",
+    "varlock": "catalog:"
+  }
+}
