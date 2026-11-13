@@ -99,8 +99,9 @@ export const registration = sqliteTable(
       .unique()
       .references(() => proposal.id),
     amountMxn: integer("amount_mxn").notNull(),
-    // Null for an Admin, who registers for free.
-    stripeCheckoutSessionId: text("stripe_checkout_session_id").unique(),
+    stripeCheckoutSessionId: text("stripe_checkout_session_id")
+      .notNull()
+      .unique(),
     createdAt: createdAt(),
   },
   (table) => [

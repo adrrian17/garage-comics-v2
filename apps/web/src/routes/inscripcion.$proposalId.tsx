@@ -7,7 +7,6 @@ import { z } from "zod";
 
 import {
   getRegistrationOffer,
-  registerFree,
   startRegistrationCheckout,
 } from "@/functions/registrations";
 import { formatDateTime, formatMxn } from "@/lib/format";
@@ -110,97 +109,17 @@ const Pay = ({
   );
 };
 
-const Free = ({
-  proposalId,
-  offer,
-}: {
-  proposalId: string;
-  offer: Extract<Offer, { status: "free" }>;
-}) => {
-  const router = useRouter();
-  const [failure, setFailure] = useState<"sign-in" | "error" | null>(null);
-  const [isPending, setIsPending] = useState(false);
-
-  const confirm = async () => {
-    setIsPending(true);
-    setFailure(null);
-
-    const result = await registerFree({ data: { proposalId } }).catch(
-      () => null
-    );
-
-    if (result?.status === "registered") {
-      await router.invalidate();
-
-      return;
-    }
-
-    setIsPending(false);
-
-    setFailure(result?.status === "unavailable" ? "sign-in" : "error");
-  };
-
-  return (
-    <>
-      <Heading>Confirma tu Inscripción</Heading>
-      <p className="text-muted-foreground mt-2">
-        Tu propuesta para {offer.editionName} fue aceptada. Como Administrador
-        no pagas la Inscripción: solo confírmala con{" "}
-        <strong className="text-foreground wrap-anywhere">{offer.email}</strong>
-        .
-      </p>
-      {failure === null ? null : (
-        <Alert variant="destructive" className="mt-6">
-          <AlertDescription>
-            {failure === "sign-in" ? (
-              <>
-                Para confirmar, entra primero con {offer.email}.{" "}
-                <Link to="/entrar" className="underline">
-                  Ir a entrar
-                </Link>
-              </>
-            ) : (
-              "No pudimos confirmar la Inscripción. Intenta de nuevo en un momento."
-            )}
-          </AlertDescription>
-        </Alert>
-      )}
-      <Button
-        size="lg"
-        className="mt-8"
-        disabled={isPending}
-        onClick={() => {
-          void confirm();
-        }}
-      >
-        {isPending ? "Confirmando…" : "Confirmar Inscripción"}
-      </Button>
-    </>
-  );
-};
-
-const Registered = () => {
-  const isAdmin = Route.useRouteContext({
-    select: (context) => context.session?.user.role === "admin",
-  });
-
-  return (
-    <>
-      <Heading>Tu Inscripción ya está registrada</Heading>
-      <p className="text-muted-foreground mt-2">
-        {isAdmin
-          ? "Ya puedes armar tu perfil de Autor."
-          : "Entra con tu correo para ver tu cuenta."}
-      </p>
-      <Link
-        to={isAdmin ? "/autor" : "/entrar"}
-        className={buttonVariants({ className: "mt-8" })}
-      >
-        {isAdmin ? "Ir a mi cuenta de Autor" : "Entrar"}
-      </Link>
-    </>
-  );
-};
+const Registered = () => (
+  <>
+    <Heading>Tu Inscripción ya está pagada</Heading>
+    <p className="text-muted-foreground mt-2">
+      Entra con tu correo para ver tu cuenta.
+    </p>
+    <Link to="/entrar" className={buttonVariants({ className: "mt-8" })}>
+      Entrar
+    </Link>
+  </>
+);
 
 const Expired = () => (
   <>
@@ -233,10 +152,6 @@ const RegistrationPage = () => {
     switch (offer.status) {
       case "payable": {
         return <Pay proposalId={proposalId} offer={offer} />;
-      }
-
-      case "free": {
-        return <Free proposalId={proposalId} offer={offer} />;
       }
 
       case "registered": {

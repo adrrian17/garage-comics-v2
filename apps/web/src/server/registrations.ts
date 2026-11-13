@@ -26,16 +26,6 @@ const CENTAVOS_PER_PESO = 100;
 export const registrationUrl = (proposalId: string) =>
   `${env.BETTER_AUTH_URL}/inscripcion/${proposalId}`;
 
-const findProposal = async (db: Database, proposalId: string) =>
-  await db
-    .select({ proposal, edition })
-    .from(proposal)
-    .innerJoin(edition, eq(edition.id, proposal.editionId))
-    .where(eq(proposal.id, proposalId))
-    .get();
-
-type FoundProposal = NonNullable<Awaited<ReturnType<typeof findProposal>>>;
-
 export type RegistrationOffer =
   | {
       status: "payable";
@@ -44,7 +34,6 @@ export type RegistrationOffer =
       priceMxn: number;
       deadline: Date;
     }
-  | { status: "free"; email: string; editionName: string }
   | { status: "registered" }
   | { status: "unavailable" };
 
@@ -56,7 +45,12 @@ export const findRegistrationOffer = async (
 ): Promise<RegistrationOffer> => {
   await expireStaleAcceptances(db, now);
 
-  const found = await findProposal(db, proposalId);
+  const found = await db
+    .select({ proposal, edition })
+    .from(proposal)
+    .innerJoin(edition, eq(edition.id, proposal.editionId))
+    .where(eq(proposal.id, proposalId))
+    .get();
 
   if (found === undefined) {
     return { status: "unavailable" };
@@ -74,7 +68,7 @@ export const findRegistrationOffer = async (
     return { status: "unavailable" };
   }
 
-  // An Admin does not pay the Registration.
+  // An Admin is already an Author without a Registration, so they never pay one.
   const holder = await db
     .select({ role: user.role })
     .from(user)
@@ -82,11 +76,7 @@ export const findRegistrationOffer = async (
     .get();
 
   if (holder?.role === "admin") {
-    return {
-      status: "free",
-      email: found.proposal.email,
-      editionName: found.edition.name,
-    };
+    return { status: "unavailable" };
   }
 
   return {
@@ -140,14 +130,39 @@ export const createRegistrationCheckout = async (
 };
 
 /**
- * Creates the Registration and, for a new proposer, their Author account and profile.
- * Safe to repeat: the unique `proposalId` makes a replay change nothing. Returns the proposer's email, or null when the Registration already existed.
+ * Turns a paid Checkout Session into a Registration. Safe to repeat: the unique
+ * `proposalId` makes a replayed webhook change nothing. Returns the new Author's email, or null when the Registration already existed.
  */
-const recordRegistration = async (
+export const registerPayment = async (
   db: Database,
-  found: FoundProposal,
-  payment: { amountMxn: number; stripeCheckoutSessionId: string | null }
+  session: Stripe.Checkout.Session
 ) => {
+  const proposalId = session.metadata?.proposalId;
+
+  const found =
+    proposalId === undefined
+      ? undefined
+      : await db
+          .select({ proposal, edition })
+          .from(proposal)
+          .innerJoin(edition, eq(edition.id, proposal.editionId))
+          .where(eq(proposal.id, proposalId))
+          .get();
+
+  if (found === undefined) {
+    log.warn({ action: "register_payment", reason: "unknown_proposal" });
+
+    return null;
+  }
+
+  if (found.proposal.status === "expired") {
+    log.warn({
+      action: "register_payment",
+      reason: "paid_after_expiry",
+      proposalId: found.proposal.id,
+    });
+  }
+
   const { email } = found.proposal;
 
   const existingUser = await db
@@ -190,7 +205,9 @@ const recordRegistration = async (
         editionId: found.edition.id,
         userId,
         proposalId: found.proposal.id,
-        ...payment,
+        // Editions never change their price after creation, so this is what the proposer paid.
+        amountMxn: found.edition.registrationPriceMxn,
+        stripeCheckoutSessionId: session.id,
       })
       .onConflictDoNothing({ target: registration.proposalId })
       .returning({ id: registration.id }),
@@ -209,68 +226,6 @@ const recordRegistration = async (
 
   // The third statement is the Registration insert; it returns no row when the proposal was already registered.
   return results[2].length === 0 ? null : email;
-};
-
-/** Turns a paid Checkout Session into a Registration. Returns the new Author's email, or null when it already existed. */
-export const registerPayment = async (
-  db: Database,
-  session: Stripe.Checkout.Session
-) => {
-  const proposalId = session.metadata?.proposalId;
-
-  const found =
-    proposalId === undefined ? undefined : await findProposal(db, proposalId);
-
-  if (found === undefined) {
-    log.warn({ action: "register_payment", reason: "unknown_proposal" });
-
-    return null;
-  }
-
-  if (found.proposal.status === "expired") {
-    log.warn({
-      action: "register_payment",
-      reason: "paid_after_expiry",
-      proposalId: found.proposal.id,
-    });
-  }
-
-  return await recordRegistration(db, found, {
-    // Editions never change their price after creation, so this is what the proposer paid.
-    amountMxn: found.edition.registrationPriceMxn,
-    stripeCheckoutSessionId: session.id,
-  });
-};
-
-/** Registers the signed-in Admin whose Proposal was accepted, at no cost. Returns false when the link or the session does not allow it. */
-export const registerAdminForFree = async (
-  db: Database,
-  proposalId: string,
-  sessionUser: { role?: string | null; email: string },
-  now: Date
-) => {
-  const offer = await findRegistrationOffer(db, proposalId, now);
-
-  if (
-    offer.status !== "free" ||
-    sessionUser.role !== "admin" ||
-    sessionUser.email !== offer.email
-  ) {
-    return false;
-  }
-
-  const found = await findProposal(db, proposalId);
-
-  if (found === undefined) {
-    return false;
-  }
-
-  await recordRegistration(db, found, {
-    amountMxn: 0,
-    stripeCheckoutSessionId: null,
-  });
-
-  return true;
 };
 
 /** Emails the new Author their first magic link; a failure is logged because the Registration is already saved and they can ask for a link at /entrar. */

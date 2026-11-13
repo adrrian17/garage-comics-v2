@@ -3,7 +3,6 @@ import { LayoutDashboard, ShieldCheck, UserRound } from "lucide-react";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
 import type { DashboardSection } from "@/components/dashboard-layout";
-import { hasAuthorProfile } from "@/functions/authors";
 
 const sections = [
   { to: "/autor", label: "Inicio", icon: LayoutDashboard },
@@ -29,15 +28,10 @@ const AuthorLayout = () => {
 };
 
 export const Route = createFileRoute("/autor")({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: ({ context }) => {
     if (context.session === null) {
       // oxlint-disable-next-line typescript/only-throw-error -- TanStack Router redirects by throwing its redirect object.
       throw redirect({ to: "/entrar" });
-    }
-
-    if (context.session.user.role === "admin" && !(await hasAuthorProfile())) {
-      // oxlint-disable-next-line typescript/only-throw-error -- TanStack Router redirects by throwing its redirect object.
-      throw redirect({ to: "/admin" });
     }
   },
   head: () => ({
