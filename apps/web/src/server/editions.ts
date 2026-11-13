@@ -7,7 +7,7 @@ import { acceptanceCutoff, proposalTransitions } from "@/lib/proposal";
 export const findActiveEdition = async (db: Database) =>
   await db.select().from(edition).where(eq(edition.isActive, true)).get();
 
-// shortcut: lazy expiry on read, move to a Worker cron trigger when slice 2 adds Registration payment
+// shortcut: lazy expiry on read, move to a Worker cron trigger when something must happen at expiry time, such as an email
 export const expireStaleAcceptances = async (db: Database, now: Date) => {
   const { from, to } = proposalTransitions.expire;
 

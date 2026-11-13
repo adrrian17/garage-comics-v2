@@ -19,6 +19,7 @@ import {
   proposalReceivedEmail,
   sendNotification,
 } from "@/server/email";
+import { registrationUrl } from "@/server/registrations";
 import { createDatabase } from "@/server/services";
 
 export const submitProposal = createServerFn({ method: "POST" })
@@ -118,11 +119,12 @@ export const countPendingProposals = createServerFn({ method: "GET" })
 type DecidedEdition = typeof edition.$inferSelect;
 
 const decisionEmails = {
-  accept: (decidedEdition: DecidedEdition, now: Date) =>
+  accept: (decidedEdition: DecidedEdition, now: Date, proposalId: string) =>
     proposalAcceptedEmail({
       editionName: decidedEdition.name,
       registrationPrice: formatMxn(decidedEdition.registrationPriceMxn),
       deadline: formatDateTime(acceptanceDeadline(now)),
+      paymentUrl: registrationUrl(proposalId),
     }),
   reject: (decidedEdition: DecidedEdition) =>
     proposalNotAcceptedEmail(decidedEdition.name),
@@ -169,7 +171,7 @@ export const decideProposal = createServerFn({ method: "POST" })
 
     const notified = await sendNotification({
       to: decided.email,
-      ...decisionEmails[data.decision](active, now),
+      ...decisionEmails[data.decision](active, now, decided.id),
     });
 
     return { status: "decided" as const, notified, email: decided.email };

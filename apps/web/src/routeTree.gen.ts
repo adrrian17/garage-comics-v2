@@ -17,7 +17,9 @@ import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin/administradores'
 import { Route as AdminEdicionesRouteImport } from './routes/admin/ediciones'
 import { Route as AdminPropuestasRouteImport } from './routes/admin/propuestas'
+import { Route as InscripcionProposalIdRouteImport } from './routes/inscripcion.$proposalId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,9 +61,19 @@ const AdminPropuestasRoute = AdminPropuestasRouteImport.update({
   path: '/propuestas',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const InscripcionProposalIdRoute = InscripcionProposalIdRouteImport.update({
+  id: '/inscripcion/$proposalId',
+  path: '/inscripcion/$proposalId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
+  id: '/api/stripe/webhook',
+  path: '/api/stripe/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -73,8 +85,10 @@ export interface FileRoutesByFullPath {
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
+  '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -83,8 +97,10 @@ export interface FileRoutesByTo {
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
+  '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/admin': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,8 +111,10 @@ export interface FileRoutesById {
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
+  '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/admin/': typeof AdminIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,8 +126,10 @@ export interface FileRouteTypes {
     | '/admin/administradores'
     | '/admin/ediciones'
     | '/admin/propuestas'
+    | '/inscripcion/$proposalId'
     | '/admin/'
     | '/api/auth/$'
+    | '/api/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,8 +138,10 @@ export interface FileRouteTypes {
     | '/admin/administradores'
     | '/admin/ediciones'
     | '/admin/propuestas'
+    | '/inscripcion/$proposalId'
     | '/admin'
     | '/api/auth/$'
+    | '/api/stripe/webhook'
   id:
     | '__root__'
     | '/'
@@ -129,8 +151,10 @@ export interface FileRouteTypes {
     | '/admin/administradores'
     | '/admin/ediciones'
     | '/admin/propuestas'
+    | '/inscripcion/$proposalId'
     | '/admin/'
     | '/api/auth/$'
+    | '/api/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -138,7 +162,9 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   EntrarRoute: typeof EntrarRoute
   PropuestaRoute: typeof PropuestaRoute
+  InscripcionProposalIdRoute: typeof InscripcionProposalIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -199,11 +225,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPropuestasRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/inscripcion/$proposalId': {
+      id: '/inscripcion/$proposalId'
+      path: '/inscripcion/$proposalId'
+      fullPath: '/inscripcion/$proposalId'
+      preLoaderRoute: typeof InscripcionProposalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stripe/webhook': {
+      id: '/api/stripe/webhook'
+      path: '/api/stripe/webhook'
+      fullPath: '/api/stripe/webhook'
+      preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -232,7 +272,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   EntrarRoute: EntrarRoute,
   PropuestaRoute: PropuestaRoute,
+  InscripcionProposalIdRoute: InscripcionProposalIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

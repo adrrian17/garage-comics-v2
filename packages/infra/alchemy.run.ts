@@ -24,6 +24,12 @@ export const web = Cloudflare.Website.Vite("web", {
     BETTER_AUTH_URL: portlessUrl ?? Cloudflare.Worker.URL,
     ADMIN_EMAIL: Config.String("ADMIN_EMAIL"),
     EMAIL_FROM: Config.String("EMAIL_FROM"),
+    STRIPE_SECRET_KEY: Config.Redacted("STRIPE_SECRET_KEY"),
+    STRIPE_WEBHOOK_SECRET: Config.Redacted("STRIPE_WEBHOOK_SECRET"),
+    // Empty outside development, where the Stripe SDK talks to Stripe itself.
+    STRIPE_API_URL: Config.String("STRIPE_API_URL").pipe(
+      Config.withDefault("")
+    ),
     EMAIL: email,
   },
   dev: {
