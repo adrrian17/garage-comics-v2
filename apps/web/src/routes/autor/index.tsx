@@ -60,54 +60,51 @@ const AuthorHome = () => {
           )}
         </CardContent>
       </Card>
-      {/* An Admin is an Author without Registrations. */}
-      {session?.user.role === "admin" ? null : (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <h2 className="text-base font-semibold">Mis Inscripciones</h2>
-            </CardTitle>
-            <CardDescription>
-              Solo puedes vender en las Ediciones en las que tienes Inscripción.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {registrations.length === 0 ? (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyTitle>Aún no tienes Inscripciones</EmptyTitle>
-                  <EmptyDescription>
-                    Aparecerán aquí cuando pagues una.
-                  </EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Edición</TableHead>
-                    <TableHead>Inscrita el</TableHead>
-                    <TableHead className="text-right">Monto</TableHead>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <h2 className="text-base font-semibold">Mis Inscripciones</h2>
+          </CardTitle>
+          <CardDescription>
+            Solo puedes vender en las Ediciones en las que tienes Inscripción.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {registrations.length === 0 ? (
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>Aún no tienes Inscripciones</EmptyTitle>
+                <EmptyDescription>
+                  Aparecerán aquí cuando pagues una.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Edición</TableHead>
+                  <TableHead>Inscrita el</TableHead>
+                  <TableHead className="text-right">Monto</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {registrations.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.editionName}</TableCell>
+                    <TableCell>
+                      {formatShortDateTime(item.registeredAt)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatMxn(item.amountMxn)}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {registrations.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.editionName}</TableCell>
-                      <TableCell>
-                        {formatShortDateTime(item.registeredAt)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatMxn(item.amountMxn)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
-      )}
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 };

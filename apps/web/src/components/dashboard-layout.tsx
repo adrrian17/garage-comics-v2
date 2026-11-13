@@ -39,8 +39,6 @@ interface DashboardProps {
   groupLabel: string;
   /** The first section is the dashboard's home and is current only on its exact path. */
   sections: readonly [DashboardSection, ...DashboardSection[]];
-  /** Link to the user's other area, shown only when they can use it. */
-  switchTo?: DashboardSection;
 }
 
 const isCurrent = (
@@ -50,7 +48,7 @@ const isCurrent = (
 ) =>
   section === home ? pathname === section.to : pathname.startsWith(section.to);
 
-const DashboardNav = ({ groupLabel, sections, switchTo }: DashboardProps) => {
+const DashboardNav = ({ groupLabel, sections }: DashboardProps) => {
   const pathname = useLocation({ select: (location) => location.pathname });
   const { setOpenMobile } = useSidebar();
   const [home] = sections;
@@ -80,23 +78,6 @@ const DashboardNav = ({ groupLabel, sections, switchTo }: DashboardProps) => {
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
-          {switchTo === undefined ? null : (
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                render={
-                  <Link
-                    to={switchTo.to}
-                    onClick={() => {
-                      setOpenMobile(false);
-                    }}
-                  />
-                }
-              >
-                <switchTo.icon />
-                <span>{switchTo.label}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          )}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
@@ -162,11 +143,7 @@ const DashboardTitle = ({ sections }: Pick<DashboardProps, "sections">) => {
 };
 
 /** The sidebar shell shared by the Admin and Author areas. */
-export const DashboardLayout = ({
-  groupLabel,
-  sections,
-  switchTo,
-}: DashboardProps) => (
+export const DashboardLayout = ({ groupLabel, sections }: DashboardProps) => (
   <SidebarProvider>
     <Sidebar>
       <SidebarHeader>
@@ -178,11 +155,7 @@ export const DashboardLayout = ({
         </Link>
       </SidebarHeader>
       <SidebarContent>
-        <DashboardNav
-          groupLabel={groupLabel}
-          sections={sections}
-          switchTo={switchTo}
-        />
+        <DashboardNav groupLabel={groupLabel} sections={sections} />
       </SidebarContent>
       <DashboardFooter />
     </Sidebar>

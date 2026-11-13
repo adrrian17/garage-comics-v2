@@ -15,14 +15,11 @@ const sections = [
   { to: "/admin/propuestas", label: "Propuestas", icon: FileText },
   { to: "/admin/ediciones", label: "Ediciones", icon: CalendarDays },
   { to: "/admin/administradores", label: "Administradores", icon: ShieldCheck },
+  { to: "/admin/perfil", label: "Mi perfil", icon: UserRound },
 ] as const satisfies readonly [DashboardSection, ...DashboardSection[]];
 
 const AdminLayout = () => (
-  <DashboardLayout
-    groupLabel="Administración"
-    sections={sections}
-    switchTo={{ to: "/autor", label: "Mi cuenta de Autor", icon: UserRound }}
-  />
+  <DashboardLayout groupLabel="Administración" sections={sections} />
 );
 
 export const Route = createFileRoute("/admin")({

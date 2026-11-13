@@ -6,7 +6,7 @@ import { eq, like } from "drizzle-orm";
 import { availableSlug, slugify } from "@/lib/author";
 import { createAuth, createDatabase } from "@/server/services";
 
-/** Gives an Admin their Author profile the first time they open the Author area; Admins are Authors without a Registration. */
+/** Gives an Admin their Author profile the first time they open /admin/perfil; Admins are Authors without a Registration. */
 const ensureAdminProfile = async (admin: { id: string; name: string }) => {
   const db = createDatabase();
 
