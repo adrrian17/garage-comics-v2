@@ -37,7 +37,11 @@ const AuthorHome = () => {
             <h2 className="text-base font-semibold">Mi página pública</h2>
           </CardTitle>
           <CardDescription>
-            Así te encuentran los lectores. Edítala en Perfil.
+            Así te encuentran los lectores.{" "}
+            <Link to="/autor/perfil" className="underline">
+              Edita tu perfil
+            </Link>
+            .
           </CardDescription>
         </CardHeader>
         <CardContent>

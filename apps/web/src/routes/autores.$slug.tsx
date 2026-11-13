@@ -35,12 +35,14 @@ const AuthorPage = () => {
             {author.displayName}
           </h1>
           {author.role === "" ? null : (
-            <p className="text-muted-foreground mt-1">{author.role}</p>
+            <p className="text-muted-foreground mt-1 wrap-anywhere">
+              {author.role}
+            </p>
           )}
         </div>
       </header>
       {author.bio === "" ? null : (
-        <p className="mt-8 whitespace-pre-line">{author.bio}</p>
+        <p className="mt-8 wrap-anywhere whitespace-pre-line">{author.bio}</p>
       )}
       {links.length === 0 ? null : (
         <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2">

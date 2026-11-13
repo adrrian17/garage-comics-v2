@@ -15,19 +15,8 @@ type Offer = Awaited<ReturnType<typeof getRegistrationOffer>>;
 
 const headingClass = "text-3xl font-bold tracking-tight";
 
-// Moves focus to the heading so screen readers announce the new state.
-const focusOnMount = (element: HTMLElement | null) => {
-  element?.focus();
-};
-
 const Heading = ({ children }: { children: string }) => (
-  <h1
-    ref={focusOnMount}
-    tabIndex={-1}
-    className={`${headingClass} outline-none`}
-  >
-    {children}
-  </h1>
+  <h1 className={headingClass}>{children}</h1>
 );
 
 const CheckEmail = () => (
@@ -83,7 +72,9 @@ const Pay = ({
       <Heading>Paga tu Inscripción</Heading>
       <p className="text-muted-foreground mt-2">
         Tu propuesta para {offer.editionName} fue aceptada. Paga tu Inscripción
-        para asegurar tu lugar.
+        para asegurar tu lugar. Tu cuenta de Autor usará{" "}
+        <strong className="text-foreground wrap-anywhere">{offer.email}</strong>
+        .
       </p>
       <dl className="mt-8 grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border p-4">
@@ -120,9 +111,9 @@ const Pay = ({
 
 const Registered = () => (
   <>
-    <Heading>Ya estás inscrito</Heading>
+    <Heading>Tu Inscripción ya está pagada</Heading>
     <p className="text-muted-foreground mt-2">
-      Tu Inscripción está pagada. Entra con tu correo para ver tu cuenta.
+      Entra con tu correo para ver tu cuenta.
     </p>
     <Link to="/entrar" className={buttonVariants({ className: "mt-8" })}>
       Entrar
@@ -132,7 +123,7 @@ const Registered = () => (
 
 const Expired = () => (
   <>
-    <Heading>Este link ya venció</Heading>
+    <Heading>Este link ya no funciona</Heading>
     <p className="text-muted-foreground mt-2">
       El plazo para pagar esta Inscripción terminó o el link no es válido. Si
       todavía quieres participar, manda una nueva propuesta mientras la

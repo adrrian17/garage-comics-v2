@@ -65,9 +65,8 @@ const DashboardNav = ({ groupLabel, sections }: DashboardProps) => {
                 render={
                   <Link
                     to={section.to}
-                    aria-current={
-                      isCurrent(pathname, section, home) ? "page" : undefined
-                    }
+                    // Link sets aria-current itself; the home matches only its own path, not every page below it.
+                    activeOptions={{ exact: section === home }}
                     onClick={() => {
                       setOpenMobile(false);
                     }}

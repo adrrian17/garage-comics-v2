@@ -68,6 +68,17 @@ export const findRegistrationOffer = async (
     return { status: "unavailable" };
   }
 
+  // An Admin account has no Author area, so it cannot hold a Registration.
+  const holder = await db
+    .select({ role: user.role })
+    .from(user)
+    .where(eq(user.email, found.proposal.email))
+    .get();
+
+  if (holder?.role === "admin") {
+    return { status: "unavailable" };
+  }
+
   return {
     status: "payable",
     email: found.proposal.email,
