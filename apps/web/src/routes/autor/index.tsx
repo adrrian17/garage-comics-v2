@@ -84,7 +84,7 @@ const AuthorHome = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Edición</TableHead>
-                  <TableHead>Pagada el</TableHead>
+                  <TableHead>Inscrita el</TableHead>
                   <TableHead className="text-right">Monto</TableHead>
                 </TableRow>
               </TableHeader>
@@ -92,7 +92,9 @@ const AuthorHome = () => {
                 {registrations.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell>{item.editionName}</TableCell>
-                    <TableCell>{formatShortDateTime(item.paidAt)}</TableCell>
+                    <TableCell>
+                      {formatShortDateTime(item.registeredAt)}
+                    </TableCell>
                     <TableCell className="text-right">
                       {formatMxn(item.amountMxn)}
                     </TableCell>

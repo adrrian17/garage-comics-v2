@@ -25,9 +25,10 @@ const handleWebhook = async ({ request }: { request: Request }) => {
     return new Response("Firma inválida.", { status: 400 });
   }
 
-  // Only a paid Checkout Session registers: the success redirect proves nothing.
+  // Only a paid Checkout Session registers: the success redirect proves nothing. A delayed payment method reports its payment in the async event.
   if (
-    event.type !== "checkout.session.completed" ||
+    (event.type !== "checkout.session.completed" &&
+      event.type !== "checkout.session.async_payment_succeeded") ||
     event.data.object.payment_status !== "paid"
   ) {
     return ok();

@@ -56,13 +56,13 @@ const ProfileForm = ({ profile }: { profile: Profile }) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     setIsPending(true);
+    setFailure(null);
 
     const result = await saveAuthorProfile({ data }).catch(() => null);
 
     setIsPending(false);
 
     if (result?.status === "saved") {
-      setFailure(null);
       toast.success("Guardamos tu perfil.");
       await router.invalidate();
 

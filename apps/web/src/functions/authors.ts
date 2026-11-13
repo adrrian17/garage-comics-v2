@@ -28,7 +28,7 @@ export const getAuthorHome = createServerFn({ method: "GET" })
           id: registration.id,
           editionName: edition.name,
           amountMxn: registration.amountMxn,
-          paidAt: registration.createdAt,
+          registeredAt: registration.createdAt,
         })
         .from(registration)
         .innerJoin(edition, eq(edition.id, registration.editionId))
