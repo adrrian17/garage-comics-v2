@@ -55,7 +55,7 @@ export const checkoutExpiresAt = (deadline: Date, now: Date) =>
   );
 
 /** A blank field becomes null; anything else must be an http(s) link. `subject` starts the error message. */
-const optionalHttpUrl = (subject: string) =>
+export const optionalHttpUrl = (subject: string) =>
   z
     .string()
     .trim()

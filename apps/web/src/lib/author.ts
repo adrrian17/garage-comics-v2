@@ -1,3 +1,7 @@
+import { z } from "zod";
+
+import { NAME_MAX_LENGTH, optionalHttpUrl } from "./proposal";
+
 const FALLBACK_SLUG = "autor";
 
 /** Lowercase ASCII words joined by hyphens, so a name such as "José Ángel" becomes "jose-angel". */
@@ -23,3 +27,37 @@ export const availableSlug = (name: string, taken: readonly string[]) => {
     }
   }
 };
+
+const INITIALS_MAX = 2;
+
+/** Up to two capital letters from the first words of a name, for the placeholder avatar. */
+export const initials = (name: string) =>
+  name
+    .split(/\s+/u)
+    .filter((word) => word !== "")
+    .slice(0, INITIALS_MAX)
+    .map((word) => String.fromCodePoint(word.codePointAt(0) ?? 0).toUpperCase())
+    .join("");
+
+export const ROLE_MAX_LENGTH = 60;
+export const BIO_MAX_LENGTH = 1000;
+
+export const authorProfileInput = z.object({
+  displayName: z
+    .string()
+    .trim()
+    .min(1, "Escribe tu nombre público.")
+    .max(NAME_MAX_LENGTH, "Tu nombre es demasiado largo."),
+  role: z
+    .string()
+    .trim()
+    .max(ROLE_MAX_LENGTH, `Usa como máximo ${ROLE_MAX_LENGTH} caracteres.`),
+  bio: z
+    .string()
+    .trim()
+    .max(BIO_MAX_LENGTH, `Usa como máximo ${BIO_MAX_LENGTH} caracteres.`),
+  instagramUrl: optionalHttpUrl("El link de Instagram"),
+  xUrl: optionalHttpUrl("El link de X"),
+  facebookUrl: optionalHttpUrl("El link de Facebook"),
+  portfolioUrl: optionalHttpUrl("El portafolio"),
+});
