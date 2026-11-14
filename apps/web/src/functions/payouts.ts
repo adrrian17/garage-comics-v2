@@ -18,6 +18,7 @@ export const getPayoutSetup = createServerFn({ method: "GET" })
     ]);
 
     return {
+      userId: context.session.user.id,
       status: payoutSetupStatus(account),
       publishableKey: env.STRIPE_PUBLISHABLE_KEY,
       salesOpenAt: activeEdition?.salesOpenAt ?? null,

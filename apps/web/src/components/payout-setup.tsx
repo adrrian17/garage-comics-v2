@@ -7,18 +7,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@garage-comics/ui/components/card";
-import { loadConnectAndInitialize } from "@stripe/connect-js/pure";
 import {
   ConnectAccountOnboarding,
   ConnectComponentsProvider,
 } from "@stripe/react-connect-js";
 import { useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { getPayoutSetup } from "@/functions/payouts";
-import { createPayoutSession } from "@/functions/payouts";
 import { formatDateTime } from "@/lib/format";
 import type { PayoutSetupStatus } from "@/lib/payout-setup";
+import { getConnect } from "@/lib/stripe-connect";
 import { useIsClient } from "@/lib/use-is-client";
 
 type PayoutSetupData = Awaited<ReturnType<typeof getPayoutSetup>>;
@@ -29,18 +28,28 @@ const statusCopy = {
     badgeVariant: "destructive",
     description:
       "Completa tus datos para que Garage Cómics pueda hacerte el Envío de fondos de cada venta.",
+    showsOnboarding: true,
   },
   in_review: {
     badge: "En revisión",
     badgeVariant: "secondary",
     description:
       "Ya recibimos tus datos. Stripe los está revisando y no necesitas hacer nada más por ahora.",
+    showsOnboarding: true,
+  },
+  rejected: {
+    badge: "Rechazada",
+    badgeVariant: "destructive",
+    description:
+      "Stripe no aprobó tu cuenta, así que no podemos hacerte Envíos de fondos. Escríbenos para revisar tu caso.",
+    showsOnboarding: false,
   },
   ready: {
     badge: "Lista",
     badgeVariant: "default",
     description:
       "Tu cuenta está lista. Recibirás un Envío de fondos por cada cómic que vendas, y Stripe te hará una Transferencia a tu banco cada lunes.",
+    showsOnboarding: false,
   },
 } as const satisfies Record<
   PayoutSetupStatus,
@@ -48,29 +57,39 @@ const statusCopy = {
     badge: string;
     badgeVariant: "default" | "secondary" | "destructive";
     description: string;
+    showsOnboarding: boolean;
   }
 >;
 
 const LOAD_ERROR =
   "No pudimos cargar el formulario de Stripe. Recarga la página o intenta de nuevo en un momento.";
 
-// Connect.js asks for a client secret as soon as it initializes, so a second instance (a remount, React's dev double render) would race the first to create the Stripe account. One per page load.
-let connectInstance: ReturnType<typeof loadConnectAndInitialize> | undefined;
+// A blocked or failed Connect.js download never reaches `onLoadError`, so a loader that has not started by then counts as a failure.
+const LOADER_START_TIMEOUT_MS = 20_000;
 
-const getConnect = (publishableKey: string) => {
-  connectInstance ??= loadConnectAndInitialize({
-    publishableKey,
-    locale: "es-419",
-    fetchClientSecret: async () => await createPayoutSession(),
-  });
-
-  return connectInstance;
-};
-
-const ConnectOnboarding = ({ publishableKey }: { publishableKey: string }) => {
+const ConnectOnboarding = ({
+  userId,
+  publishableKey,
+}: {
+  userId: string;
+  publishableKey: string;
+}) => {
   const router = useRouter();
   const [failed, setFailed] = useState(false);
-  const connect = getConnect(publishableKey);
+  const started = useRef(false);
+  const connect = getConnect(userId, publishableKey);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!started.current) {
+        setFailed(true);
+      }
+    }, LOADER_START_TIMEOUT_MS);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, []);
 
   if (failed) {
     return (
@@ -83,6 +102,9 @@ const ConnectOnboarding = ({ publishableKey }: { publishableKey: string }) => {
   return (
     <ConnectComponentsProvider connectInstance={connect}>
       <ConnectAccountOnboarding
+        onLoaderStart={() => {
+          started.current = true;
+        }}
         onLoadError={() => {
           setFailed(true);
         }}
@@ -96,6 +118,7 @@ const ConnectOnboarding = ({ publishableKey }: { publishableKey: string }) => {
 
 /** The payouts page body, shared by the Author area and an Admin's own area. */
 export const PayoutSetup = ({
+  userId,
   status,
   publishableKey,
   salesOpenAt,
@@ -117,7 +140,7 @@ export const PayoutSetup = ({
           <CardDescription>{copy.description}</CardDescription>
         </CardHeader>
       </Card>
-      {status !== "ready" && salesOpenAt !== null && (
+      {copy.showsOnboarding && salesOpenAt !== null && (
         <Alert>
           <AlertDescription>
             Termina este registro antes de que abran las ventas de la Edición,
@@ -125,10 +148,15 @@ export const PayoutSetup = ({
           </AlertDescription>
         </Alert>
       )}
-      {status !== "ready" && (
+      {copy.showsOnboarding && (
         <Card>
           <CardContent>
-            {isClient && <ConnectOnboarding publishableKey={publishableKey} />}
+            {isClient && (
+              <ConnectOnboarding
+                userId={userId}
+                publishableKey={publishableKey}
+              />
+            )}
           </CardContent>
         </Card>
       )}

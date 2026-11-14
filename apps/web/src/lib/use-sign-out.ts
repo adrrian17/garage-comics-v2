@@ -2,6 +2,7 @@ import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
+import { logoutConnect } from "@/lib/stripe-connect";
 
 export const useSignOut = () => {
   const router = useRouter();
@@ -15,6 +16,7 @@ export const useSignOut = () => {
       return;
     }
 
+    logoutConnect();
     await router.invalidate();
     await router.navigate({ to: "/" });
   };

@@ -4,7 +4,8 @@ import { payoutSetupStatus } from "./payout-setup";
 
 const account = {
   details_submitted: true,
-  requirements: { currently_due: [], past_due: [] },
+  payouts_enabled: true,
+  requirements: { currently_due: [], past_due: [], disabled_reason: null },
   capabilities: { transfers: "active" },
 };
 
@@ -43,7 +44,28 @@ describe(payoutSetupStatus, () => {
     );
   });
 
-  it("is ready when transfers are active", () => {
+  it("is in review while Payouts to the bank are disabled", () => {
+    expect(payoutSetupStatus({ ...account, payouts_enabled: false })).toBe(
+      "in_review"
+    );
+  });
+
+  it("is rejected when Stripe rejects the account, whatever else is due", () => {
+    expect(
+      payoutSetupStatus({
+        ...account,
+        details_submitted: false,
+        capabilities: { transfers: "inactive" },
+        requirements: {
+          currently_due: ["external_account"],
+          past_due: [],
+          disabled_reason: "rejected.fraud",
+        },
+      })
+    ).toBe("rejected");
+  });
+
+  it("is ready when transfers are active and Payouts are enabled", () => {
     expect(payoutSetupStatus(account)).toBe("ready");
   });
 });
