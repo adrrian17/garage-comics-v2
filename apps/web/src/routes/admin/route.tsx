@@ -2,6 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import {
   CalendarDays,
   FileText,
+  Landmark,
   LayoutDashboard,
   ShieldCheck,
   UserRound,
@@ -16,6 +17,7 @@ const sections = [
   { to: "/admin/ediciones", label: "Ediciones", icon: CalendarDays },
   { to: "/admin/administradores", label: "Administradores", icon: ShieldCheck },
   { to: "/admin/perfil", label: "Mi perfil", icon: UserRound },
+  { to: "/admin/pagos", label: "Mis pagos", icon: Landmark },
 ] as const satisfies readonly [DashboardSection, ...DashboardSection[]];
 
 const AdminLayout = () => (

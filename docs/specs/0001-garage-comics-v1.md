@@ -70,7 +70,7 @@ A web app with three kinds of people. Anyone can send a Proposal for the open Ed
 
 35. As Garage Cómics, I want to keep a 10% Commission on each comic sold, which also absorbs Stripe's processing fees.
 36. As an Author, I want a Transfer for my share of each comic sold, which reaches my Stripe balance once that Order's payment is available.
-37. As an Author, I want monthly Payouts from my Stripe balance to my bank account.
+37. As an Author, I want weekly Payouts from my Stripe balance to my bank account, so that my money reaches me soon after the sales window.
 38. As Garage Cómics, I do not offer refunds in the app; any exceptional refund is handled by hand in Stripe.
 
 ### Author section
@@ -98,7 +98,7 @@ A web app with three kinds of people. Anyone can send a Proposal for the open Ed
 - Separate charges and transfers. The platform controls pricing ("Tú controlas los precios"), and connected accounts are onboarded and managed through Connect embedded components (Account onboarding, Balances, Payouts list).
 - Checkout Sessions with card and OXXO. OXXO vouchers use `expires_after_days: 2`. Orders are fulfilled on payment success (`checkout.session.completed` for card, `checkout.session.async_payment_succeeded` for OXXO), never on the redirect.
 - Each Transfer is created after payment success with the Order's charge as `source_transaction`, so funds reach the Author only when the charge's funds are available.
-- Connected accounts use a monthly payout schedule.
+- Connected accounts use a weekly payout schedule, anchored on Monday. A week with no available balance makes no Payout, so an Author has about two or three Payouts per Edition.
 - The Registration is paid through its own Checkout Session.
 
 ### Comic files and watermarking

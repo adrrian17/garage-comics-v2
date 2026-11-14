@@ -5,6 +5,14 @@ import "varlock/auto-load";
 // The emulator listens where the app's STRIPE_API_URL points, and its checkout page links back to that address.
 const api = new URL(process.env.STRIPE_API_URL ?? "");
 
+// Real Stripe test keys point STRIPE_API_URL at Stripe itself (see docs/agents/server-and-api.md), so there is nothing to emulate.
+if (api.hostname !== "localhost") {
+  process.stdout.write(
+    `STRIPE_API_URL is ${api.origin}, not the local emulator; the emulator stays off.\n`
+  );
+  process.exit(0);
+}
+
 // portless picks the app's address, which depends on the checkout (a worktree gets its own prefix).
 // oxlint-disable-next-line sonarjs/no-os-command-from-path -- dev-only script; portless is a pinned devDependency that pnpm puts first on PATH.
 const appUrl = execFileSync("portless", ["get", "garage-comics"], {
