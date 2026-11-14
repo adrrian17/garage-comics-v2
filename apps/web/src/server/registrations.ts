@@ -68,7 +68,7 @@ export const findRegistrationOffer = async (
     return { status: "unavailable" };
   }
 
-  // An Admin account has no Author area, so it cannot hold a Registration.
+  // An Admin is already an Author without a Registration, so they never pay one.
   const holder = await db
     .select({ role: user.role })
     .from(user)

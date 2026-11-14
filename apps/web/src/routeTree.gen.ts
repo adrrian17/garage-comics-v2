@@ -17,6 +17,7 @@ import { Route as PropuestaRouteImport } from './routes/propuesta'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin/administradores'
 import { Route as AdminEdicionesRouteImport } from './routes/admin/ediciones'
+import { Route as AdminPerfilRouteImport } from './routes/admin/perfil'
 import { Route as AdminPropuestasRouteImport } from './routes/admin/propuestas'
 import { Route as AutorIndexRouteImport } from './routes/autor/index'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
@@ -65,6 +66,11 @@ const AdminEdicionesRoute = AdminEdicionesRouteImport.update({
   path: '/ediciones',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminPerfilRoute = AdminPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminPropuestasRoute = AdminPropuestasRouteImport.update({
   id: '/propuestas',
   path: '/propuestas',
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/propuesta'
     | '/admin/administradores'
     | '/admin/ediciones'
+    | '/admin/perfil'
     | '/admin/propuestas'
     | '/autor/perfil'
     | '/autores/$slug'
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/propuesta'
     | '/admin/administradores'
     | '/admin/ediciones'
+    | '/admin/perfil'
     | '/admin/propuestas'
     | '/autor/perfil'
     | '/autores/$slug'
@@ -193,6 +204,7 @@ export interface FileRouteTypes {
     | '/propuesta'
     | '/admin/administradores'
     | '/admin/ediciones'
+    | '/admin/perfil'
     | '/admin/propuestas'
     | '/autor/perfil'
     | '/autores/$slug'
@@ -273,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEdicionesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/perfil': {
+      id: '/admin/perfil'
+      path: '/perfil'
+      fullPath: '/admin/perfil'
+      preLoaderRoute: typeof AdminPerfilRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/propuestas': {
       id: '/admin/propuestas'
       path: '/propuestas'
@@ -328,6 +347,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteRouteChildren {
   AdminAdministradoresRoute: typeof AdminAdministradoresRoute
   AdminEdicionesRoute: typeof AdminEdicionesRoute
+  AdminPerfilRoute: typeof AdminPerfilRoute
   AdminPropuestasRoute: typeof AdminPropuestasRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -335,6 +355,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAdministradoresRoute: AdminAdministradoresRoute,
   AdminEdicionesRoute: AdminEdicionesRoute,
+  AdminPerfilRoute: AdminPerfilRoute,
   AdminPropuestasRoute: AdminPropuestasRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

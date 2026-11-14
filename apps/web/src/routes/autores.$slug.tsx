@@ -7,7 +7,7 @@ import {
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 import { getAuthorPage } from "@/functions/authors";
-import { initials } from "@/lib/author";
+import { initials, isBlankProfile } from "@/lib/author";
 
 const BIO_DESCRIPTION_LENGTH = 160;
 
@@ -96,6 +96,10 @@ export const Route = createFileRoute("/autores/$slug")({
             ? "Autor de Garage Cómics."
             : loaderData.bio.slice(0, BIO_DESCRIPTION_LENGTH),
       },
+      // A profile with only a name stays out of search engines until its Author fills it in.
+      ...(loaderData === undefined || isBlankProfile(loaderData)
+        ? [{ name: "robots", content: "noindex" }]
+        : []),
     ],
   }),
   component: AuthorPage,

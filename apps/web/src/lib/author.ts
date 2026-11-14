@@ -28,6 +28,24 @@ export const availableSlug = (name: string, taken: readonly string[]) => {
   }
 };
 
+/** True when an Author has filled in nothing beyond their name. */
+export const isBlankProfile = (profile: {
+  role: string;
+  bio: string;
+  instagramUrl: string | null;
+  xUrl: string | null;
+  facebookUrl: string | null;
+  portfolioUrl: string | null;
+}) =>
+  profile.role === "" &&
+  profile.bio === "" &&
+  [
+    profile.instagramUrl,
+    profile.xUrl,
+    profile.facebookUrl,
+    profile.portfolioUrl,
+  ].every((link) => link === null);
+
 const INITIALS_MAX = 2;
 
 /** Up to two capital letters from the first words of a name, for the placeholder avatar. */

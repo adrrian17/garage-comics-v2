@@ -4,6 +4,7 @@ import {
   FileText,
   LayoutDashboard,
   ShieldCheck,
+  UserRound,
 } from "lucide-react";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
@@ -14,6 +15,7 @@ const sections = [
   { to: "/admin/propuestas", label: "Propuestas", icon: FileText },
   { to: "/admin/ediciones", label: "Ediciones", icon: CalendarDays },
   { to: "/admin/administradores", label: "Administradores", icon: ShieldCheck },
+  { to: "/admin/perfil", label: "Mi perfil", icon: UserRound },
 ] as const satisfies readonly [DashboardSection, ...DashboardSection[]];
 
 const AdminLayout = () => (
