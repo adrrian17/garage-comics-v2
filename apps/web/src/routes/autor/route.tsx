@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { LayoutDashboard, UserRound } from "lucide-react";
+import { Landmark, LayoutDashboard, UserRound } from "lucide-react";
 
 import { DashboardLayout } from "@/components/dashboard-layout";
 import type { DashboardSection } from "@/components/dashboard-layout";
@@ -7,6 +7,7 @@ import type { DashboardSection } from "@/components/dashboard-layout";
 const sections = [
   { to: "/autor", label: "Inicio", icon: LayoutDashboard },
   { to: "/autor/perfil", label: "Perfil", icon: UserRound },
+  { to: "/autor/pagos", label: "Pagos", icon: Landmark },
 ] as const satisfies readonly [DashboardSection, ...DashboardSection[]];
 
 const AuthorLayout = () => (
