@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { authorProfileInput, availableSlug, initials, slugify } from "./author";
+import {
+  authorProfileInput,
+  availableSlug,
+  initials,
+  isBlankProfile,
+  slugify,
+} from "./author";
 
 describe(slugify, () => {
   it.each([
@@ -70,5 +76,28 @@ describe("the Author profile form", () => {
     expect(
       authorProfileInput.safeParse({ ...form, displayName: "   " }).success
     ).toBeFalsy();
+  });
+});
+
+describe(isBlankProfile, () => {
+  const blank = {
+    role: "",
+    bio: "",
+    instagramUrl: null,
+    xUrl: null,
+    facebookUrl: null,
+    portfolioUrl: null,
+  };
+
+  it("is blank with only a name", () => {
+    expect(isBlankProfile(blank)).toBeTruthy();
+  });
+
+  it.each([
+    { role: "Guionista" },
+    { bio: "Hago cómics." },
+    { portfolioUrl: "https://ana.example.com" },
+  ])("is not blank with %j", (filled) => {
+    expect(isBlankProfile({ ...blank, ...filled })).toBeFalsy();
   });
 });
