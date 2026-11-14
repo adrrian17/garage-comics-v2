@@ -310,6 +310,12 @@ importers:
       '@garage-comics/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@stripe/connect-js':
+        specifier: 3.5.0
+        version: 3.5.0
+      '@stripe/react-connect-js':
+        specifier: 3.5.1
+        version: 3.5.1(@stripe/connect-js@3.5.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.5(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))
@@ -2570,6 +2576,16 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@stripe/connect-js@3.5.0':
+    resolution: {integrity: sha512-r0x134GLNJaQa0xY2bVEWZ/57D2QU78bigs+F/I3GJx4UBNwkmq4WeZKkYla9vHPZZ00454lDKpz0KJwnXzE5g==}
+
+  '@stripe/react-connect-js@3.5.1':
+    resolution: {integrity: sha512-DsNcdwlWw2oNMLysYG3OPs/1FcmYsA0yNSD+xNBpWPRmPgz9BeONjzRQzcIXgxBDBZ4jgGZUTUKyRPrNoSh9NA==}
+    peerDependencies:
+      '@stripe/connect-js': '>=3.5.0'
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   '@tailwindcss/node@4.3.5':
     resolution: {integrity: sha512-yT53FzV4ke0cr/BguDxhWMpm5MJu1O2muzk+tKw6lKHjODAsYArBbWwFbJiaksfzFv1tpkO9QHGzmfs1hJT66g==}
@@ -7735,6 +7751,14 @@ snapshots:
   '@sonarsource/analyzer-commons-configurations@2.31.0-5284': {}
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@stripe/connect-js@3.5.0': {}
+
+  '@stripe/react-connect-js@3.5.1(@stripe/connect-js@3.5.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+    dependencies:
+      '@stripe/connect-js': 3.5.0
+      react: 19.3.1
+      react-dom: 19.3.1(react@19.3.1)
 
   '@tailwindcss/node@4.3.5':
     dependencies:

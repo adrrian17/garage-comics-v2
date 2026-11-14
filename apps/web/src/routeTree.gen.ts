@@ -17,9 +17,11 @@ import { Route as PropuestaRouteImport } from './routes/propuesta'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin/administradores'
 import { Route as AdminEdicionesRouteImport } from './routes/admin/ediciones'
+import { Route as AdminPagosRouteImport } from './routes/admin/pagos'
 import { Route as AdminPerfilRouteImport } from './routes/admin/perfil'
 import { Route as AdminPropuestasRouteImport } from './routes/admin/propuestas'
 import { Route as AutorIndexRouteImport } from './routes/autor/index'
+import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
 import { Route as InscripcionProposalIdRouteImport } from './routes/inscripcion.$proposalId'
@@ -66,6 +68,11 @@ const AdminEdicionesRoute = AdminEdicionesRouteImport.update({
   path: '/ediciones',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminPagosRoute = AdminPagosRouteImport.update({
+  id: '/pagos',
+  path: '/pagos',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminPerfilRoute = AdminPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
@@ -79,6 +86,11 @@ const AdminPropuestasRoute = AdminPropuestasRouteImport.update({
 const AutorIndexRoute = AutorIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AutorRouteRoute,
+} as any)
+const AutorPagosRoute = AutorPagosRouteImport.update({
+  id: '/pagos',
+  path: '/pagos',
   getParentRoute: () => AutorRouteRoute,
 } as any)
 const AutorPerfilRoute = AutorPerfilRouteImport.update({
@@ -115,8 +127,10 @@ export interface FileRoutesByFullPath {
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
+  '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
@@ -131,8 +145,10 @@ export interface FileRoutesByTo {
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
+  '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
@@ -150,8 +166,10 @@ export interface FileRoutesById {
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
+  '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
@@ -170,8 +188,10 @@ export interface FileRouteTypes {
     | '/propuesta'
     | '/admin/administradores'
     | '/admin/ediciones'
+    | '/admin/pagos'
     | '/admin/perfil'
     | '/admin/propuestas'
+    | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
     | '/inscripcion/$proposalId'
@@ -186,8 +206,10 @@ export interface FileRouteTypes {
     | '/propuesta'
     | '/admin/administradores'
     | '/admin/ediciones'
+    | '/admin/pagos'
     | '/admin/perfil'
     | '/admin/propuestas'
+    | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
     | '/inscripcion/$proposalId'
@@ -204,8 +226,10 @@ export interface FileRouteTypes {
     | '/propuesta'
     | '/admin/administradores'
     | '/admin/ediciones'
+    | '/admin/pagos'
     | '/admin/perfil'
     | '/admin/propuestas'
+    | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
     | '/inscripcion/$proposalId'
@@ -285,6 +309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEdicionesRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/pagos': {
+      id: '/admin/pagos'
+      path: '/pagos'
+      fullPath: '/admin/pagos'
+      preLoaderRoute: typeof AdminPagosRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/perfil': {
       id: '/admin/perfil'
       path: '/perfil'
@@ -304,6 +335,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/autor/'
       preLoaderRoute: typeof AutorIndexRouteImport
+      parentRoute: typeof AutorRouteRoute
+    }
+    '/autor/pagos': {
+      id: '/autor/pagos'
+      path: '/pagos'
+      fullPath: '/autor/pagos'
+      preLoaderRoute: typeof AutorPagosRouteImport
       parentRoute: typeof AutorRouteRoute
     }
     '/autor/perfil': {
@@ -347,6 +385,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteRouteChildren {
   AdminAdministradoresRoute: typeof AdminAdministradoresRoute
   AdminEdicionesRoute: typeof AdminEdicionesRoute
+  AdminPagosRoute: typeof AdminPagosRoute
   AdminPerfilRoute: typeof AdminPerfilRoute
   AdminPropuestasRoute: typeof AdminPropuestasRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -355,6 +394,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAdministradoresRoute: AdminAdministradoresRoute,
   AdminEdicionesRoute: AdminEdicionesRoute,
+  AdminPagosRoute: AdminPagosRoute,
   AdminPerfilRoute: AdminPerfilRoute,
   AdminPropuestasRoute: AdminPropuestasRoute,
   AdminIndexRoute: AdminIndexRoute,
@@ -365,11 +405,13 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 )
 
 interface AutorRouteRouteChildren {
+  AutorPagosRoute: typeof AutorPagosRoute
   AutorPerfilRoute: typeof AutorPerfilRoute
   AutorIndexRoute: typeof AutorIndexRoute
 }
 
 const AutorRouteRouteChildren: AutorRouteRouteChildren = {
+  AutorPagosRoute: AutorPagosRoute,
   AutorPerfilRoute: AutorPerfilRoute,
   AutorIndexRoute: AutorIndexRoute,
 }
