@@ -65,6 +65,20 @@ describe(payoutSetupStatus, () => {
     ).toBe("rejected");
   });
 
+  it("is paused when Garage Cómics pauses the account in Stripe", () => {
+    expect(
+      payoutSetupStatus({
+        ...account,
+        payouts_enabled: false,
+        requirements: {
+          currently_due: [],
+          past_due: [],
+          disabled_reason: "platform_paused",
+        },
+      })
+    ).toBe("paused");
+  });
+
   it("is ready when transfers are active and Payouts are enabled", () => {
     expect(payoutSetupStatus(account)).toBe("ready");
   });

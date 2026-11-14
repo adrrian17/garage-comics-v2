@@ -44,6 +44,13 @@ const statusCopy = {
       "Stripe no aprobó tu cuenta, así que no podemos hacerte Envíos de fondos. Escríbenos para revisar tu caso.",
     showsOnboarding: false,
   },
+  paused: {
+    badge: "Pausada",
+    badgeVariant: "secondary",
+    description:
+      "Garage Cómics pausó tu cuenta por ahora. Mientras siga pausada, pueden detenerse tus Envíos de fondos o tus Transferencias a tu banco. Escríbenos si tienes dudas.",
+    showsOnboarding: false,
+  },
   ready: {
     badge: "Lista",
     badgeVariant: "default",

@@ -3,6 +3,7 @@ export type PayoutSetupStatus =
   | "needs_details"
   | "in_review"
   | "rejected"
+  | "paused"
   | "ready";
 
 /** The part of a Stripe Account that decides the status. */
@@ -25,9 +26,15 @@ export const payoutSetupStatus = (
     return "needs_details";
   }
 
-  // Stripe's rejection is final; no more details from the Author change it.
-  if ((account.requirements?.disabled_reason ?? "").startsWith("rejected.")) {
+  const disabledReason = account.requirements?.disabled_reason ?? "";
+
+  // Stripe's rejection is final, and a pause is Garage Cómics's own decision; no more details from the Author change either.
+  if (disabledReason.startsWith("rejected.")) {
     return "rejected";
+  }
+
+  if (disabledReason === "platform_paused") {
+    return "paused";
   }
 
   const due = [
