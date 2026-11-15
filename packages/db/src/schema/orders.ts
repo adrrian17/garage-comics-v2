@@ -16,7 +16,6 @@ const createdAt = () =>
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull();
 
-// GRG-1000 is the first Order Number; `lib/order-number.ts` adds the prefix, so only the integer is stored.
 export const FIRST_ORDER_NUMBER = 1000;
 
 export const orderStatuses = ["pending", "paid", "cancelled"] as const;
@@ -44,7 +43,6 @@ export const order = sqliteTable(
       .unique(),
     stripePaymentIntentId: text("stripe_payment_intent_id"),
     paidAt: integer("paid_at", { mode: "timestamp_ms" }),
-    // Null while the confirmation email is still owed.
     confirmationSentAt: integer("confirmation_sent_at", {
       mode: "timestamp_ms",
     }),
@@ -84,7 +82,6 @@ export const orderItem = sqliteTable(
     commissionCentavos: integer("commission_centavos").notNull(),
   },
   (table) => [
-    // A digital comic is bought once per Order.
     uniqueIndex("order_item_order_comic_idx").on(
       table.orderId,
       table.editionComicId
@@ -104,8 +101,8 @@ export const transfer = sqliteTable(
       .primaryKey()
       .references(() => orderItem.id),
     stripeTransferId: text("stripe_transfer_id").unique(),
+    // Counts outright rejections by Stripe; each one starts a fresh idempotency key, because no Transfer exists to return.
     attempts: integer("attempts").default(0).notNull(),
-    // Stripe remembers an idempotency key for 24 hours; see `lib/transfers.ts`.
     firstAttemptAt: integer("first_attempt_at", { mode: "timestamp_ms" }),
     lastError: text("last_error"),
     createdAt: createdAt(),

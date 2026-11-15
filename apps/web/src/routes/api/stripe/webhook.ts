@@ -44,7 +44,12 @@ const handleWebhook = async ({ request }: { request: Request }) => {
       }
 
       case "order_paid": {
-        await fulfillOrder(createDatabase(), action, new Date());
+        await fulfillOrder(
+          createDatabase(),
+          createStripe(),
+          action,
+          new Date()
+        );
 
         return ok();
       }

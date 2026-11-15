@@ -17,6 +17,8 @@ import {
 import { formatOrderNumber } from "@/lib/order-number";
 import type { PaidOrder } from "@/lib/stripe-events";
 import { orderConfirmationEmail, sendEmail } from "@/server/email";
+import { sendTransfers } from "@/server/transfers";
+import type { TransferStripe } from "@/server/transfers";
 
 /**
  * Marks the Order paid, gives it the next Order Number and creates the rows for the Transfers it owes, in one batch.
@@ -31,7 +33,6 @@ const ensurePaid = async (db: Database, paid: PaidOrder, now: Date) => {
         status: "paid",
         paidAt: now,
         stripePaymentIntentId: paid.paymentIntentId,
-        // Stripe's copy of the address wins over the one typed in our form.
         customerEmail: sql`coalesce(${paid.email}, ${order.customerEmail})`,
         number: sql`(select coalesce(max(number), ${FIRST_ORDER_NUMBER - 1}) + 1 from "order")`,
       })
@@ -42,7 +43,6 @@ const ensurePaid = async (db: Database, paid: PaidOrder, now: Date) => {
           inArray(order.status, payableStatuses)
         )
       ),
-    // On a replay the rows already exist, so this changes nothing.
     db
       .insert(transfer)
       .select(
@@ -117,13 +117,31 @@ const ensureConfirmed = async (db: Database, orderId: string, now: Date) => {
     .where(and(eq(order.id, orderId), isNull(order.confirmationSentAt)));
 };
 
+/** Sends the Author's Transfers; throws while some are unsent and worth retrying, so the webhook answers 500 and Stripe delivers the event again. */
+const ensureTransfers = async (
+  db: Database,
+  stripe: TransferStripe,
+  orderId: string,
+  now: Date
+) => {
+  const unsent = await sendTransfers(db, stripe, orderId, now);
+
+  if (unsent > 0) {
+    throw new Error(
+      `${unsent} Transfer(s) of Order ${orderId} are still unsent.`
+    );
+  }
+};
+
 /**
- * Brings an Order to paid and confirmed. Safe to repeat in any order and after a crash at any point: each step checks its own saved state.
+ * Brings an Order to paid, confirmed and transferred. Safe to repeat in any order and after a crash at any point: each step checks its own saved state.
+ * Payment is saved first. Only then do the email and the Transfers run, independently, so an email outage never holds back an Author's money and a Stripe error never holds back the email.
  * It never reads the sales phase or the active Edition, so an OXXO Order paid after the window closed is honoured (story 29).
  * It throws when a step needs a retry.
  */
 export const fulfillOrder = async (
   db: Database,
+  stripe: TransferStripe,
   paid: PaidOrder,
   now: Date
 ) => {
@@ -149,7 +167,25 @@ export const fulfillOrder = async (
   }
 
   await ensurePaid(db, paid, now);
-  await ensureConfirmed(db, paid.orderId, now);
+
+  const steps = await Promise.allSettled([
+    ensureConfirmed(db, paid.orderId, now),
+    ensureTransfers(db, stripe, paid.orderId, now),
+  ]);
+
+  const failures = steps.flatMap((step) =>
+    step.status === "rejected"
+      ? [
+          step.reason instanceof Error
+            ? step.reason.message
+            : String(step.reason),
+        ]
+      : []
+  );
+
+  if (failures.length > 0) {
+    throw new Error(failures.join("; "));
+  }
 };
 
 /** Cancels an Order that is still pending, silently (story 31). A paid or unknown Order is left alone. */
