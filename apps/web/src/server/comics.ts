@@ -80,7 +80,7 @@ const resolveSeller = async (db: Database, user: Seller, now: Date) => {
   };
 };
 
-// Checked inside each write: an R2 upload or a slow request can outlast the cutoff that resolveWriter saw.
+// Checked inside each write, on the database clock: an R2 upload or a slow request can outlast the cutoff that resolveWriter saw.
 const stillOpen = (db: Database, editionId: string) =>
   exists(
     db
@@ -90,7 +90,10 @@ const stillOpen = (db: Database, editionId: string) =>
         and(
           eq(editionTable.id, editionId),
           eq(editionTable.isActive, true),
-          gt(editionTable.salesOpenAt, new Date())
+          gt(
+            editionTable.salesOpenAt,
+            sql`cast(unixepoch('subsecond') * 1000 as integer)`
+          )
         )
       )
   );

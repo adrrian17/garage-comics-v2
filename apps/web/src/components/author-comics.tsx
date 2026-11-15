@@ -167,8 +167,16 @@ const SlotCard = ({
             </Alert>
           ) : null}
           <ComicFiles comic={comic} disabled={!canEdit} />
+          {/* Keyed by the form's own fields: attaching a file bumps the revision and must not discard unsaved edits. */}
           <ComicForm
-            key={comic.revision}
+            key={JSON.stringify([
+              comic.title,
+              comic.description,
+              comic.genre,
+              comic.priceMxn,
+              comic.pageCount,
+              comic.collaborators,
+            ])}
             slot={slot}
             comic={comic}
             disabled={!canEdit}

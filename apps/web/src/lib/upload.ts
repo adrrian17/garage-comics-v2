@@ -5,6 +5,9 @@ import type { UploadKind } from "./comic";
 
 const MAX_ATTEMPTS = 3;
 
+// A 10 MiB part over a slow link takes minutes; past this, the connection is stalled and the part is retried.
+const PART_TIMEOUT_MS = 10 * 60 * 1000;
+
 const attempt = async <T>(
   task: () => Promise<T>,
   left = MAX_ATTEMPTS
@@ -31,6 +34,7 @@ const putPart = async (
     const request = new XMLHttpRequest();
 
     request.open("PUT", url);
+    request.timeout = PART_TIMEOUT_MS;
     request.upload.addEventListener("progress", (event) => {
       onProgress(event.loaded);
     });
@@ -46,6 +50,9 @@ const putPart = async (
     });
     request.addEventListener("error", () => {
       reject(new Error("The connection dropped during a part"));
+    });
+    request.addEventListener("timeout", () => {
+      reject(new Error("A part stalled"));
     });
     request.send(body);
   });
