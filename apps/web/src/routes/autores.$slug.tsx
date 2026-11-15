@@ -6,6 +6,7 @@ import {
 } from "@garage-comics/ui/components/empty";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
+import { CartLink } from "@/components/cart-link";
 import { ComicGrid } from "@/components/comic-grid";
 import { getAuthorPage } from "@/functions/authors";
 import { initials, isBlankProfile } from "@/lib/author";
@@ -62,7 +63,10 @@ const AuthorPage = () => {
         </ul>
       )}
       <section className="mt-12">
-        <h2 className="text-xl font-semibold">Cómics</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-semibold">Cómics</h2>
+          {comics.length === 0 ? null : <CartLink />}
+        </div>
         {comics.length === 0 ? (
           <Empty className="mt-4">
             <EmptyHeader>

@@ -3,6 +3,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { SquarePen } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { CartLink } from "@/components/cart-link";
 import { ComicGrid } from "@/components/comic-grid";
 import { getCatalog } from "@/functions/catalog";
 import { getActiveEdition } from "@/functions/editions";
@@ -153,9 +154,12 @@ const Landing = ({
             </p>
           </Hero>
           <section aria-labelledby="catalogo" className="mt-16 lg:mt-24">
-            <h2 id="catalogo" className="text-2xl font-bold tracking-tight">
-              Catálogo
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 id="catalogo" className="text-2xl font-bold tracking-tight">
+                Catálogo
+              </h2>
+              <CartLink />
+            </div>
             {catalog?.status === "open" && catalog.comics.length > 0 ? (
               <div className="mt-6">
                 <ComicGrid comics={catalog.comics} />
@@ -190,7 +194,6 @@ export const Route = createFileRoute("/")({
   loader: async () => {
     const edition = await getActiveEdition();
 
-    // No catalog outside the sales window (story 4).
     const catalog = edition?.phase === "sales" ? await getCatalog() : null;
 
     return { edition, catalog };

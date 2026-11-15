@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AutorRouteRouteImport } from './routes/autor/route'
+import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as PropuestaRouteImport } from './routes/propuesta'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -45,6 +46,11 @@ const AdminRouteRoute = AdminRouteRouteImport.update({
 const AutorRouteRoute = AutorRouteRouteImport.update({
   id: '/autor',
   path: '/autor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarritoRoute = CarritoRouteImport.update({
+  id: '/carrito',
+  path: '/carrito',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EntrarRoute = EntrarRouteImport.update({
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/autor': typeof AutorRouteRouteWithChildren
+  '/carrito': typeof CarritoRoute
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
@@ -169,6 +176,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/carrito': typeof CarritoRoute
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/autor': typeof AutorRouteRouteWithChildren
+  '/carrito': typeof CarritoRoute
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/autor'
+    | '/carrito'
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/carrito'
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
@@ -266,6 +277,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/autor'
+    | '/carrito'
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
@@ -291,6 +303,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AutorRouteRoute: typeof AutorRouteRouteWithChildren
+  CarritoRoute: typeof CarritoRoute
   EntrarRoute: typeof EntrarRoute
   PropuestaRoute: typeof PropuestaRoute
   AutoresSlugRoute: typeof AutoresSlugRoute
@@ -321,6 +334,13 @@ declare module '@tanstack/react-router' {
       path: '/autor'
       fullPath: '/autor'
       preLoaderRoute: typeof AutorRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrito': {
+      id: '/carrito'
+      path: '/carrito'
+      fullPath: '/carrito'
+      preLoaderRoute: typeof CarritoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/entrar': {
@@ -507,6 +527,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AutorRouteRoute: AutorRouteRouteWithChildren,
+  CarritoRoute: CarritoRoute,
   EntrarRoute: EntrarRoute,
   PropuestaRoute: PropuestaRoute,
   AutoresSlugRoute: AutoresSlugRoute,

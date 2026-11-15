@@ -8,6 +8,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import { AddToCartButton } from "@/components/add-to-cart-button";
 import { formatMxn } from "@/lib/format";
 import type { SellableComic } from "@/server/catalog";
 
@@ -76,7 +77,11 @@ export const ComicGrid = ({
   <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
     {comics.map((comic) => (
       <li key={comic.id} className="flex">
-        <ComicCard comic={comic} showAuthor={showAuthor} />
+        <ComicCard
+          comic={comic}
+          showAuthor={showAuthor}
+          action={<AddToCartButton comicId={comic.id} title={comic.title} />}
+        />
       </li>
     ))}
   </ul>
