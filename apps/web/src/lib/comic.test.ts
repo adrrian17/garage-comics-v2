@@ -6,6 +6,7 @@ import {
   canPrepareComics,
   comicInput,
   contentChanged,
+  decisionInput,
   pageCountError,
   planParts,
   sniffMatches,
@@ -249,5 +250,40 @@ describe("the content of a comic", () => {
     ],
   ] as const)("refuses %s", (_case, change) => {
     expect(comicInput.safeParse({ ...valid, ...change }).success).toBeFalsy();
+  });
+});
+
+describe("an Admin's decision", () => {
+  const base = { id: "c1", revision: 3 };
+
+  it.each([
+    ["approves with no reason", { decision: "approve" }, true],
+    ["approves with a reason", { decision: "approve", reason: "Bien" }, true],
+    [
+      "rejects with a reason",
+      { decision: "reject", reason: "Falta el PDF" },
+      true,
+    ],
+    ["rejects with no reason", { decision: "reject" }, false],
+    [
+      "rejects with a blank reason",
+      { decision: "reject", reason: "   " },
+      false,
+    ],
+    [
+      "rejects with a reason that is too long",
+      { decision: "reject", reason: "a".repeat(1001) },
+      false,
+    ],
+    ["makes up a decision", { decision: "reopen", reason: "x" }, false],
+  ] as const)("%s: valid=%s", (_case, change, valid) => {
+    expect(decisionInput.safeParse({ ...base, ...change }).success).toBe(valid);
+  });
+
+  it("trims the reason", () => {
+    expect(
+      decisionInput.parse({ ...base, decision: "reject", reason: "  Falta  " })
+        .reason
+    ).toBe("Falta");
   });
 });

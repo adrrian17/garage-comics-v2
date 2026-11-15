@@ -64,3 +64,19 @@ export const proposalAcceptedEmail = ({
   subject: `¡Tu propuesta para ${editionName} fue aceptada!`,
   text: `¡Felicidades! Tu propuesta para ${editionName} fue aceptada.\n\nPara asegurar tu lugar, paga tu Inscripción de ${registrationPrice} antes del ${deadline} en este link:\n\n${paymentUrl}\n\nSi no pagas antes de esa fecha, tu lugar se libera.`,
 });
+
+export const comicApprovedEmail = (comicTitle: string) => ({
+  subject: `Aprobamos tu cómic "${comicTitle}"`,
+  text: `¡Buenas noticias! Aprobamos tu cómic "${comicTitle}". Ya está listo para salir a la venta cuando abra la Edición.\n\nSi cambias algo del cómic, volverá a revisión.`,
+});
+
+export const comicRejectedEmail = ({
+  comicTitle,
+  reason,
+}: {
+  comicTitle: string;
+  reason: string;
+}) => ({
+  subject: `Tu cómic "${comicTitle}" necesita cambios`,
+  text: `Revisamos tu cómic "${comicTitle}" y esta vez no lo pudimos aprobar.\n\nMotivo:\n${reason}\n\nCorrígelo desde Mis cómics y vuelve a enviarlo a revisión.`,
+});

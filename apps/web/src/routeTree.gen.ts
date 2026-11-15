@@ -16,6 +16,7 @@ import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as PropuestaRouteImport } from './routes/propuesta'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin/administradores'
+import { Route as AdminComicsRouteImport } from './routes/admin/comics'
 import { Route as AdminEdicionesRouteImport } from './routes/admin/ediciones'
 import { Route as AdminPagosRouteImport } from './routes/admin/pagos'
 import { Route as AdminPerfilRouteImport } from './routes/admin/perfil'
@@ -62,6 +63,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
 const AdminAdministradoresRoute = AdminAdministradoresRouteImport.update({
   id: '/administradores',
   path: '/administradores',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminComicsRoute = AdminComicsRouteImport.update({
+  id: '/comics',
+  path: '/comics',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminEdicionesRoute = AdminEdicionesRouteImport.update({
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
+  '/admin/comics': typeof AdminComicsRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
+  '/admin/comics': typeof AdminComicsRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
@@ -173,6 +181,7 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
+  '/admin/comics': typeof AdminComicsRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
+    | '/admin/comics'
     | '/admin/ediciones'
     | '/admin/pagos'
     | '/admin/perfil'
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
+    | '/admin/comics'
     | '/admin/ediciones'
     | '/admin/pagos'
     | '/admin/perfil'
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
+    | '/admin/comics'
     | '/admin/ediciones'
     | '/admin/pagos'
     | '/admin/perfil'
@@ -312,6 +324,13 @@ declare module '@tanstack/react-router' {
       path: '/administradores'
       fullPath: '/admin/administradores'
       preLoaderRoute: typeof AdminAdministradoresRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/comics': {
+      id: '/admin/comics'
+      path: '/comics'
+      fullPath: '/admin/comics'
+      preLoaderRoute: typeof AdminComicsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/ediciones': {
@@ -403,6 +422,7 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteRouteChildren {
   AdminAdministradoresRoute: typeof AdminAdministradoresRoute
+  AdminComicsRoute: typeof AdminComicsRoute
   AdminEdicionesRoute: typeof AdminEdicionesRoute
   AdminPagosRoute: typeof AdminPagosRoute
   AdminPerfilRoute: typeof AdminPerfilRoute
@@ -412,6 +432,7 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAdministradoresRoute: AdminAdministradoresRoute,
+  AdminComicsRoute: AdminComicsRoute,
   AdminEdicionesRoute: AdminEdicionesRoute,
   AdminPagosRoute: AdminPagosRoute,
   AdminPerfilRoute: AdminPerfilRoute,

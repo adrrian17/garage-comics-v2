@@ -16,6 +16,7 @@ export const EXCLUSIVE_PAGES = { min: 12, max: 24 } as const;
 export const TITLE_MAX_LENGTH = 120;
 export const DESCRIPTION_MAX_LENGTH = 2000;
 export const GENRE_MAX_LENGTH = 60;
+export const REASON_MAX_LENGTH = 1000;
 export const COLLABORATORS_MAX = 10;
 const COLLABORATOR_LINKS_MAX = 5;
 export const COLLABORATOR_NAME_MAX_LENGTH = 120;
@@ -248,3 +249,26 @@ export const comicInput = z.object({
 });
 
 export type ComicInput = z.output<typeof comicInput>;
+
+/** An Admin's decision on a comic in review; a rejection must say why, because the Author reads it in an email. */
+export const decisionInput = z
+  .object({
+    id: z.string(),
+    revision: z.number().int(),
+    decision: z.enum(["approve", "reject"]),
+    reason: z
+      .string()
+      .trim()
+      .max(
+        REASON_MAX_LENGTH,
+        `Usa como máximo ${REASON_MAX_LENGTH} caracteres en el motivo.`
+      )
+      .optional(),
+  })
+  .refine(
+    ({ decision, reason }) =>
+      decision === "approve" || (reason !== undefined && reason !== ""),
+    { error: "Escribe el motivo del rechazo.", path: ["reason"] }
+  );
+
+export type Decision = z.output<typeof decisionInput>["decision"];

@@ -6,6 +6,7 @@ import {
 } from "@garage-comics/ui/components/card";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
+  BookOpen,
   CalendarClock,
   CalendarDays,
   FileText,
@@ -14,6 +15,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 import { listAdmins } from "@/functions/admins";
+import { getComicsInReviewCount } from "@/functions/comics-review";
 import { getActiveEdition } from "@/functions/editions";
 import { countPendingProposals } from "@/functions/proposals";
 import { editionPhaseLabels } from "@/lib/edition";
@@ -44,7 +46,9 @@ const StatCard = ({
 );
 
 const AdminHome = () => {
-  const { edition, pendingProposals, admins } = Route.useLoaderData();
+  const { edition, pendingProposals, comicsInReview, admins } =
+    Route.useLoaderData();
+
   const { session } = Route.useRouteContext();
 
   return (
@@ -67,6 +71,11 @@ const AdminHome = () => {
           label="Propuestas pendientes"
           icon={FileText}
           value={pendingProposals}
+        />
+        <StatCard
+          label="Cómics por revisar"
+          icon={BookOpen}
+          value={comicsInReview}
         />
         <StatCard label="Administradores" icon={ShieldCheck} value={admins} />
       </div>
@@ -110,13 +119,20 @@ const AdminHome = () => {
 
 export const Route = createFileRoute("/admin/")({
   loader: async () => {
-    const [edition, pendingProposals, admins] = await Promise.all([
-      getActiveEdition(),
-      countPendingProposals(),
-      listAdmins(),
-    ]);
+    const [edition, pendingProposals, comicsInReview, admins] =
+      await Promise.all([
+        getActiveEdition(),
+        countPendingProposals(),
+        getComicsInReviewCount(),
+        listAdmins(),
+      ]);
 
-    return { edition, pendingProposals, admins: admins.length };
+    return {
+      edition,
+      pendingProposals,
+      comicsInReview,
+      admins: admins.length,
+    };
   },
   head: () => ({ meta: [{ title: "Inicio · Garage Cómics" }] }),
   component: AdminHome,
