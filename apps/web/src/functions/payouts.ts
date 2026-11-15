@@ -4,7 +4,11 @@ import { env } from "cloudflare:workers";
 import { authorMiddleware } from "@/functions/author-middleware";
 import { payoutSetupStatus } from "@/lib/payout-setup";
 import { findActiveEdition } from "@/server/editions";
-import { ensureStripeAccountId, findStripeAccount } from "@/server/payouts";
+import {
+  ensureStripeAccountId,
+  findStripeAccount,
+  recordPayoutStatus,
+} from "@/server/payouts";
 import { createDatabase, createStripe } from "@/server/services";
 
 export const getPayoutSetup = createServerFn({ method: "GET" })
@@ -17,9 +21,13 @@ export const getPayoutSetup = createServerFn({ method: "GET" })
       findActiveEdition(db),
     ]);
 
+    const status = payoutSetupStatus(account);
+
+    await recordPayoutStatus(db, context.session.user.id, status);
+
     return {
       userId: context.session.user.id,
-      status: payoutSetupStatus(account),
+      status,
       publishableKey: env.STRIPE_PUBLISHABLE_KEY,
       salesOpenAt: activeEdition?.salesOpenAt ?? null,
     };
