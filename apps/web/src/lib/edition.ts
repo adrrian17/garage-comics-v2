@@ -8,7 +8,7 @@ type EditionWindows = Pick<
   "proposalsOpenAt" | "proposalsCloseAt" | "salesOpenAt" | "salesCloseAt"
 >;
 
-type EditionPhase =
+export type EditionPhase =
   | "upcoming"
   | "proposals"
   | "preparation"

@@ -10,6 +10,26 @@ export const db = Cloudflare.D1.Database("database", {
   migrations: "../../packages/db/src/migrations",
 });
 
+// Browsers PUT file parts straight to this bucket through presigned URLs, so it allows any origin: the signature is the credential.
+const comics = Cloudflare.R2.Bucket("comics", {
+  cors: [
+    {
+      allowedMethods: ["GET", "PUT"],
+      allowedOrigins: ["*"],
+      allowedHeaders: ["content-type"],
+      exposeHeaders: ["etag"],
+    },
+  ],
+  lifecycleRules: [
+    {
+      id: "abort-stale-uploads",
+      abortMultipartUploadsTransition: {
+        condition: { type: "Age", maxAge: 60 * 60 * 24 },
+      },
+    },
+  ],
+});
+
 // Under `alchemy dev` this writes each message as an .eml file to .alchemy/local/email.
 const email = Cloudflare.Email.SendEmail("EMAIL");
 
@@ -32,6 +52,8 @@ export const web = Cloudflare.Website.Vite("web", {
       Config.withDefault("")
     ),
     EMAIL: email,
+    COMICS: comics,
+    COMICS_S3: Cloudflare.R2.S3Credentials(comics, { access: "read-write" }),
   },
   dev: {
     // portless assigns the port; see the dev script in package.json.

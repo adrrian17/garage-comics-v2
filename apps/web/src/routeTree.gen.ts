@@ -16,11 +16,14 @@ import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as PropuestaRouteImport } from './routes/propuesta'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin/administradores'
+import { Route as AdminComicsRouteImport } from './routes/admin/comics'
 import { Route as AdminEdicionesRouteImport } from './routes/admin/ediciones'
+import { Route as AdminMisComicsRouteImport } from './routes/admin/mis-comics'
 import { Route as AdminPagosRouteImport } from './routes/admin/pagos'
 import { Route as AdminPerfilRouteImport } from './routes/admin/perfil'
 import { Route as AdminPropuestasRouteImport } from './routes/admin/propuestas'
 import { Route as AutorIndexRouteImport } from './routes/autor/index'
+import { Route as AutorComicsRouteImport } from './routes/autor/comics'
 import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
@@ -63,9 +66,19 @@ const AdminAdministradoresRoute = AdminAdministradoresRouteImport.update({
   path: '/administradores',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminComicsRoute = AdminComicsRouteImport.update({
+  id: '/comics',
+  path: '/comics',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminEdicionesRoute = AdminEdicionesRouteImport.update({
   id: '/ediciones',
   path: '/ediciones',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminMisComicsRoute = AdminMisComicsRouteImport.update({
+  id: '/mis-comics',
+  path: '/mis-comics',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminPagosRoute = AdminPagosRouteImport.update({
@@ -86,6 +99,11 @@ const AdminPropuestasRoute = AdminPropuestasRouteImport.update({
 const AutorIndexRoute = AutorIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AutorRouteRoute,
+} as any)
+const AutorComicsRoute = AutorComicsRouteImport.update({
+  id: '/comics',
+  path: '/comics',
   getParentRoute: () => AutorRouteRoute,
 } as any)
 const AutorPagosRoute = AutorPagosRouteImport.update({
@@ -126,10 +144,13 @@ export interface FileRoutesByFullPath {
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
+  '/admin/comics': typeof AdminComicsRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/mis-comics': typeof AdminMisComicsRoute
   '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
+  '/autor/comics': typeof AutorComicsRoute
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
@@ -144,10 +165,13 @@ export interface FileRoutesByTo {
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
+  '/admin/comics': typeof AdminComicsRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/mis-comics': typeof AdminMisComicsRoute
   '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
+  '/autor/comics': typeof AutorComicsRoute
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
@@ -165,10 +189,13 @@ export interface FileRoutesById {
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
+  '/admin/comics': typeof AdminComicsRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
+  '/admin/mis-comics': typeof AdminMisComicsRoute
   '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
+  '/autor/comics': typeof AutorComicsRoute
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
@@ -187,10 +214,13 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
+    | '/admin/comics'
     | '/admin/ediciones'
+    | '/admin/mis-comics'
     | '/admin/pagos'
     | '/admin/perfil'
     | '/admin/propuestas'
+    | '/autor/comics'
     | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
@@ -205,10 +235,13 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
+    | '/admin/comics'
     | '/admin/ediciones'
+    | '/admin/mis-comics'
     | '/admin/pagos'
     | '/admin/perfil'
     | '/admin/propuestas'
+    | '/autor/comics'
     | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
@@ -225,10 +258,13 @@ export interface FileRouteTypes {
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
+    | '/admin/comics'
     | '/admin/ediciones'
+    | '/admin/mis-comics'
     | '/admin/pagos'
     | '/admin/perfil'
     | '/admin/propuestas'
+    | '/autor/comics'
     | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
@@ -302,11 +338,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdministradoresRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/comics': {
+      id: '/admin/comics'
+      path: '/comics'
+      fullPath: '/admin/comics'
+      preLoaderRoute: typeof AdminComicsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/ediciones': {
       id: '/admin/ediciones'
       path: '/ediciones'
       fullPath: '/admin/ediciones'
       preLoaderRoute: typeof AdminEdicionesRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/mis-comics': {
+      id: '/admin/mis-comics'
+      path: '/mis-comics'
+      fullPath: '/admin/mis-comics'
+      preLoaderRoute: typeof AdminMisComicsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/pagos': {
@@ -335,6 +385,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/autor/'
       preLoaderRoute: typeof AutorIndexRouteImport
+      parentRoute: typeof AutorRouteRoute
+    }
+    '/autor/comics': {
+      id: '/autor/comics'
+      path: '/comics'
+      fullPath: '/autor/comics'
+      preLoaderRoute: typeof AutorComicsRouteImport
       parentRoute: typeof AutorRouteRoute
     }
     '/autor/pagos': {
@@ -384,7 +441,9 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteRouteChildren {
   AdminAdministradoresRoute: typeof AdminAdministradoresRoute
+  AdminComicsRoute: typeof AdminComicsRoute
   AdminEdicionesRoute: typeof AdminEdicionesRoute
+  AdminMisComicsRoute: typeof AdminMisComicsRoute
   AdminPagosRoute: typeof AdminPagosRoute
   AdminPerfilRoute: typeof AdminPerfilRoute
   AdminPropuestasRoute: typeof AdminPropuestasRoute
@@ -393,7 +452,9 @@ interface AdminRouteRouteChildren {
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAdministradoresRoute: AdminAdministradoresRoute,
+  AdminComicsRoute: AdminComicsRoute,
   AdminEdicionesRoute: AdminEdicionesRoute,
+  AdminMisComicsRoute: AdminMisComicsRoute,
   AdminPagosRoute: AdminPagosRoute,
   AdminPerfilRoute: AdminPerfilRoute,
   AdminPropuestasRoute: AdminPropuestasRoute,
@@ -405,12 +466,14 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
 )
 
 interface AutorRouteRouteChildren {
+  AutorComicsRoute: typeof AutorComicsRoute
   AutorPagosRoute: typeof AutorPagosRoute
   AutorPerfilRoute: typeof AutorPerfilRoute
   AutorIndexRoute: typeof AutorIndexRoute
 }
 
 const AutorRouteRouteChildren: AutorRouteRouteChildren = {
+  AutorComicsRoute: AutorComicsRoute,
   AutorPagosRoute: AutorPagosRoute,
   AutorPerfilRoute: AutorPerfilRoute,
   AutorIndexRoute: AutorIndexRoute,
