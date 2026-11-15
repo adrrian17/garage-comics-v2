@@ -113,7 +113,7 @@ export const createRegistrationCheckout = async (
     mode: "payment",
     line_items: [{ price: priceId, quantity: 1 }],
     customer_email: offer.email,
-    metadata: { proposalId },
+    metadata: { kind: "registration", proposalId },
     expires_at: Math.floor(
       checkoutExpiresAt(offer.deadline, now).getTime() / 1000
     ),
@@ -130,7 +130,7 @@ export const createRegistrationCheckout = async (
  */
 export const registerPayment = async (
   db: Database,
-  session: Stripe.Checkout.Session
+  session: Pick<Stripe.Checkout.Session, "id" | "metadata">
 ) => {
   const proposalId = session.metadata?.proposalId;
 

@@ -26,7 +26,7 @@ export default {
     webhooks: [
       {
         url: `${appUrl}/api/stripe/webhook`,
-        events: ["checkout.session.completed"],
+        events: ["checkout.session.completed", "checkout.session.expired"],
         secret: process.env.STRIPE_WEBHOOK_SECRET,
       },
     ],

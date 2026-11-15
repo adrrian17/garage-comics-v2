@@ -6,9 +6,20 @@ Server code lives inside the TanStack Start app in `apps/web`; there is no separ
 - `apps/web/src/server/services.ts`: builds Better Auth and the database from the `cloudflare:workers` env. Only server code imports it.
 - `apps/web/src/functions/`: server functions (`createServerFn`). Read the session with `getRequest().headers`; reject unauthenticated calls inside the handler.
 - `apps/web/src/routes/api/`: server routes, such as the Better Auth handler at `/api/auth/$`.
-- `apps/web/src/routes/api/stripe/webhook.ts`: the Stripe webhook. It verifies the signature and registers a paid Registration (`server/registrations.ts`); it must stay safe to replay.
+- `apps/web/src/routes/api/stripe/webhook.ts`: the Stripe webhook. It verifies the signature, asks `routeCheckoutEvent` (`lib/stripe-events.ts`, the only list of handled events) what the event means, then registers a paid Registration (`server/registrations.ts`) or pays or cancels an Order (`server/orders.ts`). It must stay safe to replay, and it answers 500 when a step needs a retry so Stripe delivers the event again.
 - `packages/auth`: Better Auth configuration (`createAuth`).
 - Shared packages receive config or initialized clients from the app; they do not read env vars themselves (see [environment](environment.md)).
+
+## Stripe webhook events
+
+Subscribe the endpoint (`/api/stripe/webhook`) to these events in the Stripe Dashboard; any other event is ignored.
+
+- `checkout.session.completed`: a card payment, a Registration, or an OXXO voucher being issued (unpaid, ignored).
+- `checkout.session.async_payment_succeeded`: an OXXO voucher paid.
+- `checkout.session.async_payment_failed`: an OXXO voucher expired unpaid; the Order is cancelled silently.
+- `checkout.session.expired`: a Checkout Session lapsed; the Order is cancelled silently.
+
+Checkout Sessions carry `metadata.kind` (`order` or `registration`) so the webhook can tell them apart. OXXO must also be enabled as a payment method in the Dashboard for the Checkout page to offer it.
 
 ## Stripe in development
 

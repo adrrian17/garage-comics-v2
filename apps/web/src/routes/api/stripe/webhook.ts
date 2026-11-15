@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { env } from "cloudflare:workers";
+import { log } from "evlog";
 import { Stripe } from "stripe";
 
+import { routeCheckoutEvent } from "@/lib/stripe-events";
+import { cancelOrder, fulfillOrder } from "@/server/orders";
 import { registerPayment, sendAuthorMagicLink } from "@/server/registrations";
 import { createDatabase, createStripe } from "@/server/services";
 
@@ -25,22 +28,58 @@ const handleWebhook = async ({ request }: { request: Request }) => {
     return new Response("Firma inválida.", { status: 400 });
   }
 
-  // Only a paid Checkout Session registers: the success redirect proves nothing. A delayed payment method reports its payment in the async event.
-  if (
-    (event.type !== "checkout.session.completed" &&
-      event.type !== "checkout.session.async_payment_succeeded") ||
-    event.data.object.payment_status !== "paid"
-  ) {
-    return ok();
+  const action = routeCheckoutEvent(event);
+
+  // An error here becomes a 500, which makes Stripe deliver the event again for up to three days.
+  try {
+    switch (action.kind) {
+      case "registration_paid": {
+        const email = await registerPayment(createDatabase(), action.session);
+
+        if (email !== null) {
+          await sendAuthorMagicLink(email, request.headers);
+        }
+
+        return ok();
+      }
+
+      case "order_paid": {
+        await fulfillOrder(createDatabase(), action, new Date());
+
+        return ok();
+      }
+
+      case "order_cancelled": {
+        await cancelOrder(createDatabase(), action.orderId, action.sessionId);
+
+        return ok();
+      }
+
+      case "ignore": {
+        if (action.reason === "unrecognized_session") {
+          log.warn({
+            action: "stripe_webhook",
+            reason: action.reason,
+            eventType: event.type,
+          });
+        }
+
+        return ok();
+      }
+
+      default: {
+        return action satisfies never;
+      }
+    }
+  } catch (error) {
+    log.error({
+      action: "stripe_webhook",
+      eventType: event.type,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    return new Response("No pudimos procesar el evento.", { status: 500 });
   }
-
-  const email = await registerPayment(createDatabase(), event.data.object);
-
-  if (email !== null) {
-    await sendAuthorMagicLink(email, request.headers);
-  }
-
-  return ok();
 };
 
 export const Route = createFileRoute("/api/stripe/webhook")({

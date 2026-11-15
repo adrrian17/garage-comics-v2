@@ -17,7 +17,7 @@ const createdAt = () =>
     .notNull();
 
 // GRG-1000 is the first Order Number; `lib/order-number.ts` adds the prefix, so only the integer is stored.
-const FIRST_ORDER_NUMBER = 1000;
+export const FIRST_ORDER_NUMBER = 1000;
 
 export const orderStatuses = ["pending", "paid", "cancelled"] as const;
 
