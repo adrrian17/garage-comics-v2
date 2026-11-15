@@ -28,6 +28,7 @@ import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
 import { Route as InscripcionProposalIdRouteImport } from './routes/inscripcion.$proposalId'
+import { Route as PortadasComicIdRouteImport } from './routes/portadas.$comicId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 
@@ -126,6 +127,11 @@ const InscripcionProposalIdRoute = InscripcionProposalIdRouteImport.update({
   path: '/inscripcion/$proposalId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PortadasComicIdRoute = PortadasComicIdRouteImport.update({
+  id: '/portadas/$comicId',
+  path: '/portadas/$comicId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
+  '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -176,6 +183,7 @@ export interface FileRoutesByTo {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
+  '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin': typeof AdminIndexRoute
   '/autor': typeof AutorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
+  '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -225,6 +234,7 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autores/$slug'
     | '/inscripcion/$proposalId'
+    | '/portadas/$comicId'
     | '/admin/'
     | '/autor/'
     | '/api/auth/$'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autores/$slug'
     | '/inscripcion/$proposalId'
+    | '/portadas/$comicId'
     | '/admin'
     | '/autor'
     | '/api/auth/$'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autores/$slug'
     | '/inscripcion/$proposalId'
+    | '/portadas/$comicId'
     | '/admin/'
     | '/autor/'
     | '/api/auth/$'
@@ -283,6 +295,7 @@ export interface RootRouteChildren {
   PropuestaRoute: typeof PropuestaRoute
   AutoresSlugRoute: typeof AutoresSlugRoute
   InscripcionProposalIdRoute: typeof InscripcionProposalIdRoute
+  PortadasComicIdRoute: typeof PortadasComicIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
@@ -422,6 +435,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InscripcionProposalIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/portadas/$comicId': {
+      id: '/portadas/$comicId'
+      path: '/portadas/$comicId'
+      fullPath: '/portadas/$comicId'
+      preLoaderRoute: typeof PortadasComicIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -491,6 +511,7 @@ const rootRouteChildren: RootRouteChildren = {
   PropuestaRoute: PropuestaRoute,
   AutoresSlugRoute: AutoresSlugRoute,
   InscripcionProposalIdRoute: InscripcionProposalIdRoute,
+  PortadasComicIdRoute: PortadasComicIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }

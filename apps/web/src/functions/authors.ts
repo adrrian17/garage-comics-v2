@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { authorMiddleware } from "@/functions/author-middleware";
 import { authorProfileInput } from "@/lib/author";
+import { sellableComics } from "@/server/catalog";
 import { createDatabase } from "@/server/services";
 
 export const getAuthorHome = createServerFn({ method: "GET" })
@@ -74,10 +75,12 @@ export const saveAuthorProfile = createServerFn({ method: "POST" })
 
 export const getAuthorPage = createServerFn({ method: "GET" })
   .validator(z.object({ slug: z.string() }))
-  .handler(
-    async ({ data }) =>
-      // The user id stays out: this page is public.
-      (await createDatabase()
+  .handler(async ({ data }) => {
+    const db = createDatabase();
+
+    const [profile, sellable] = await Promise.all([
+      db
+        // The user id stays out: this page is public.
         .select({
           displayName: authorProfile.displayName,
           role: authorProfile.role,
@@ -89,5 +92,16 @@ export const getAuthorPage = createServerFn({ method: "GET" })
         })
         .from(authorProfile)
         .where(eq(authorProfile.slug, data.slug))
-        .get()) ?? null
-  );
+        .get(),
+      sellableComics(db, new Date(), { authorSlug: data.slug }),
+    ]);
+
+    if (profile === undefined) {
+      return null;
+    }
+
+    return {
+      profile,
+      comics: sellable.status === "open" ? sellable.comics : [],
+    };
+  });

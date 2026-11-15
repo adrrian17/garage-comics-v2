@@ -3,10 +3,14 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { SquarePen } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { ComicGrid } from "@/components/comic-grid";
+import { getCatalog } from "@/functions/catalog";
 import { getActiveEdition } from "@/functions/editions";
 import { formatDate, formatDateTime } from "@/lib/format";
 
 type ActiveEdition = Awaited<ReturnType<typeof getActiveEdition>>;
+
+type Catalog = Awaited<ReturnType<typeof getCatalog>>;
 
 const Hero = ({
   kicker,
@@ -63,7 +67,13 @@ const EditionDates = ({ edition }: { edition: NonNullable<ActiveEdition> }) => (
   </dl>
 );
 
-const Landing = ({ edition }: { edition: ActiveEdition }) => {
+const Landing = ({
+  edition,
+  catalog,
+}: {
+  edition: ActiveEdition;
+  catalog: Catalog | null;
+}) => {
   if (edition === null || edition.phase === "closed") {
     return (
       <Hero kicker="Garage Cómics" title="La próxima Edición viene en camino">
@@ -132,16 +142,31 @@ const Landing = ({ edition }: { edition: ActiveEdition }) => {
 
     case "sales": {
       return (
-        <Hero kicker="A la venta" title={edition.name}>
-          <p>
-            Aquí vas a encontrar el catálogo de esta Edición, a la venta hasta
-            el{" "}
-            <strong className="text-foreground">
-              {formatDateTime(edition.salesCloseAt)}
-            </strong>
-            .
-          </p>
-        </Hero>
+        <>
+          <Hero kicker="A la venta" title={edition.name}>
+            <p>
+              Esta Edición está a la venta hasta el{" "}
+              <strong className="text-foreground">
+                {formatDateTime(edition.salesCloseAt)}
+              </strong>
+              .
+            </p>
+          </Hero>
+          <section aria-labelledby="catalogo" className="mt-16 lg:mt-24">
+            <h2 id="catalogo" className="text-2xl font-bold tracking-tight">
+              Catálogo
+            </h2>
+            {catalog?.status === "open" && catalog.comics.length > 0 ? (
+              <div className="mt-6">
+                <ComicGrid comics={catalog.comics} />
+              </div>
+            ) : (
+              <p className="text-muted-foreground mt-2">
+                Todavía no hay cómics a la venta. Vuelve en un rato.
+              </p>
+            )}
+          </section>
+        </>
       );
     }
 
@@ -151,14 +176,25 @@ const Landing = ({ edition }: { edition: ActiveEdition }) => {
   }
 };
 
-const HomePage = () => (
-  <main className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:py-20">
-    <Landing edition={Route.useLoaderData()} />
-  </main>
-);
+const HomePage = () => {
+  const { edition, catalog } = Route.useLoaderData();
+
+  return (
+    <main className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:py-20">
+      <Landing edition={edition} catalog={catalog} />
+    </main>
+  );
+};
 
 export const Route = createFileRoute("/")({
-  loader: async () => await getActiveEdition(),
+  loader: async () => {
+    const edition = await getActiveEdition();
+
+    // No catalog outside the sales window (story 4).
+    const catalog = edition?.phase === "sales" ? await getCatalog() : null;
+
+    return { edition, catalog };
+  },
   head: () => ({
     meta: [
       { title: "Garage Cómics · Cómics digitales de autores mexicanos" },
