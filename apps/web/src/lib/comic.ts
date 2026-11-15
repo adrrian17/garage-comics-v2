@@ -1,3 +1,7 @@
+import {
+  COMIC_MIN_PRICE_MXN,
+  EXCLUSIVE_PAGES,
+} from "@garage-comics/db/schema/comics";
 import type {
   Collaborator,
   ComicSlot,
@@ -8,10 +12,6 @@ import { z } from "zod";
 
 import type { EditionPhase } from "./edition";
 import { optionalHttpUrl } from "./proposal";
-
-export const COMIC_MIN_PRICE_MXN = 70;
-
-export const EXCLUSIVE_PAGES = { min: 12, max: 24 } as const;
 
 export const TITLE_MAX_LENGTH = 120;
 export const DESCRIPTION_MAX_LENGTH = 2000;

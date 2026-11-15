@@ -1,3 +1,7 @@
+import {
+  COMIC_MIN_PRICE_MXN,
+  EXCLUSIVE_PAGES,
+} from "@garage-comics/db/schema/comics";
 import type { Collaborator, ComicSlot } from "@garage-comics/db/schema/comics";
 import { Alert, AlertDescription } from "@garage-comics/ui/components/alert";
 import { Button } from "@garage-comics/ui/components/button";
@@ -23,9 +27,7 @@ import {
   COLLABORATORS_MAX,
   COLLABORATOR_NAME_MAX_LENGTH,
   COLLABORATOR_ROLE_MAX_LENGTH,
-  COMIC_MIN_PRICE_MXN,
   DESCRIPTION_MAX_LENGTH,
-  EXCLUSIVE_PAGES,
   GENRE_MAX_LENGTH,
   TITLE_MAX_LENGTH,
 } from "@/lib/comic";

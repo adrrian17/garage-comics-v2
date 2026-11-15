@@ -30,6 +30,10 @@ export const comicStatuses = [
 
 export type ComicStatus = (typeof comicStatuses)[number];
 
+export const COMIC_MIN_PRICE_MXN = 70;
+
+export const EXCLUSIVE_PAGES = { min: 12, max: 24 } as const;
+
 export interface Collaborator {
   name: string;
   role: string;
@@ -108,10 +112,14 @@ export const editionComic = sqliteTable(
       table.editionId,
       table.status
     ),
-    check("edition_comic_price_check", sql`${table.priceMxn} >= 70`),
+    // sql.raw because a CHECK takes literals, not bound parameters.
+    check(
+      "edition_comic_price_check",
+      sql`${table.priceMxn} >= ${sql.raw(String(COMIC_MIN_PRICE_MXN))}`
+    ),
     check(
       "edition_comic_exclusive_pages_check",
-      sql`${table.slot} != 'exclusive' or ${table.pageCount} between 12 and 24`
+      sql`${table.slot} != 'exclusive' or ${table.pageCount} between ${sql.raw(String(EXCLUSIVE_PAGES.min))} and ${sql.raw(String(EXCLUSIVE_PAGES.max))}`
     ),
     check("edition_comic_pages_check", sql`${table.pageCount} >= 1`),
   ]

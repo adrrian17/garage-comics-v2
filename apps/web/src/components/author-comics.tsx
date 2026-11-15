@@ -1,4 +1,4 @@
-import { comicSlots } from "@garage-comics/db/schema/comics";
+import { EXCLUSIVE_PAGES, comicSlots } from "@garage-comics/db/schema/comics";
 import type { ComicSlot, ComicStatus } from "@garage-comics/db/schema/comics";
 import { Alert, AlertDescription } from "@garage-comics/ui/components/alert";
 import { Badge } from "@garage-comics/ui/components/badge";
@@ -31,7 +31,6 @@ import { WithdrawComic } from "@/components/withdraw-comic";
 import { submitComic } from "@/functions/comics";
 import type { getMyComics } from "@/functions/comics";
 import {
-  EXCLUSIVE_PAGES,
   canApply,
   comicStatusLabels,
   editionSlotLabels,

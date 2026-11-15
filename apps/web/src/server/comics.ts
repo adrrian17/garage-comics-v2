@@ -16,6 +16,7 @@ import {
   gt,
   inArray,
   lt,
+  not,
   notExists,
   sql,
 } from "drizzle-orm";
@@ -97,6 +98,13 @@ const stillOpen = (db: Database, editionId: string) =>
         )
       )
   );
+
+// An INSERT cannot carry the stillOpen guard, so a batch removes the new row in the same transaction when sales already opened.
+const undoIfClosed = (db: Database, id: string, editionId: string) =>
+  db
+    .delete(editionComic)
+    .where(and(eq(editionComic.id, id), not(stillOpen(db, editionId))))
+    .returning({ id: editionComic.id });
 
 const resolveWriter = async (db: Database, user: Seller, now: Date) => {
   const seller = await resolveSeller(db, user, now);
@@ -190,14 +198,16 @@ export const addComic = async (
   }
 
   const comicId = crypto.randomUUID();
+  const id = crypto.randomUUID();
 
   // The unique slot index refuses a second comic in the same slot, so the count rule holds under concurrent requests.
-  const [, created] = await db.batch([
+  const [, created, late] = await db.batch([
     db.insert(comic).values({ id: comicId, authorId: user.id }),
     db
       .insert(editionComic)
       .values({
         ...content,
+        id,
         editionId: seller.edition.id,
         comicId,
         authorId: user.id,
@@ -205,12 +215,15 @@ export const addComic = async (
       })
       .onConflictDoNothing()
       .returning({ id: editionComic.id }),
+    undoIfClosed(db, id, seller.edition.id),
   ]);
 
-  if (created[0] === undefined) {
+  if (created[0] === undefined || late[0] !== undefined) {
     await db.delete(comic).where(eq(comic.id, comicId));
 
-    return { status: "slot_taken" as const };
+    return {
+      status: created[0] === undefined ? "slot_taken" : "closed",
+    } as const;
   }
 
   return { status: "created" as const };
@@ -518,6 +531,18 @@ export const decideComic = async (
   const { from, to } = comicTransitions[input.decision];
   const reason = input.reason ?? "";
 
+  // Read before the update: a failed lookup after it would report a saved decision as failed, and the retry would only get stale.
+  const author = await db
+    .select({ email: userTable.email })
+    .from(editionComic)
+    .innerJoin(userTable, eq(userTable.id, editionComic.authorId))
+    .where(eq(editionComic.id, input.id))
+    .get();
+
+  if (author === undefined) {
+    return { status: "stale" as const };
+  }
+
   // Matching on the status and revision makes a decision on a comic that changed, or was decided elsewhere, change nothing.
   const [decided] = await db
     .update(editionComic)
@@ -543,13 +568,7 @@ export const decideComic = async (
     return { status: "stale" as const };
   }
 
-  const author = await db
-    .select({ email: userTable.email })
-    .from(userTable)
-    .where(eq(userTable.id, decided.authorId))
-    .get();
-
-  const email = author?.email ?? "";
+  const { email } = author;
 
   const notified = await sendNotification({
     to: email,
@@ -610,11 +629,13 @@ export const offerPreviousWork = async (
 
   const status = offeredStatus(source.status);
   const keepsApproval = status === "approved";
+  const id = crypto.randomUUID();
 
   // The unique indexes refuse the same comic twice in an Edition, and a slot taken since the read above.
-  const [offered] = await db
+  const insert = db
     .insert(editionComic)
     .values({
+      id,
       editionId: seller.edition.id,
       comicId: source.comicId,
       authorId: user.id,
@@ -635,9 +656,18 @@ export const offerPreviousWork = async (
     .onConflictDoNothing()
     .returning({ id: editionComic.id });
 
-  return offered === undefined
-    ? { status: "slot_taken" as const }
-    : { status: "offered" as const, approved: keepsApproval };
+  const [[offered], [late]] = await db.batch([
+    insert,
+    undoIfClosed(db, id, seller.edition.id),
+  ]);
+
+  if (offered === undefined) {
+    return { status: "slot_taken" as const };
+  }
+
+  return late === undefined
+    ? { status: "offered" as const, approved: keepsApproval }
+    : { status: "closed" as const };
 };
 
 /** Takes a comic out of this Edition. Its files and its place in earlier Editions stay. */
