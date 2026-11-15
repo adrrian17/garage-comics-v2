@@ -30,6 +30,8 @@ Garage Cómics is a limited-time store that sells digital comics by Mexican auth
 
 **Collaborator** (UI: Colaborador): A person credited on an Author's comic who has no account and receives no money from Garage Cómics. _Avoid_: Co-author, contributor, additional author
 
+**Review** (UI: Revisión): An Admin's check of a comic before it is sold. A comic is a Draft (Borrador) until its Author sends it, then In review (En revisión) until an Admin marks it Approved (Aprobado) or Rejected (Rechazado, always with a reason). _Avoid_: Moderation, validation, and Pending or Accepted, which belong to Proposals
+
 ### Sales
 
 **Order** (UI: Compra): One checkout by a Customer, covering one or more comics from any Authors in the open Edition. _Avoid_: Purchase, sale, transaction, cart
