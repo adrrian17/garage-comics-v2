@@ -3,8 +3,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { authorMiddleware } from "@/functions/author-middleware";
-import { comicInput } from "@/lib/comic";
-import { addComic, listComics, saveComic, sendToReview } from "@/server/comics";
+import { MAX_PARTS, comicInput, uploadKinds } from "@/lib/comic";
+import {
+  addComic,
+  beginUpload,
+  completeUpload,
+  listComics,
+  saveComic,
+  sendToReview,
+} from "@/server/comics";
 import { createDatabase } from "@/server/services";
 
 const createInput = comicInput.extend({ slot: z.enum(comicSlots) });
@@ -15,6 +22,23 @@ const updateInput = comicInput.extend({
 });
 
 const submitInput = z.object({ id: z.string(), revision: z.number().int() });
+
+const startInput = z.object({
+  id: z.string(),
+  kind: z.enum(uploadKinds),
+  contentType: z.string(),
+  sizeBytes: z.number(),
+});
+
+const finishInput = z.object({
+  id: z.string(),
+  kind: z.enum(uploadKinds),
+  key: z.string(),
+  uploadId: z.string(),
+  parts: z
+    .array(z.object({ partNumber: z.number().int(), etag: z.string() }))
+    .max(MAX_PARTS),
+});
 
 const invalid = (error: z.ZodError) => ({
   status: "invalid" as const,
@@ -62,6 +86,32 @@ export const submitComic = createServerFn({ method: "POST" })
   .handler(
     async ({ data, context }) =>
       await sendToReview(
+        createDatabase(),
+        context.session.user,
+        data,
+        new Date()
+      )
+  );
+
+export const startComicUpload = createServerFn({ method: "POST" })
+  .middleware([authorMiddleware])
+  .validator(startInput)
+  .handler(
+    async ({ data, context }) =>
+      await beginUpload(
+        createDatabase(),
+        context.session.user,
+        data,
+        new Date()
+      )
+  );
+
+export const finishComicUpload = createServerFn({ method: "POST" })
+  .middleware([authorMiddleware])
+  .validator(finishInput)
+  .handler(
+    async ({ data, context }) =>
+      await completeUpload(
         createDatabase(),
         context.session.user,
         data,

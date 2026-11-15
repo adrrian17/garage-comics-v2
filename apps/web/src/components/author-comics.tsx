@@ -23,6 +23,7 @@ import { useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ComicFiles } from "@/components/comic-files";
 import { ComicForm } from "@/components/comic-form";
 import type { MyComic } from "@/components/comic-form";
 import { submitComic } from "@/functions/comics";
@@ -157,10 +158,12 @@ const SlotCard = ({
           {comic.status === "approved" && canEdit ? (
             <Alert>
               <AlertDescription>
-                Si guardas cambios en un cómic aprobado, vuelve a revisión.
+                Si guardas cambios o subes otro archivo en un cómic aprobado,
+                vuelve a revisión.
               </AlertDescription>
             </Alert>
           ) : null}
+          <ComicFiles comic={comic} disabled={!canEdit} />
           <ComicForm
             key={comic.revision}
             slot={slot}

@@ -41,6 +41,13 @@ const uploadRules = {
 
 export type UploadKind = keyof typeof uploadRules;
 
+export const uploadKinds = [
+  "cover",
+  "pdf",
+] as const satisfies readonly UploadKind[];
+
+export const MAX_PARTS = Math.ceil(uploadRules.pdf.maxBytes / PART_BYTES);
+
 /** The size and type gate that runs before any upload starts. */
 export const planParts = (
   kind: UploadKind,

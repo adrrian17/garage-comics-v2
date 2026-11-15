@@ -12,9 +12,12 @@ import {
   pageCountError,
   statusAfterEdit,
 } from "@/lib/comic";
-import type { ComicInput } from "@/lib/comic";
+import type { ComicInput, UploadKind } from "@/lib/comic";
 import { editionPhase } from "@/lib/edition";
 import { findActiveEdition } from "@/server/editions";
+import { fileUrl, finishUpload, startUpload } from "@/server/storage";
+
+const COVER_URL_TTL_SECONDS = 60 * 60;
 
 interface Seller {
   id: string;
@@ -79,7 +82,21 @@ export const listComics = async (db: Database, user: Seller, now: Date) => {
     )
     .orderBy(asc(editionComic.slot));
 
-  return { ...seller, canEdit: canPrepareComics(seller.phase), comics };
+  const withCovers = await Promise.all(
+    comics.map(async (item) => ({
+      ...item,
+      coverUrl:
+        item.coverKey === null
+          ? null
+          : await fileUrl(item.coverKey, COVER_URL_TTL_SECONDS),
+    }))
+  );
+
+  return {
+    ...seller,
+    canEdit: canPrepareComics(seller.phase),
+    comics: withCovers,
+  };
 };
 
 export const addComic = async (
@@ -240,4 +257,95 @@ export const sendToReview = async (
   return submitted === undefined
     ? { status: "stale" as const }
     : { status: "submitted" as const };
+};
+
+export const beginUpload = async (
+  db: Database,
+  user: Seller,
+  input: {
+    id: string;
+    kind: UploadKind;
+    contentType: string;
+    sizeBytes: number;
+  },
+  now: Date
+) => {
+  const seller = await resolveWriter(db, user, now);
+
+  if (seller.status !== "ok") {
+    return seller;
+  }
+
+  const current = await findOwnComic(db, user.id, seller.edition.id, input.id);
+
+  if (current === undefined) {
+    return { status: "stale" as const };
+  }
+
+  return await startUpload({ comicId: current.comicId, ...input });
+};
+
+export const completeUpload = async (
+  db: Database,
+  user: Seller,
+  input: {
+    id: string;
+    kind: UploadKind;
+    key: string;
+    uploadId: string;
+    parts: { partNumber: number; etag: string }[];
+  },
+  now: Date
+) => {
+  const seller = await resolveWriter(db, user, now);
+
+  if (seller.status !== "ok") {
+    return seller;
+  }
+
+  const current = await findOwnComic(db, user.id, seller.edition.id, input.id);
+
+  if (current === undefined) {
+    return { status: "stale" as const };
+  }
+
+  const attachedKey =
+    input.kind === "cover" ? current.coverKey : current.pdfKey;
+
+  // A retry after a lost reply finds the file already attached.
+  if (attachedKey === input.key) {
+    return { status: "attached" as const, sentBackToReview: false };
+  }
+
+  const stored = await finishUpload({ comicId: current.comicId, ...input });
+
+  if (stored.status === "invalid") {
+    return stored;
+  }
+
+  const files =
+    input.kind === "cover"
+      ? { coverKey: input.key }
+      : { pdfKey: input.key, pdfBytes: stored.bytes };
+
+  // A new file is always a content change, so an approved comic goes back to review.
+  const status = statusAfterEdit(current.status, true);
+
+  const [attached] = await db
+    .update(editionComic)
+    .set({ ...files, status, revision: sql`${editionComic.revision} + 1` })
+    .where(
+      and(
+        eq(editionComic.id, input.id),
+        eq(editionComic.revision, current.revision)
+      )
+    )
+    .returning({ id: editionComic.id });
+
+  return attached === undefined
+    ? { status: "stale" as const }
+    : {
+        status: "attached" as const,
+        sentBackToReview: status !== current.status,
+      };
 };
