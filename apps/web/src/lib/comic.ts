@@ -9,17 +9,17 @@ import { z } from "zod";
 import type { EditionPhase } from "./edition";
 import { optionalHttpUrl } from "./proposal";
 
-const COMIC_MIN_PRICE_MXN = 70;
+export const COMIC_MIN_PRICE_MXN = 70;
 
-const EXCLUSIVE_PAGES = { min: 12, max: 24 } as const;
+export const EXCLUSIVE_PAGES = { min: 12, max: 24 } as const;
 
-const TITLE_MAX_LENGTH = 120;
-const DESCRIPTION_MAX_LENGTH = 2000;
-const GENRE_MAX_LENGTH = 60;
-const COLLABORATORS_MAX = 10;
+export const TITLE_MAX_LENGTH = 120;
+export const DESCRIPTION_MAX_LENGTH = 2000;
+export const GENRE_MAX_LENGTH = 60;
+export const COLLABORATORS_MAX = 10;
 const COLLABORATOR_LINKS_MAX = 5;
-const COLLABORATOR_NAME_MAX_LENGTH = 120;
-const COLLABORATOR_ROLE_MAX_LENGTH = 80;
+export const COLLABORATOR_NAME_MAX_LENGTH = 120;
+export const COLLABORATOR_ROLE_MAX_LENGTH = 80;
 
 const MB = 1_000_000;
 
@@ -95,7 +95,7 @@ export const sniffMatches = (kind: UploadKind, head: Uint8Array) =>
   kind === "pdf" ? startsWith(head, PDF_SIGNATURE) : isCoverImage(head);
 
 /** Every allowed comic status change; anything not listed here is refused. */
-const comicTransitions = {
+export const comicTransitions = {
   submit: { from: ["draft", "rejected"], to: "in_review" },
   approve: { from: ["in_review"], to: "approved" },
   reject: { from: ["in_review"], to: "rejected" },
@@ -158,6 +158,19 @@ export const pageCountError = (slot: ComicSlot, pageCount: number) =>
 /** Authors can write, and Admins can decide, only until the sales window opens. */
 export const canPrepareComics = (phase: EditionPhase) =>
   phase !== "sales" && phase !== "closed";
+
+export const comicStatusLabels = {
+  draft: "Borrador",
+  in_review: "En revisión",
+  approved: "Aprobado",
+  rejected: "Rechazado",
+} as const satisfies Record<ComicStatus, string>;
+
+export const editionSlotLabels = {
+  exclusive: "Exclusivo de la edición",
+  previous_1: "Trabajo previo",
+  previous_2: "Trabajo previo",
+} as const satisfies Record<ComicSlot, string>;
 
 const collaboratorInput = z.object({
   name: z
@@ -226,3 +239,5 @@ export const comicInput = z.object({
       `Puedes acreditar hasta ${COLLABORATORS_MAX} Colaboradores.`
     ),
 });
+
+export type ComicInput = z.output<typeof comicInput>;
