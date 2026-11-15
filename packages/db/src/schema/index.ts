@@ -10,3 +10,7 @@ export type { Collaborator, ComicSlot, ComicStatus } from "./comics";
 export { edition, proposal, proposalStatuses, registration } from "./editions";
 
 export type { ProposalStatus } from "./editions";
+
+export { order, orderItem, orderStatuses, transfer } from "./orders";
+
+export type { OrderStatus } from "./orders";

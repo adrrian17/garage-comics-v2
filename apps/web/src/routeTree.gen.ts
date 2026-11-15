@@ -28,6 +28,7 @@ import { Route as AutorComicsRouteImport } from './routes/autor/comics'
 import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
+import { Route as CompraListaRouteImport } from './routes/compra.lista'
 import { Route as InscripcionProposalIdRouteImport } from './routes/inscripcion.$proposalId'
 import { Route as PortadasComicIdRouteImport } from './routes/portadas.$comicId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -128,6 +129,11 @@ const AutoresSlugRoute = AutoresSlugRouteImport.update({
   path: '/autores/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompraListaRoute = CompraListaRouteImport.update({
+  id: '/compra/lista',
+  path: '/compra/lista',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InscripcionProposalIdRoute = InscripcionProposalIdRouteImport.update({
   id: '/inscripcion/$proposalId',
   path: '/inscripcion/$proposalId',
@@ -167,6 +173,7 @@ export interface FileRoutesByFullPath {
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/compra/lista': typeof CompraListaRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/compra/lista': typeof CompraListaRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin': typeof AdminIndexRoute
@@ -216,6 +224,7 @@ export interface FileRoutesById {
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/compra/lista': typeof CompraListaRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -243,6 +252,7 @@ export interface FileRouteTypes {
     | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
+    | '/compra/lista'
     | '/inscripcion/$proposalId'
     | '/portadas/$comicId'
     | '/admin/'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
+    | '/compra/lista'
     | '/inscripcion/$proposalId'
     | '/portadas/$comicId'
     | '/admin'
@@ -291,6 +302,7 @@ export interface FileRouteTypes {
     | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
+    | '/compra/lista'
     | '/inscripcion/$proposalId'
     | '/portadas/$comicId'
     | '/admin/'
@@ -307,6 +319,7 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   PropuestaRoute: typeof PropuestaRoute
   AutoresSlugRoute: typeof AutoresSlugRoute
+  CompraListaRoute: typeof CompraListaRoute
   InscripcionProposalIdRoute: typeof InscripcionProposalIdRoute
   PortadasComicIdRoute: typeof PortadasComicIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
@@ -448,6 +461,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutoresSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compra/lista': {
+      id: '/compra/lista'
+      path: '/compra/lista'
+      fullPath: '/compra/lista'
+      preLoaderRoute: typeof CompraListaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inscripcion/$proposalId': {
       id: '/inscripcion/$proposalId'
       path: '/inscripcion/$proposalId'
@@ -531,6 +551,7 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute: EntrarRoute,
   PropuestaRoute: PropuestaRoute,
   AutoresSlugRoute: AutoresSlugRoute,
+  CompraListaRoute: CompraListaRoute,
   InscripcionProposalIdRoute: InscripcionProposalIdRoute,
   PortadasComicIdRoute: PortadasComicIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,

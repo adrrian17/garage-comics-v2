@@ -12,6 +12,7 @@ import { log } from "evlog";
 import type { Stripe } from "stripe";
 
 import { availableSlug, slugify } from "@/lib/author";
+import { pesosToCentavos } from "@/lib/money";
 import {
   acceptanceDeadline,
   checkoutExpiresAt,
@@ -19,8 +20,7 @@ import {
 } from "@/lib/proposal";
 import { expireStaleAcceptances } from "@/server/editions";
 import { createAuth, createStripe } from "@/server/services";
-
-const CENTAVOS_PER_PESO = 100;
+import { priceFor } from "@/server/stripe-lines";
 
 /** The page where a proposer pays; the acceptance email links here because a Checkout Session itself lives at most 24 hours. */
 export const registrationUrl = (proposalId: string) =>
@@ -103,20 +103,15 @@ export const createRegistrationCheckout = async (
   const stripe = createStripe();
   const pageUrl = registrationUrl(proposalId);
 
-  // shortcut: a Product and a Price per Checkout Session because the Stripe emulator rejects inline `price_data`; create them once per Edition when that matters in the Stripe dashboard.
-  const product = await stripe.products.create({
-    name: `Inscripción a ${offer.editionName}`,
-  });
-
-  const price = await stripe.prices.create({
-    product: product.id,
-    currency: "mxn",
-    unit_amount: offer.priceMxn * CENTAVOS_PER_PESO,
-  });
+  const priceId = await priceFor(
+    stripe,
+    `Inscripción a ${offer.editionName}`,
+    pesosToCentavos(offer.priceMxn)
+  );
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",
-    line_items: [{ price: price.id, quantity: 1 }],
+    line_items: [{ price: priceId, quantity: 1 }],
     customer_email: offer.email,
     metadata: { proposalId },
     expires_at: Math.floor(

@@ -4,6 +4,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { CheckoutForm } from "@/components/checkout-form";
 import { getCartLines } from "@/functions/catalog";
 import { formatMxn } from "@/lib/format";
 import { useCart } from "@/lib/use-cart";
@@ -43,7 +44,6 @@ const CartPage = () => {
           setFailed(false);
           setLines(result);
 
-          // The server prices and filters the cart; a comic it no longer sells leaves it, and the Customer is told.
           if (result.status === "open" && result.dropped.length > 0) {
             remove(result.dropped);
             setDroppedCount((count) => count + result.dropped.length);
@@ -181,6 +181,13 @@ const CartPage = () => {
         <span>Total</span>
         <span>{formatMxn(total)}</span>
       </p>
+      <CheckoutForm
+        ids={comics.map((comic) => comic.id)}
+        onChanged={(dropped) => {
+          remove(dropped);
+          setDroppedCount((count) => count + dropped.length);
+        }}
+      />
     </>
   );
 };
