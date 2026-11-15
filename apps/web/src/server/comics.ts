@@ -12,9 +12,10 @@ import {
   count,
   desc,
   eq,
+  exists,
+  gt,
   inArray,
   lt,
-  ne,
   notExists,
   sql,
 } from "drizzle-orm";
@@ -78,6 +79,21 @@ const resolveSeller = async (db: Database, user: Seller, now: Date) => {
     phase: editionPhase(edition, now),
   };
 };
+
+// Checked inside each write: an R2 upload or a slow request can outlast the cutoff that resolveWriter saw.
+const stillOpen = (db: Database, editionId: string) =>
+  exists(
+    db
+      .select({ one: sql`1` })
+      .from(editionTable)
+      .where(
+        and(
+          eq(editionTable.id, editionId),
+          eq(editionTable.isActive, true),
+          gt(editionTable.salesOpenAt, new Date())
+        )
+      )
+  );
 
 const resolveWriter = async (db: Database, user: Seller, now: Date) => {
   const seller = await resolveSeller(db, user, now);
@@ -251,7 +267,11 @@ export const saveComic = async (
     .update(editionComic)
     .set({ ...content, status, revision: sql`${editionComic.revision} + 1` })
     .where(
-      and(eq(editionComic.id, id), eq(editionComic.revision, current.revision))
+      and(
+        eq(editionComic.id, id),
+        eq(editionComic.revision, current.revision),
+        stillOpen(db, seller.edition.id)
+      )
     )
     .returning({ id: editionComic.id });
 
@@ -300,7 +320,8 @@ export const sendToReview = async (
       and(
         eq(editionComic.id, input.id),
         eq(editionComic.status, current.status),
-        eq(editionComic.revision, current.revision)
+        eq(editionComic.revision, current.revision),
+        stillOpen(db, seller.edition.id)
       )
     )
     .returning({ id: editionComic.id });
@@ -388,7 +409,8 @@ export const completeUpload = async (
     .where(
       and(
         eq(editionComic.id, input.id),
-        eq(editionComic.revision, current.revision)
+        eq(editionComic.revision, current.revision),
+        stillOpen(db, seller.edition.id)
       )
     )
     .returning({ id: editionComic.id });
@@ -508,7 +530,8 @@ export const decideComic = async (
         eq(editionComic.id, input.id),
         eq(editionComic.editionId, edition.id),
         inArray(editionComic.status, [...from]),
-        eq(editionComic.revision, input.revision)
+        eq(editionComic.revision, input.revision),
+        stillOpen(db, edition.id)
       )
     )
     .returning();
@@ -547,17 +570,20 @@ export const offerPreviousWork = async (
     return seller;
   }
 
-  const source = await db
-    .select()
+  const found = await db
+    .select({ source: editionComic })
     .from(editionComic)
+    .innerJoin(editionTable, eq(editionTable.id, editionComic.editionId))
     .where(
       and(
         eq(editionComic.id, input.id),
         eq(editionComic.authorId, user.id),
-        ne(editionComic.editionId, seller.edition.id)
+        lt(editionTable.proposalsOpenAt, seller.edition.proposalsOpenAt)
       )
     )
     .get();
+
+  const source = found?.source;
 
   if (source === undefined) {
     return { status: "stale" as const };
@@ -631,7 +657,8 @@ export const withdrawComic = async (
         eq(editionComic.id, input.id),
         eq(editionComic.authorId, user.id),
         eq(editionComic.editionId, seller.edition.id),
-        eq(editionComic.revision, input.revision)
+        eq(editionComic.revision, input.revision),
+        stillOpen(db, seller.edition.id)
       )
     )
     .returning({ comicId: editionComic.comicId });
