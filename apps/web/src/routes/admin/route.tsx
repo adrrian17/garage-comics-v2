@@ -5,6 +5,7 @@ import {
   FileText,
   Landmark,
   LayoutDashboard,
+  Library,
   ShieldCheck,
   UserRound,
 } from "lucide-react";
@@ -19,6 +20,7 @@ const sections = [
   { to: "/admin/ediciones", label: "Ediciones", icon: CalendarDays },
   { to: "/admin/administradores", label: "Administradores", icon: ShieldCheck },
   { to: "/admin/perfil", label: "Mi perfil", icon: UserRound },
+  { to: "/admin/mis-comics", label: "Mis cómics", icon: Library },
   { to: "/admin/pagos", label: "Mis pagos", icon: Landmark },
 ] as const satisfies readonly [DashboardSection, ...DashboardSection[]];
 

@@ -60,7 +60,6 @@ const failures = {
   not_registered: "Necesitas una Inscripción en esta Edición.",
 } as const;
 
-/** Creates a comic in an empty slot, or edits the one that is there. Files are attached separately. */
 export const ComicForm = ({
   slot,
   comic,

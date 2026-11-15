@@ -2,14 +2,30 @@ import type { Database } from "@garage-comics/db";
 import { user as userTable } from "@garage-comics/db/schema/auth";
 import { comic, editionComic } from "@garage-comics/db/schema/comics";
 import type { ComicSlot, ComicStatus } from "@garage-comics/db/schema/comics";
-import { registration } from "@garage-comics/db/schema/editions";
-import { and, asc, count, eq, inArray, sql } from "drizzle-orm";
+import {
+  edition as editionTable,
+  registration,
+} from "@garage-comics/db/schema/editions";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  lt,
+  ne,
+  notExists,
+  sql,
+} from "drizzle-orm";
 
 import {
   canApply,
   canPrepareComics,
   comicTransitions,
   contentChanged,
+  freePreviousSlot,
+  offeredStatus,
   pageCountError,
   statusAfterEdit,
 } from "@/lib/comic";
@@ -99,10 +115,39 @@ export const listComics = async (db: Database, user: Seller, now: Date) => {
     }))
   );
 
+  const inThisEdition = new Set(comics.map((item) => item.comicId));
+
+  // Earlier Editions, newest first, so the first snapshot of each comic is its latest.
+  const earlier = await db
+    .select({
+      id: editionComic.id,
+      comicId: editionComic.comicId,
+      title: editionComic.title,
+      status: editionComic.status,
+      pageCount: editionComic.pageCount,
+      editionName: editionTable.name,
+    })
+    .from(editionComic)
+    .innerJoin(editionTable, eq(editionTable.id, editionComic.editionId))
+    .where(
+      and(
+        eq(editionComic.authorId, user.id),
+        lt(editionTable.proposalsOpenAt, seller.edition.proposalsOpenAt)
+      )
+    )
+    .orderBy(desc(editionTable.proposalsOpenAt));
+
+  const past = earlier.filter(
+    (item, index) =>
+      !inThisEdition.has(item.comicId) &&
+      earlier.findIndex((other) => other.comicId === item.comicId) === index
+  );
+
   return {
     ...seller,
     canEdit: canPrepareComics(seller.phase),
     comics: withCovers,
+    past,
   };
 };
 
@@ -152,7 +197,6 @@ export const addComic = async (
   return { status: "created" as const };
 };
 
-/** The comic as it stands in the active Edition, only when it belongs to the person asking. */
 const findOwnComic = async (
   db: Database,
   userId: string,
@@ -489,4 +533,125 @@ export const decideComic = async (
   });
 
   return { status: "decided" as const, notified, email };
+};
+
+export const offerPreviousWork = async (
+  db: Database,
+  user: Seller,
+  input: { id: string },
+  now: Date
+) => {
+  const seller = await resolveWriter(db, user, now);
+
+  if (seller.status !== "ok") {
+    return seller;
+  }
+
+  const source = await db
+    .select()
+    .from(editionComic)
+    .where(
+      and(
+        eq(editionComic.id, input.id),
+        eq(editionComic.authorId, user.id),
+        ne(editionComic.editionId, seller.edition.id)
+      )
+    )
+    .get();
+
+  if (source === undefined) {
+    return { status: "stale" as const };
+  }
+
+  const taken = await db
+    .select({ slot: editionComic.slot })
+    .from(editionComic)
+    .where(
+      and(
+        eq(editionComic.editionId, seller.edition.id),
+        eq(editionComic.authorId, user.id)
+      )
+    );
+
+  const slot = freePreviousSlot(taken.map((row) => row.slot));
+
+  if (slot === null) {
+    return { status: "slot_taken" as const };
+  }
+
+  const status = offeredStatus(source.status);
+  const keepsApproval = status === "approved";
+
+  // The unique indexes refuse the same comic twice in an Edition, and a slot taken since the read above.
+  const [offered] = await db
+    .insert(editionComic)
+    .values({
+      editionId: seller.edition.id,
+      comicId: source.comicId,
+      authorId: user.id,
+      slot,
+      title: source.title,
+      description: source.description,
+      genre: source.genre,
+      priceMxn: source.priceMxn,
+      pageCount: source.pageCount,
+      collaborators: source.collaborators,
+      coverKey: source.coverKey,
+      pdfKey: source.pdfKey,
+      pdfBytes: source.pdfBytes,
+      status,
+      reviewedBy: keepsApproval ? source.reviewedBy : null,
+      reviewedAt: keepsApproval ? source.reviewedAt : null,
+    })
+    .onConflictDoNothing()
+    .returning({ id: editionComic.id });
+
+  return offered === undefined
+    ? { status: "slot_taken" as const }
+    : { status: "offered" as const, approved: keepsApproval };
+};
+
+/** Takes a comic out of this Edition. Its files and its place in earlier Editions stay. */
+export const withdrawComic = async (
+  db: Database,
+  user: Seller,
+  input: { id: string; revision: number },
+  now: Date
+) => {
+  const seller = await resolveWriter(db, user, now);
+
+  if (seller.status !== "ok") {
+    return seller;
+  }
+
+  const [withdrawn] = await db
+    .delete(editionComic)
+    .where(
+      and(
+        eq(editionComic.id, input.id),
+        eq(editionComic.authorId, user.id),
+        eq(editionComic.editionId, seller.edition.id),
+        eq(editionComic.revision, input.revision)
+      )
+    )
+    .returning({ comicId: editionComic.comicId });
+
+  if (withdrawn === undefined) {
+    return { status: "stale" as const };
+  }
+
+  // The identity goes only when no Edition still holds a snapshot of it.
+  await db.delete(comic).where(
+    and(
+      eq(comic.id, withdrawn.comicId),
+      notExists(
+        db
+          .select({ one: sql`1` })
+          .from(editionComic)
+          .where(eq(editionComic.comicId, withdrawn.comicId))
+      )
+    )
+  );
+
+  return { status: "withdrawn" as const };
 };

@@ -7,6 +7,8 @@ import {
   comicInput,
   contentChanged,
   decisionInput,
+  freePreviousSlot,
+  offeredStatus,
   pageCountError,
   planParts,
   sniffMatches,
@@ -285,5 +287,30 @@ describe("an Admin's decision", () => {
       decisionInput.parse({ ...base, decision: "reject", reason: "  Falta  " })
         .reason
     ).toBe("Falta");
+  });
+});
+
+describe(freePreviousSlot, () => {
+  it.each([
+    [[], "previous_1"],
+    [["exclusive"], "previous_1"],
+    [["previous_1"], "previous_2"],
+    [["previous_2"], "previous_1"],
+    [["exclusive", "previous_1"], "previous_2"],
+    [["previous_1", "previous_2"], null],
+    [["exclusive", "previous_1", "previous_2"], null],
+  ] as const)("with %j taken the free slot is %s", (taken, expected) => {
+    expect(freePreviousSlot(taken)).toBe(expected);
+  });
+});
+
+describe(offeredStatus, () => {
+  it.each([
+    ["draft", "draft"],
+    ["in_review", "draft"],
+    ["approved", "approved"],
+    ["rejected", "draft"],
+  ] as const)("a %s comic is offered as %s", (status, expected) => {
+    expect(offeredStatus(status)).toBe(expected);
   });
 });

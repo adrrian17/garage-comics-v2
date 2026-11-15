@@ -157,6 +157,18 @@ export const contentChanged = (previous: ComicContent, next: ComicContent) =>
   collaboratorsFingerprint(previous.collaborators) !==
     collaboratorsFingerprint(next.collaborators);
 
+const previousSlots = [
+  "previous_1",
+  "previous_2",
+] as const satisfies readonly ComicSlot[];
+
+export const freePreviousSlot = (taken: readonly ComicSlot[]) =>
+  previousSlots.find((slot) => !taken.includes(slot)) ?? null;
+
+/** A comic approved in an earlier Edition stays approved when offered again; any other starts over as a draft. */
+export const offeredStatus = (status: ComicStatus): ComicStatus =>
+  status === "approved" ? "approved" : "draft";
+
 export const pageCountError = (slot: ComicSlot, pageCount: number) =>
   slot === "exclusive" &&
   (pageCount < EXCLUSIVE_PAGES.min || pageCount > EXCLUSIVE_PAGES.max)

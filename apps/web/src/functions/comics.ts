@@ -9,8 +9,10 @@ import {
   beginUpload,
   completeUpload,
   listComics,
+  offerPreviousWork,
   saveComic,
   sendToReview,
+  withdrawComic,
 } from "@/server/comics";
 import { createDatabase } from "@/server/services";
 
@@ -112,6 +114,32 @@ export const finishComicUpload = createServerFn({ method: "POST" })
   .handler(
     async ({ data, context }) =>
       await completeUpload(
+        createDatabase(),
+        context.session.user,
+        data,
+        new Date()
+      )
+  );
+
+export const offerPast = createServerFn({ method: "POST" })
+  .middleware([authorMiddleware])
+  .validator(z.object({ id: z.string() }))
+  .handler(
+    async ({ data, context }) =>
+      await offerPreviousWork(
+        createDatabase(),
+        context.session.user,
+        data,
+        new Date()
+      )
+  );
+
+export const removeComic = createServerFn({ method: "POST" })
+  .middleware([authorMiddleware])
+  .validator(submitInput)
+  .handler(
+    async ({ data, context }) =>
+      await withdrawComic(
         createDatabase(),
         context.session.user,
         data,

@@ -26,6 +26,8 @@ import { toast } from "sonner";
 import { ComicFiles } from "@/components/comic-files";
 import { ComicForm } from "@/components/comic-form";
 import type { MyComic } from "@/components/comic-form";
+import { PastComics } from "@/components/past-comics";
+import { WithdrawComic } from "@/components/withdraw-comic";
 import { submitComic } from "@/functions/comics";
 import type { getMyComics } from "@/functions/comics";
 import {
@@ -33,6 +35,7 @@ import {
   canApply,
   comicStatusLabels,
   editionSlotLabels,
+  freePreviousSlot,
 } from "@/lib/comic";
 import { editionPhaseLabels } from "@/lib/edition";
 
@@ -172,15 +175,19 @@ const SlotCard = ({
           />
         </div>
       </CardContent>
-      {canEdit && canApply(comic.status, "submit") ? (
+      {canEdit ? (
         <CardFooter>
-          {hasFiles ? (
-            <SubmitButton comic={comic} />
-          ) : (
-            <p className="text-muted-foreground text-sm">
-              Sube la portada y el PDF para enviarlo a revisión.
-            </p>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {canApply(comic.status, "submit") && hasFiles ? (
+              <SubmitButton comic={comic} />
+            ) : null}
+            <WithdrawComic comic={comic} />
+            {canApply(comic.status, "submit") && !hasFiles ? (
+              <p className="text-muted-foreground text-sm">
+                Sube la portada y el PDF para enviarlo a revisión.
+              </p>
+            ) : null}
+          </div>
         </CardFooter>
       ) : null}
     </Card>
@@ -241,6 +248,15 @@ export const AuthorComics = ({ data }: { data: MyComics }) => {
           </li>
         ))}
       </ul>
+      {data.past.length === 0 ? null : (
+        <PastComics
+          past={data.past}
+          canOffer={
+            data.canEdit &&
+            freePreviousSlot(data.comics.map((item) => item.slot)) !== null
+          }
+        />
+      )}
     </section>
   );
 };
