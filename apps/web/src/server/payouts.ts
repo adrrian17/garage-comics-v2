@@ -3,6 +3,7 @@ import { authorProfile } from "@garage-comics/db/schema/authors";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Stripe } from "stripe";
 
+import { payoutSetupStatus } from "@/lib/payout-setup";
 import type { PayoutSetupStatus } from "@/lib/payout-setup";
 import { createStripe } from "@/server/services";
 
@@ -93,6 +94,17 @@ export const recordPayoutStatus = async (
     .update(authorProfile)
     .set({ payoutSetupStatus: status })
     .where(eq(authorProfile.userId, userId));
+};
+
+/** Saves the status of an Author's Stripe account as Stripe reports it now, for changes made while the Author was away from their payouts page. */
+export const syncPayoutStatus = async (db: Database, accountId: string) => {
+  // Read now rather than from the event: Stripe may deliver `account.updated` events out of order, and the latest read always wins.
+  const account = await createStripe().accounts.retrieve(accountId);
+
+  await db
+    .update(authorProfile)
+    .set({ payoutSetupStatus: payoutSetupStatus(account) })
+    .where(eq(authorProfile.stripeAccountId, accountId));
 };
 
 /** The live Stripe account of an Author, or null before their first visit. */

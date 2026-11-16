@@ -32,6 +32,7 @@ import { Route as CompraListaRouteImport } from './routes/compra.lista'
 import { Route as InscripcionProposalIdRouteImport } from './routes/inscripcion.$proposalId'
 import { Route as PortadasComicIdRouteImport } from './routes/portadas.$comicId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiStripeConnectWebhookRouteImport } from './routes/api/stripe/connect-webhook'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -149,6 +150,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStripeConnectWebhookRoute = ApiStripeConnectWebhookRouteImport.update({
+  id: '/api/stripe/connect-webhook',
+  path: '/api/stripe/connect-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   id: '/api/stripe/webhook',
   path: '/api/stripe/webhook',
@@ -179,6 +185,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesByTo {
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/autor': typeof AutorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRoutesById {
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
 }
 export interface FileRouteTypes {
@@ -258,6 +267,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/autor/'
     | '/api/auth/$'
+    | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/autor'
     | '/api/auth/$'
+    | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
   id:
     | '__root__'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/autor/'
     | '/api/auth/$'
+    | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
   fileRoutesById: FileRoutesById
 }
@@ -323,6 +335,7 @@ export interface RootRouteChildren {
   InscripcionProposalIdRoute: typeof InscripcionProposalIdRoute
   PortadasComicIdRoute: typeof PortadasComicIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiStripeConnectWebhookRoute: typeof ApiStripeConnectWebhookRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
 
@@ -489,6 +502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/stripe/connect-webhook': {
+      id: '/api/stripe/connect-webhook'
+      path: '/api/stripe/connect-webhook'
+      fullPath: '/api/stripe/connect-webhook'
+      preLoaderRoute: typeof ApiStripeConnectWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/stripe/webhook': {
       id: '/api/stripe/webhook'
       path: '/api/stripe/webhook'
@@ -555,6 +575,7 @@ const rootRouteChildren: RootRouteChildren = {
   InscripcionProposalIdRoute: InscripcionProposalIdRoute,
   PortadasComicIdRoute: PortadasComicIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiStripeConnectWebhookRoute: ApiStripeConnectWebhookRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }
 export const routeTree = rootRouteImport
