@@ -1,0 +1,1 @@
+ALTER TABLE `author_profile` ADD `payout_setup_status` text;

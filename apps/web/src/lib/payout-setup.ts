@@ -1,10 +1,7 @@
+import type { payoutSetupStatuses } from "@garage-comics/db/schema/authors";
+
 /** Where an Author is in setting up the Stripe account their Transfers go to. */
-export type PayoutSetupStatus =
-  | "needs_details"
-  | "in_review"
-  | "rejected"
-  | "paused"
-  | "ready";
+export type PayoutSetupStatus = (typeof payoutSetupStatuses)[number];
 
 /** The part of a Stripe Account that decides the status. */
 interface PayoutAccount {
@@ -18,7 +15,7 @@ interface PayoutAccount {
   capabilities?: { transfers?: string } | null;
 }
 
-// shortcut: the status is read live from Stripe on every page load; store it from an `account.updated` webhook when the catalog needs to filter Authors by it.
+// shortcut: the catalog filters on the status saved the last time the Author opened their payouts page, so it goes stale until they reopen it; upgrade with a Connect `account.updated` webhook.
 export const payoutSetupStatus = (
   account: PayoutAccount | null
 ): PayoutSetupStatus => {

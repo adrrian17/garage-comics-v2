@@ -45,6 +45,10 @@ export const proposalStatusLabels = {
 const CHECKOUT_MIN_LIFETIME_MS = 31 * 60_000;
 const CHECKOUT_MAX_LIFETIME_MS = DAY_MS - 60_000;
 
+/** The shortest Checkout Session life Stripe allows. */
+export const soonestCheckoutExpiry = (now: Date) =>
+  new Date(now.getTime() + CHECKOUT_MIN_LIFETIME_MS);
+
 /** When a Checkout Session should expire: at the acceptance deadline, within what Stripe allows. */
 export const checkoutExpiresAt = (deadline: Date, now: Date) =>
   new Date(

@@ -3,6 +3,7 @@ import { authorProfile } from "@garage-comics/db/schema/authors";
 import { and, eq, isNull } from "drizzle-orm";
 import type { Stripe } from "stripe";
 
+import type { PayoutSetupStatus } from "@/lib/payout-setup";
 import { createStripe } from "@/server/services";
 
 const findAccountId = async (db: Database, userId: string) => {
@@ -80,6 +81,18 @@ export const ensureStripeAccountId = async (
   }
 
   return stored;
+};
+
+/** Saves the status the payouts page just computed, so the catalog can filter on it without calling Stripe. */
+export const recordPayoutStatus = async (
+  db: Database,
+  userId: string,
+  status: PayoutSetupStatus
+) => {
+  await db
+    .update(authorProfile)
+    .set({ payoutSetupStatus: status })
+    .where(eq(authorProfile.userId, userId));
 };
 
 /** The live Stripe account of an Author, or null before their first visit. */

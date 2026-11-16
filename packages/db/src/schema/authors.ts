@@ -2,6 +2,14 @@ import { sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 import { user } from "./auth";
 
+export const payoutSetupStatuses = [
+  "needs_details",
+  "in_review",
+  "rejected",
+  "paused",
+  "ready",
+] as const;
+
 // The public page of an Author. Every link is nullable and holds an http(s) URL.
 // `stripe_account_id` is the exception: it is private and must never be selected for the public page.
 export const authorProfile = sqliteTable(
@@ -20,6 +28,10 @@ export const authorProfile = sqliteTable(
     portfolioUrl: text("portfolio_url"),
     // The Author's Stripe Connect account, created on their first visit to the payouts page.
     stripeAccountId: text("stripe_account_id"),
+    // The last status seen on the payouts page; null means it was never checked. The catalog sells only `ready` Authors.
+    payoutSetupStatus: text("payout_setup_status", {
+      enum: payoutSetupStatuses,
+    }),
   },
   // An index rather than a column constraint, so adding it does not rebuild the table.
   (table) => [

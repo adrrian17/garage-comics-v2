@@ -6,13 +6,15 @@ import {
 } from "@garage-comics/ui/components/empty";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
+import { CartLink } from "@/components/cart-link";
+import { ComicGrid } from "@/components/comic-grid";
 import { getAuthorPage } from "@/functions/authors";
 import { initials, isBlankProfile } from "@/lib/author";
 
 const BIO_DESCRIPTION_LENGTH = 160;
 
 const AuthorPage = () => {
-  const author = Route.useLoaderData();
+  const { profile: author, comics } = Route.useLoaderData();
 
   const links = [
     { label: "Instagram", href: author.instagramUrl },
@@ -22,7 +24,7 @@ const AuthorPage = () => {
   ].flatMap(({ label, href }) => (href === null ? [] : [{ label, href }]));
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
+    <main className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
       <header className="flex items-center gap-4">
         <div
           aria-hidden
@@ -61,15 +63,24 @@ const AuthorPage = () => {
         </ul>
       )}
       <section className="mt-12">
-        <h2 className="text-xl font-semibold">Cómics</h2>
-        <Empty className="mt-4">
-          <EmptyHeader>
-            <EmptyTitle>Todavía no hay cómics</EmptyTitle>
-            <EmptyDescription>
-              Aquí aparecerán los cómics que venda en la Edición abierta.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-semibold">Cómics</h2>
+          {comics.length === 0 ? null : <CartLink />}
+        </div>
+        {comics.length === 0 ? (
+          <Empty className="mt-4">
+            <EmptyHeader>
+              <EmptyTitle>Todavía no hay cómics</EmptyTitle>
+              <EmptyDescription>
+                Aquí aparecerán los cómics que venda en la Edición abierta.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <div className="mt-4">
+            <ComicGrid comics={comics} showAuthor={false} />
+          </div>
+        )}
       </section>
     </main>
   );
@@ -88,16 +99,18 @@ export const Route = createFileRoute("/autores/$slug")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.displayName ?? "Autor"} · Garage Cómics` },
+      {
+        title: `${loaderData?.profile.displayName ?? "Autor"} · Garage Cómics`,
+      },
       {
         name: "description",
         content:
-          loaderData === undefined || loaderData.bio === ""
+          loaderData === undefined || loaderData.profile.bio === ""
             ? "Autor de Garage Cómics."
-            : loaderData.bio.slice(0, BIO_DESCRIPTION_LENGTH),
+            : loaderData.profile.bio.slice(0, BIO_DESCRIPTION_LENGTH),
       },
       // A profile with only a name stays out of search engines until its Author fills it in.
-      ...(loaderData === undefined || isBlankProfile(loaderData)
+      ...(loaderData === undefined || isBlankProfile(loaderData.profile)
         ? [{ name: "robots", content: "noindex" }]
         : []),
     ],

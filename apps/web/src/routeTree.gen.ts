@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AutorRouteRouteImport } from './routes/autor/route'
+import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as PropuestaRouteImport } from './routes/propuesta'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -27,7 +28,9 @@ import { Route as AutorComicsRouteImport } from './routes/autor/comics'
 import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
+import { Route as CompraListaRouteImport } from './routes/compra.lista'
 import { Route as InscripcionProposalIdRouteImport } from './routes/inscripcion.$proposalId'
+import { Route as PortadasComicIdRouteImport } from './routes/portadas.$comicId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
 
@@ -44,6 +47,11 @@ const AdminRouteRoute = AdminRouteRouteImport.update({
 const AutorRouteRoute = AutorRouteRouteImport.update({
   id: '/autor',
   path: '/autor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CarritoRoute = CarritoRouteImport.update({
+  id: '/carrito',
+  path: '/carrito',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EntrarRoute = EntrarRouteImport.update({
@@ -121,9 +129,19 @@ const AutoresSlugRoute = AutoresSlugRouteImport.update({
   path: '/autores/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompraListaRoute = CompraListaRouteImport.update({
+  id: '/compra/lista',
+  path: '/compra/lista',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InscripcionProposalIdRoute = InscripcionProposalIdRouteImport.update({
   id: '/inscripcion/$proposalId',
   path: '/inscripcion/$proposalId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortadasComicIdRoute = PortadasComicIdRouteImport.update({
+  id: '/portadas/$comicId',
+  path: '/portadas/$comicId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -141,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/autor': typeof AutorRouteRouteWithChildren
+  '/carrito': typeof CarritoRoute
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
@@ -154,7 +173,9 @@ export interface FileRoutesByFullPath {
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/compra/lista': typeof CompraListaRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
+  '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -162,6 +183,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/carrito': typeof CarritoRoute
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
@@ -175,7 +197,9 @@ export interface FileRoutesByTo {
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/compra/lista': typeof CompraListaRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
+  '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin': typeof AdminIndexRoute
   '/autor': typeof AutorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -186,6 +210,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/autor': typeof AutorRouteRouteWithChildren
+  '/carrito': typeof CarritoRoute
   '/entrar': typeof EntrarRoute
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
@@ -199,7 +224,9 @@ export interface FileRoutesById {
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/compra/lista': typeof CompraListaRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
+  '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
@@ -211,6 +238,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/autor'
+    | '/carrito'
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
@@ -224,7 +252,9 @@ export interface FileRouteTypes {
     | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
+    | '/compra/lista'
     | '/inscripcion/$proposalId'
+    | '/portadas/$comicId'
     | '/admin/'
     | '/autor/'
     | '/api/auth/$'
@@ -232,6 +262,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/carrito'
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
@@ -245,7 +276,9 @@ export interface FileRouteTypes {
     | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
+    | '/compra/lista'
     | '/inscripcion/$proposalId'
+    | '/portadas/$comicId'
     | '/admin'
     | '/autor'
     | '/api/auth/$'
@@ -255,6 +288,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/autor'
+    | '/carrito'
     | '/entrar'
     | '/propuesta'
     | '/admin/administradores'
@@ -268,7 +302,9 @@ export interface FileRouteTypes {
     | '/autor/pagos'
     | '/autor/perfil'
     | '/autores/$slug'
+    | '/compra/lista'
     | '/inscripcion/$proposalId'
+    | '/portadas/$comicId'
     | '/admin/'
     | '/autor/'
     | '/api/auth/$'
@@ -279,10 +315,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AutorRouteRoute: typeof AutorRouteRouteWithChildren
+  CarritoRoute: typeof CarritoRoute
   EntrarRoute: typeof EntrarRoute
   PropuestaRoute: typeof PropuestaRoute
   AutoresSlugRoute: typeof AutoresSlugRoute
+  CompraListaRoute: typeof CompraListaRoute
   InscripcionProposalIdRoute: typeof InscripcionProposalIdRoute
+  PortadasComicIdRoute: typeof PortadasComicIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
 }
@@ -308,6 +347,13 @@ declare module '@tanstack/react-router' {
       path: '/autor'
       fullPath: '/autor'
       preLoaderRoute: typeof AutorRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/carrito': {
+      id: '/carrito'
+      path: '/carrito'
+      fullPath: '/carrito'
+      preLoaderRoute: typeof CarritoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/entrar': {
@@ -415,11 +461,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutoresSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compra/lista': {
+      id: '/compra/lista'
+      path: '/compra/lista'
+      fullPath: '/compra/lista'
+      preLoaderRoute: typeof CompraListaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inscripcion/$proposalId': {
       id: '/inscripcion/$proposalId'
       path: '/inscripcion/$proposalId'
       fullPath: '/inscripcion/$proposalId'
       preLoaderRoute: typeof InscripcionProposalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portadas/$comicId': {
+      id: '/portadas/$comicId'
+      path: '/portadas/$comicId'
+      fullPath: '/portadas/$comicId'
+      preLoaderRoute: typeof PortadasComicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -487,10 +547,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AutorRouteRoute: AutorRouteRouteWithChildren,
+  CarritoRoute: CarritoRoute,
   EntrarRoute: EntrarRoute,
   PropuestaRoute: PropuestaRoute,
   AutoresSlugRoute: AutoresSlugRoute,
+  CompraListaRoute: CompraListaRoute,
   InscripcionProposalIdRoute: InscripcionProposalIdRoute,
+  PortadasComicIdRoute: PortadasComicIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
 }

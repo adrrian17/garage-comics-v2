@@ -1,6 +1,9 @@
 import { env } from "cloudflare:workers";
 import { log } from "evlog";
 
+import { formatMxn } from "@/lib/format";
+import { centavosToPesos } from "@/lib/money";
+
 interface Email {
   to: string;
   subject: string;
@@ -79,4 +82,26 @@ export const comicRejectedEmail = ({
 }) => ({
   subject: `Tu cómic "${comicTitle}" necesita cambios`,
   text: `Revisamos tu cómic "${comicTitle}" y esta vez no lo pudimos aprobar.\n\nMotivo:\n${reason}\n\nCorrígelo desde Mis cómics y vuelve a enviarlo a revisión.`,
+});
+
+export const orderConfirmationEmail = ({
+  orderNumber,
+  editionName,
+  items,
+  totalCentavos,
+}: {
+  orderNumber: string;
+  editionName: string;
+  items: { title: string; priceCentavos: number }[];
+  totalCentavos: number;
+}) => ({
+  subject: `Tu Compra ${orderNumber} en Garage Cómics`,
+  text: `¡Gracias por tu Compra en ${editionName}! Ya confirmamos tu pago.\n\nNúmero de compra: ${orderNumber}\n\nTus cómics:\n${items
+    .map(
+      (item) =>
+        `- ${item.title}: ${formatMxn(centavosToPesos(item.priceCentavos))}`
+    )
+    .join(
+      "\n"
+    )}\n\nTotal: ${formatMxn(centavosToPesos(totalCentavos))}\n\nTu Link de descarga te llega en un correo aparte. Guarda tu Número de compra por si necesitas ayuda.`,
 });
