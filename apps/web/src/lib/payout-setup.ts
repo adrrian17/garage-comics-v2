@@ -15,7 +15,6 @@ interface PayoutAccount {
   capabilities?: { transfers?: string } | null;
 }
 
-// shortcut: the catalog filters on the status saved the last time the Author opened their payouts page, so it goes stale until they reopen it; upgrade with a Connect `account.updated` webhook.
 export const payoutSetupStatus = (
   account: PayoutAccount | null
 ): PayoutSetupStatus => {

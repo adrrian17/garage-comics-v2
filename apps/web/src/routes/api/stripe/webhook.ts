@@ -1,30 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { env } from "cloudflare:workers";
 import { log } from "evlog";
-import { Stripe } from "stripe";
 
 import { routeCheckoutEvent } from "@/lib/stripe-events";
 import { cancelOrder, fulfillOrder } from "@/server/orders";
 import { registerPayment, sendAuthorMagicLink } from "@/server/registrations";
-import { createDatabase, createStripe } from "@/server/services";
+import {
+  createDatabase,
+  createStripe,
+  readStripeEvent,
+} from "@/server/services";
 
 const ok = () => new Response(null, { status: 200 });
 
 const handleWebhook = async ({ request }: { request: Request }) => {
-  const payload = await request.text();
+  const event = await readStripeEvent(request, env.STRIPE_WEBHOOK_SECRET);
 
-  let event: Stripe.Event;
-
-  try {
-    // Workers only have the async SubtleCrypto path for checking signatures.
-    event = await createStripe().webhooks.constructEventAsync(
-      payload,
-      request.headers.get("stripe-signature") ?? "",
-      env.STRIPE_WEBHOOK_SECRET,
-      undefined,
-      Stripe.createSubtleCryptoProvider()
-    );
-  } catch {
+  if (event === null) {
     return new Response("Firma inválida.", { status: 400 });
   }
 

@@ -7,6 +7,7 @@ Server code lives inside the TanStack Start app in `apps/web`; there is no separ
 - `apps/web/src/functions/`: server functions (`createServerFn`). Read the session with `getRequest().headers`; reject unauthenticated calls inside the handler.
 - `apps/web/src/routes/api/`: server routes, such as the Better Auth handler at `/api/auth/$`.
 - `apps/web/src/routes/api/stripe/webhook.ts`: the Stripe webhook. It verifies the signature, asks `routeCheckoutEvent` (`lib/stripe-events.ts`, the only list of handled events) what the event means, then registers a paid Registration (`server/registrations.ts`) or pays or cancels an Order (`server/orders.ts`). It must stay safe to replay, and it answers 500 when a step needs a retry so Stripe delivers the event again.
+- `apps/web/src/routes/api/stripe/connect-webhook.ts`: the webhook for events from the Authors' connected accounts. On `account.updated` it saves the Author's payout setup status (`server/payouts.ts`).
 - `packages/auth`: Better Auth configuration (`createAuth`).
 - Shared packages receive config or initialized clients from the app; they do not read env vars themselves (see [environment](environment.md)).
 
@@ -18,6 +19,8 @@ Subscribe the endpoint (`/api/stripe/webhook`) to these events in the Stripe Das
 - `checkout.session.async_payment_succeeded`: an OXXO voucher paid.
 - `checkout.session.async_payment_failed`: an OXXO voucher expired unpaid; the Order is cancelled silently.
 - `checkout.session.expired`: a Checkout Session lapsed; the Order is cancelled silently.
+
+Create a second endpoint for events from connected accounts, `/api/stripe/connect-webhook`, subscribed to `account.updated`; it has its own signing secret, `STRIPE_CONNECT_WEBHOOK_SECRET`. Each event re-reads the Author's account from Stripe and saves its payout setup status, which the catalog filters on. Locally, `stripe listen --forward-connect-to <url>/api/stripe/connect-webhook` forwards these events; put the signing secret it prints in `STRIPE_WEBHOOK_SECRET` in `.env`, which `STRIPE_CONNECT_WEBHOOK_SECRET` reuses in development.
 
 Checkout Sessions carry `metadata.kind` (`order` or `registration`) so the webhook can tell them apart. OXXO must also be enabled as a payment method in the Dashboard for the Checkout page to offer it.
 

@@ -28,3 +28,19 @@ export const createStripe = () => {
 
   return new Stripe(env.STRIPE_SECRET_KEY, config);
 };
+
+/** The event a Stripe webhook request carries, or null when its signature does not match `secret`. */
+export const readStripeEvent = async (request: Request, secret: string) => {
+  try {
+    // Workers only have the async SubtleCrypto path for checking signatures.
+    return await createStripe().webhooks.constructEventAsync(
+      await request.text(),
+      request.headers.get("stripe-signature") ?? "",
+      secret,
+      undefined,
+      Stripe.createSubtleCryptoProvider()
+    );
+  } catch {
+    return null;
+  }
+};
