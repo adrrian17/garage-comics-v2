@@ -199,7 +199,7 @@ const startContainer = async (container: Container) => {
 /**
  * Streams the original PDF from the `comics` bucket into the container and the stamped copy back into the `downloads` bucket.
  * The bytes never sit in the Worker: both sides are piped, so a 500 MB PDF costs no Worker memory.
- * A retry overwrites the same key with the same bytes: the copy depends only on the PDF, the email and the Order Number.
+ * A retry overwrites the same key with an equivalent copy: the stamp depends only on the PDF, the email and the Order Number.
  */
 const makeCopy = async (container: Container, job: CopyJob) => {
   if (job.pdfKey === null || job.orderNumber === null) {

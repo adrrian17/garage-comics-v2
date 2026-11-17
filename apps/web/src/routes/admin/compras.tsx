@@ -70,8 +70,16 @@ const ResendDownloadLink = ({ paidOrder }: { paidOrder: PaidOrder }) => {
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger render={<Button variant="outline" size="sm" />}>
-        Reenviar Link de descarga
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="outline"
+            size="sm"
+            aria-label={`Reenviar el Link de descarga de ${paidOrder.orderNumber}`}
+          />
+        }
+      >
+        Reenviar
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
