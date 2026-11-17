@@ -80,6 +80,12 @@ def build(path, workdir):
     # A 9 pt bleed around a Letter trim: the reader keeps the TrimBox, so the footer belongs above the bleed.
     add([0, 0, 630, 810], "TrimBox bleed", TrimBox=Array([9, 9, 621, 801]))
     add([0, 0, 612, 792], "Dark full bleed", shade=0)
+    # Annotations are drawn above the page content, so an opaque one over the bottom edge would hide a footer drawn as content.
+    cover = pdf.make_stream(
+        b"1 g 0 0 612 80 re f", Type=Name.XObject, Subtype=Name.Form, BBox=Array([0, 0, 612, 80])
+    )
+    annotation = Dictionary(Type=Name.Annot, Subtype=Name.Square, Rect=Array([0, 0, 612, 80]), F=4, AP=Dictionary(N=cover))
+    add([0, 0, 612, 792], "Opaque annotation", Annots=Array([pdf.make_indirect(annotation)]))
     pdf.save(workdir / "flat.pdf")
 
     # Last page: MediaBox, Rotate and Resources inherited from an intermediate Pages node.

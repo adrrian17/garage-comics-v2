@@ -155,6 +155,8 @@ def stamp(source, destination, text):
                 Encoding=Name.WinAnsiEncoding,
             )
         )
+        # Annotations are drawn above the page content: burnt into it first, none can cover the footer drawn after.
+        pdf.flatten_annotations()
         for page in pdf.pages:
             page.add_resource(font, Name.Font, FONT_NAME)
             closing = b"Q\n" * (unclosed_saves(page) + 1)
