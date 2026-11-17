@@ -1,14 +1,21 @@
 import type { Database } from "@garage-comics/db";
-import { downloadLink } from "@garage-comics/db/schema/downloads";
+import { downloadCopy, downloadLink } from "@garage-comics/db/schema/downloads";
 import { edition } from "@garage-comics/db/schema/editions";
 import { order, orderItem } from "@garage-comics/db/schema/orders";
-import { env } from "cloudflare:workers";
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { env, waitUntil } from "cloudflare:workers";
+import { and, asc, eq, gt, isNotNull, isNull, sql } from "drizzle-orm";
+import { log } from "evlog";
 
-import { downloadLinkExpiry } from "@/lib/download-link";
+import { downloadLinkExpiry, viewDownloadLink } from "@/lib/download-link";
+import type { DownloadLinkView } from "@/lib/download-link";
 import { orderTotalCentavos } from "@/lib/order";
 import { formatOrderNumber } from "@/lib/order-number";
-import { orderConfirmationEmail, sendEmail } from "@/server/email";
+import {
+  downloadLinkResentEmail,
+  orderConfirmationEmail,
+  sendEmail,
+  sendNotification,
+} from "@/server/email";
 
 // The only writer of `download_link`, and everything the Customer and the Admin do with it.
 // `download_copy` is written only by the Watermarker (server/watermarker.ts); this module reads it.
@@ -20,6 +27,20 @@ const downloadLinkUrl = (downloadLinkId: string) =>
 /** Wakes the Watermarker of one Download Link. Idempotent: it only sets an alarm when none is pending. */
 const prepareCopies = async (downloadLinkId: string) => {
   await env.WATERMARKER.getByName(downloadLinkId).prepare(downloadLinkId);
+};
+
+/** Wakes it without failing the caller: the Customer's next visit to the link wakes it again. */
+const tryPrepareCopies = async (action: string, downloadLinkId: string) => {
+  try {
+    await prepareCopies(downloadLinkId);
+  } catch (error) {
+    log.warn({
+      action,
+      reason: "watermarker_not_woken",
+      downloadLinkId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 };
 
 /**
@@ -126,3 +147,142 @@ export const ensureDelivered = async (
     await prepareCopies(link.id);
   }
 };
+
+/**
+ * Story 34: a new Download Link with its own 24 hours and its own copies, made from scratch.
+ * The old link keeps working until its own expiry: nothing is shared (row, R2 key, Watermarker, container), so a resend cannot clobber a job still running.
+ */
+export const resendDownloadLink = async (
+  db: Database,
+  admin: { id: string },
+  orderId: string,
+  now: Date
+) => {
+  const found = await db
+    .select({
+      status: order.status,
+      number: order.number,
+      email: order.customerEmail,
+    })
+    .from(order)
+    .where(eq(order.id, orderId))
+    .get();
+
+  if (found?.status !== "paid" || found.number === null) {
+    return { status: "not_paid" as const };
+  }
+
+  const expiresAt = downloadLinkExpiry(now);
+
+  const [link] = await db
+    .insert(downloadLink)
+    .values({ orderId, expiresAt, resentBy: admin.id })
+    .returning({ id: downloadLink.id });
+
+  if (link === undefined) {
+    throw new Error(`Order ${orderId} got no Download Link.`);
+  }
+
+  const notified = await sendNotification({
+    to: found.email,
+    ...downloadLinkResentEmail({
+      orderNumber: formatOrderNumber(found.number),
+      downloadUrl: downloadLinkUrl(link.id),
+      expiresAt,
+    }),
+  });
+
+  // A link nobody received needs no copies. A failed wake-up is not the Admin's to fix: the Customer opening the link wakes it.
+  if (notified) {
+    await tryPrepareCopies("resend_download_link", link.id);
+  }
+
+  return {
+    status: "resent" as const,
+    notified,
+    email: found.email,
+    expiresAt,
+  };
+};
+
+/**
+ * What the Download Link page shows, or null for an unknown link. Every comic of the Order is listed with its copy's state;
+ * a comic whose copy row does not exist yet (the Watermarker has not woken) counts as preparing.
+ */
+export const readDownloadLink = async (
+  db: Database,
+  downloadLinkId: string,
+  now: Date
+): Promise<DownloadLinkView | null> => {
+  const link = await db
+    .select({
+      orderId: downloadLink.orderId,
+      expiresAt: downloadLink.expiresAt,
+      orderNumber: order.number,
+    })
+    .from(downloadLink)
+    .innerJoin(order, eq(order.id, downloadLink.orderId))
+    .where(eq(downloadLink.id, downloadLinkId))
+    .get();
+
+  if (link?.orderNumber === null || link === undefined) {
+    return null;
+  }
+
+  const copies = await db
+    .select({
+      orderItemId: orderItem.id,
+      title: orderItem.title,
+      readyAt: downloadCopy.readyAt,
+      attempts: sql<number>`coalesce(${downloadCopy.attempts}, 0)`,
+    })
+    .from(orderItem)
+    .leftJoin(
+      downloadCopy,
+      and(
+        eq(downloadCopy.orderItemId, orderItem.id),
+        eq(downloadCopy.downloadLinkId, downloadLinkId)
+      )
+    )
+    .where(eq(orderItem.orderId, link.orderId))
+    .orderBy(asc(orderItem.title));
+
+  const view = viewDownloadLink(
+    { orderNumber: link.orderNumber, expiresAt: link.expiresAt },
+    copies,
+    now
+  );
+
+  // The Customer waiting on a copy is the backstop for a Watermarker that lost its alarm. Never awaited: ready comics show even when the wake-up fails.
+  if (
+    view.status === "open" &&
+    view.comics.some((comic) => comic.state === "preparing")
+  ) {
+    waitUntil(tryPrepareCopies("read_download_link", downloadLinkId));
+  }
+
+  return view;
+};
+
+/** A copy the Customer may download now: ready, and its link not expired. The expiry is checked here, in D1, never left to the bucket's lifecycle. */
+export const findReadyCopy = async (
+  db: Database,
+  downloadLinkId: string,
+  orderItemId: string,
+  now: Date
+) =>
+  await db
+    .select({ title: orderItem.title, orderNumber: order.number })
+    .from(downloadCopy)
+    .innerJoin(downloadLink, eq(downloadLink.id, downloadCopy.downloadLinkId))
+    .innerJoin(orderItem, eq(orderItem.id, downloadCopy.orderItemId))
+    .innerJoin(order, eq(order.id, orderItem.orderId))
+    .where(
+      and(
+        eq(downloadCopy.downloadLinkId, downloadLinkId),
+        eq(downloadCopy.orderItemId, orderItemId),
+        isNotNull(downloadCopy.readyAt),
+        gt(downloadLink.expiresAt, now)
+      )
+    )
+    .get();

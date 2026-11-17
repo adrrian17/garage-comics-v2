@@ -1,18 +1,25 @@
 import type { Database } from "@garage-comics/db";
+import { downloadLink } from "@garage-comics/db/schema/downloads";
+import { edition } from "@garage-comics/db/schema/editions";
 import {
   FIRST_ORDER_NUMBER,
   order,
   orderItem,
   transfer,
 } from "@garage-comics/db/schema/orders";
-import { and, eq, exists, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, exists, inArray, max, sql } from "drizzle-orm";
 import { log } from "evlog";
 
+import { isDownloadLinkOpen } from "@/lib/download-link";
 import { cancellableStatuses, payableStatuses } from "@/lib/order";
+import { formatOrderNumber } from "@/lib/order-number";
+import type { OrderSearch } from "@/lib/order-number";
 import type { PaidOrder } from "@/lib/stripe-events";
 import { ensureDelivered } from "@/server/downloads";
 import { sendTransfers } from "@/server/transfers";
 import type { TransferStripe } from "@/server/transfers";
+
+const PAID_ORDERS_PAGE = 50;
 
 /**
  * Marks the Order paid, gives it the next Order Number and creates the rows for the Transfers it owes, in one batch.
@@ -149,4 +156,54 @@ export const cancelOrder = async (
         inArray(order.status, cancellableStatuses)
       )
     );
+};
+
+const matchesSearch = (search: OrderSearch) =>
+  "number" in search
+    ? eq(order.number, search.number)
+    : eq(sql`lower(${order.customerEmail})`, search.email);
+
+/**
+ * Paid Orders, newest first, found by Order Number or email (story 34), each with its newest Download Link, if it has one.
+ * Only Admins read this, a handful of rows at a time, so it stops at the newest 50.
+ */
+export const listPaidOrders = async (
+  db: Database,
+  search: OrderSearch | null,
+  now: Date
+) => {
+  const rows = await db
+    .select({
+      id: order.id,
+      // order_paid_check guarantees both on a paid Order.
+      number: sql<number>`${order.number}`,
+      paidAt: sql`${order.paidAt}`.mapWith(order.paidAt),
+      email: order.customerEmail,
+      editionName: edition.name,
+      latestExpiresAt: max(downloadLink.expiresAt),
+    })
+    .from(order)
+    .innerJoin(edition, eq(edition.id, order.editionId))
+    .leftJoin(downloadLink, eq(downloadLink.orderId, order.id))
+    .where(
+      and(
+        eq(order.status, "paid"),
+        search === null ? undefined : matchesSearch(search)
+      )
+    )
+    .groupBy(order.id)
+    .orderBy(desc(order.number))
+    .limit(PAID_ORDERS_PAGE);
+
+  return rows.map(({ number, latestExpiresAt, ...row }) => ({
+    ...row,
+    orderNumber: formatOrderNumber(number),
+    downloadLink:
+      latestExpiresAt === null
+        ? null
+        : {
+            expiresAt: latestExpiresAt,
+            open: isDownloadLinkOpen(latestExpiresAt, now),
+          },
+  }));
 };

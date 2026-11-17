@@ -113,3 +113,17 @@ export const orderConfirmationEmail = ({
       "\n"
     )}\n\nTotal: ${formatMxn(centavosToPesos(totalCentavos))}\n\n${downloadLinkParagraph(downloadUrl, expiresAt)}\n\nGuarda tu Número de compra por si necesitas ayuda.`,
 });
+
+/** Story 34: a new Download Link sent by an Admin. It names the Order Number so the Customer can tell which Compra it is for. */
+export const downloadLinkResentEmail = ({
+  orderNumber,
+  downloadUrl,
+  expiresAt,
+}: {
+  orderNumber: string;
+  downloadUrl: string;
+  expiresAt: Date;
+}) => ({
+  subject: `Tu nuevo Link de descarga de la Compra ${orderNumber}`,
+  text: `Te mandamos un nuevo Link de descarga para tu Compra ${orderNumber}.\n\n${downloadLinkParagraph(downloadUrl, expiresAt)}`,
+});

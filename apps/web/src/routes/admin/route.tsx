@@ -6,6 +6,7 @@ import {
   Landmark,
   LayoutDashboard,
   Library,
+  Receipt,
   ShieldCheck,
   UserRound,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const sections = [
   { to: "/admin/propuestas", label: "Propuestas", icon: FileText },
   { to: "/admin/comics", label: "Cómics", icon: BookOpen },
   { to: "/admin/ediciones", label: "Ediciones", icon: CalendarDays },
+  { to: "/admin/compras", label: "Compras", icon: Receipt },
   { to: "/admin/administradores", label: "Administradores", icon: ShieldCheck },
   { to: "/admin/perfil", label: "Mi perfil", icon: UserRound },
   { to: "/admin/mis-comics", label: "Mis cómics", icon: Library },
