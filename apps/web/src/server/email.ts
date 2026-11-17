@@ -84,7 +84,6 @@ export const comicRejectedEmail = ({
   text: `Revisamos tu cómic "${comicTitle}" y esta vez no lo pudimos aprobar.\n\nMotivo:\n${reason}\n\nCorrígelo desde Mis cómics y vuelve a enviarlo a revisión.`,
 });
 
-// Both emails that carry a Download Link make the same promise: 24 hours, no download limit, files that may still be preparing.
 const downloadLinkParagraph = (downloadUrl: string, expiresAt: Date) =>
   `Descarga tus cómics en tu Link de descarga:\n\n${downloadUrl}\n\nFunciona hasta el ${formatDateTime(expiresAt)}, sin límite de descargas. Cada PDF lleva tu correo y tu Número de compra al pie de cada página. Si al abrirlo tus cómics aún se están preparando, la página se actualiza sola.`;
 
@@ -114,7 +113,6 @@ export const orderConfirmationEmail = ({
     )}\n\nTotal: ${formatMxn(centavosToPesos(totalCentavos))}\n\n${downloadLinkParagraph(downloadUrl, expiresAt)}\n\nGuarda tu Número de compra por si necesitas ayuda.`,
 });
 
-/** Story 34: a new Download Link sent by an Admin. It names the Order Number so the Customer can tell which Compra it is for. */
 export const downloadLinkResentEmail = ({
   orderNumber,
   downloadUrl,

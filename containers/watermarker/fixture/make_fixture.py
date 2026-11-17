@@ -1,8 +1,3 @@
-"""Builds the hazard fixture: one page per way a real PDF can misplace a footer, plus a real JPEG.
-
-Each page draws a frame around its MediaBox and a 24 pt label naming its hazard, so a render shows where the footer landed.
-"""
-
 import subprocess
 from pathlib import Path
 
@@ -24,7 +19,6 @@ def content(box, label, extra=b"", shade=0.85):
 
 
 def make_jpeg(workdir):
-    """A small real JPEG, rendered by poppler from a page of coloured bands, so nothing binary is kept in the repo."""
     source = pikepdf.new()
     bands = b"".join(b"%.1f 0.3 %.1f rg %d 0 20 150 re f\n" % (i / 10, 1 - i / 10, i * 20) for i in range(10))
     source.pages.append(
@@ -92,7 +86,6 @@ def build(path, workdir):
     add([0, 0, 612, 792], "Extra Q", b"Q 0.02 0 0 0.02 0 0 cm 0 0 1 1 re W n\n")
     pdf.save(workdir / "flat.pdf")
 
-    # Last page: MediaBox, Rotate and Resources inherited from an intermediate Pages node.
     with pikepdf.open(workdir / "flat.pdf") as raw:
         root_pages = raw.Root.Pages
         inherited_box = [0, 0, 500, 700]

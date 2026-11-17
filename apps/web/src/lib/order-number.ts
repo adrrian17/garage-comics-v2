@@ -8,10 +8,6 @@ export const ORDER_SEARCH_MAX_LENGTH = 254;
 
 const ORDER_NUMBER_INPUT = /^(?:grg[\s-]?)?(?<number>\d+)$/iu;
 
-/**
- * What an Admin typed to find an Order: an Order Number ("GRG-1042", "grg 1042", "1042") or else an email, compared without case.
- * Null for an empty box, which means no filter.
- */
 export const parseOrderSearch = (input: string): OrderSearch | null => {
   const text = input.trim();
 

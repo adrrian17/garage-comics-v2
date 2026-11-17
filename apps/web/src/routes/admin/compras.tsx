@@ -38,7 +38,6 @@ import { ORDER_SEARCH_MAX_LENGTH } from "@/lib/order-number";
 
 type PaidOrder = Awaited<ReturnType<typeof getPaidOrders>>[number];
 
-// Story 34: find a paid Order by Order Number or email and send its Customer a new Download Link.
 const ResendDownloadLink = ({ paidOrder }: { paidOrder: PaidOrder }) => {
   const router = useRouter();
   const [open, setOpen] = useState(false);

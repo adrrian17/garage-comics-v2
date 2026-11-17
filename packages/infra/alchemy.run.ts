@@ -30,7 +30,6 @@ const comics = Cloudflare.R2.Bucket("comics", {
   ],
 });
 
-// Watermarked copies and nothing else, so its delete rule can never reach an original, which lives in `comics`.
 // A Download Link's 24 hours are enforced in D1; this rule only cleans up, and R2 may run it up to a day late.
 const downloads = Cloudflare.R2.Bucket("downloads", {
   lifecycleRules: [
@@ -52,12 +51,10 @@ export interface WatermarkerRpc {
   prepare: (downloadLinkId: string) => Promise<void>;
 }
 
-// Stamps the Customer's email and Order Number on every page (containers/watermarker). Its class is exported from apps/web/src/server.ts.
 const watermarker = Cloudflare.Container<WatermarkerRpc>("Watermarker", {
   context: "../../containers/watermarker",
   className: "Watermarker",
   instanceType: "standard-1",
-  // One container per Download Link being prepared; more Links than this wait for a slot, and their alarm retries.
   maxInstances: 5,
 });
 

@@ -8,8 +8,6 @@ import { getDownloadLink } from "@/functions/downloads";
 import type { CopyState } from "@/lib/download-link";
 import { formatDateTime } from "@/lib/format";
 
-// The page in the Order confirmation (stories 30, 33). No account: the id in the URL is the credential.
-
 const POLL_MS = 10_000;
 
 const CopyAction = ({
@@ -22,7 +20,6 @@ const CopyAction = ({
   orderNumber: string;
 }) => {
   if (state === "ready") {
-    // A plain link: the browser downloads the file, no script needed.
     return (
       <a href={href} className={buttonVariants()}>
         Descargar
@@ -56,7 +53,6 @@ const DownloadLinkPage = () => {
     view.status === "open" &&
     view.comics.some((comic) => comic.state === "preparing");
 
-  // Re-reads the page while a copy is being made, so each comic turns into a download without the Customer reloading.
   useEffect(() => {
     const timer = setInterval(() => {
       if (preparing) {
@@ -124,7 +120,6 @@ export const Route = createFileRoute("/descargas/$downloadLinkId")({
     meta: [
       { title: "Tu Link de descarga · Garage Cómics" },
       { name: "robots", content: "noindex" },
-      // The URL is a credential: never send it to another site as a Referer.
       { name: "referrer", content: "no-referrer" },
     ],
   }),

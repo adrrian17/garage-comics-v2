@@ -38,7 +38,6 @@ MIN_HEIGHT = 4.5
 RENDER_DPI = 432
 LIGHT, DARK = 200, 60
 MIN_SHARE = 0.02
-# How far a pixel's grey level must move from the unstamped render to count as the footer's ink.
 INK = 64
 
 WORD = re.compile(r'<word xMin="([-\d.]+)" yMin="([-\d.]+)" xMax="([-\d.]+)" yMax="([-\d.]+)">([^<]*)</word>')
@@ -68,7 +67,6 @@ def reader_box(page, width, height):
 
 
 def rendered(path, number, region, width):
-    """The grey levels inside `region` of the rendered page."""
     with tempfile.TemporaryDirectory() as work:
         stem = Path(work) / "page"
         subprocess.run(
@@ -113,7 +111,6 @@ def measure(path, original, text):
             light, dark = (sum(p >= LIGHT for p in inside) / len(inside), sum(p <= DARK for p in inside) / len(inside))
             ink = sum(abs(a - b) >= INK for a, b in zip(inside, before)) / len(inside)
             checks = {
-                # A footer on several lines drops the " · " between its parts; every other character must be there, in order.
                 "complete": "".join(w[4] for w in footer).replace("·", "") == text.replace(" ", "").replace("·", ""),
                 "inside": x0 >= left and x1 <= right and y1 <= bottom,
                 "bottom": 0 <= gap <= MAX_GAP,

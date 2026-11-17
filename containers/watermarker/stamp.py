@@ -1,9 +1,3 @@
-"""Stamps a footer on every page of a PDF without decoding any image.
-
-Each page gets its own placement, computed from that page's visible box, /Rotate and /UserUnit, so the footer sits at the
-bottom of the page as a reader sees it, at the same physical size, whatever the page size, box offset or rotation.
-"""
-
 import sys
 import unicodedata
 
@@ -14,9 +8,7 @@ FONT_SIZE = 7.0
 MIN_FONT_SIZE = 5.0
 MARGIN = 10.0
 LEADING = 1.2
-# The white outline's width, relative to the font size.
 OUTLINE = 0.2
-# Where a footer that does not fit on one line breaks first (stampText in apps/web/src/lib/download-link.ts).
 SEPARATOR = " · "
 FONT_NAME = Name("/GarageStamp")
 
@@ -38,7 +30,7 @@ WIDEST = 1000
 
 
 class StampError(ValueError):
-    """The footer cannot be drawn faithfully, so no copy is made."""
+    pass
 
 
 def char_width(char):
@@ -54,7 +46,6 @@ def text_width(text, size):
 
 
 def break_line(text, room, size):
-    """Splits a line with no space to break at (an email) into as many lines as it takes. Never drops a character."""
     lines, line = [], ""
     for char in text:
         if line and text_width(line + char, size) > room:
@@ -65,11 +56,6 @@ def break_line(text, room, size):
 
 
 def layout(text, width):
-    """The footer's lines, top to bottom, and its font size, for a page `width` points wide as the reader sees it.
-
-    One line at 7 pt; else one line per part at the largest size down to 5 pt that fits; else the parts broken wherever
-    needed at 5 pt. Never truncated.
-    """
     room = width - 2 * MARGIN
     if text_width(text, FONT_SIZE) <= room:
         return [text], FONT_SIZE
@@ -136,7 +122,6 @@ def footer_ops(text, box, rotation, user_unit):
         % ((width - text_width(line, size)) / 2, MARGIN + row * size * LEADING, pdf_string(line))
         for row, line in enumerate(reversed(lines))
     ]
-    # Outlines first, then every fill on top: a white outline under dark text keeps the footer readable over any artwork.
     return (
         b"q %s\n" % cm
         + b"BT /GarageStamp %.2f Tf 1 1 1 RG %.2f w 1 Tr %s ET\n" % (size, OUTLINE * size, b" ".join(placed))
@@ -146,7 +131,6 @@ def footer_ops(text, box, rotation, user_unit):
 
 
 def save_depths(page):
-    """How many Q the page's own content runs beyond the q it opened, at its lowest, and how many q it leaves open at its end."""
     depth = lowest = 0
     for instruction in pikepdf.parse_content_stream(page, "q Q"):
         depth += 1 if str(instruction.operator) == "q" else -1
@@ -178,7 +162,6 @@ def stamp(source, destination, text):
             page.contents_add(
                 b"Q\n" * (opened + left_open) + footer_ops(text, visible_box(page), page.rotation, user_unit), prepend=False
             )
-        # Image streams are copied byte for byte: nothing is decoded, recompressed or re-encoded.
         pdf.save(
             destination,
             stream_decode_level=pikepdf.StreamDecodeLevel.none,
@@ -188,15 +171,11 @@ def stamp(source, destination, text):
 
 
 def self_check():
-    """Run by the Dockerfile: the image does not build if the footer would land anywhere but the reader's bottom edge,
-    or if its layout could drop a character."""
-
     def apply(m, x, y):
         a, b, c, d, e, f = m
         return (a * x + c * y + e, b * x + d * y + f)
 
-    box = (100, 200, 712, 992)  # offset origin, 612 x 792
-    # rotation -> where the middle of the reader's bottom edge is in page space, and which way "up" points
+    box = (100, 200, 712, 992)
     expected = {
         0: ((406, 200), (0, 1)),
         90: ((712, 596), (-1, 0)),

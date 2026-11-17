@@ -37,7 +37,6 @@ class Handler(BaseHTTPRequestHandler):
             self._reply(400, b"POST /stamp?text=... with a PDF body and its Content-Length")
             return
 
-        # A directory per request: a request left running by a restarted Durable Object cannot collide with its retry.
         with tempfile.TemporaryDirectory() as work:
             source, copy = os.path.join(work, "in.pdf"), os.path.join(work, "out.pdf")
             started = time.monotonic()
@@ -65,7 +64,6 @@ class Handler(BaseHTTPRequestHandler):
             with open(copy, "rb") as file:
                 shutil.copyfileobj(file, self.wfile, CHUNK)
 
-            # One line per job: the measurement the spec asks for (a 500 MB PDF on standard-1) comes from these.
             print(
                 json.dumps(
                     {
@@ -85,7 +83,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def log_message(self, *args):
-        pass  # the JSON line above replaces the access log
+        pass
 
 
 if __name__ == "__main__":

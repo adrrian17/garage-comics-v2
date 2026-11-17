@@ -86,8 +86,6 @@ const ensureTransfers = async (
 
 /**
  * Brings an Order to paid, delivered and transferred. Safe to repeat in any order and after a crash at any point: each step checks its own saved state.
- * Payment is saved first. Only then do the delivery (the confirmation with its Download Link, then the watermarked copies) and the Transfers run,
- * independently, so an email or container outage never holds back an Author's money and a Stripe error never holds back the comics.
  * It never reads the sales phase or the active Edition, so an OXXO Order paid after the window closed is honoured (story 29).
  * It throws when a step needs a retry.
  */
@@ -163,10 +161,6 @@ const matchesSearch = (search: OrderSearch) =>
     ? eq(order.number, search.number)
     : eq(sql`lower(${order.customerEmail})`, search.email);
 
-/**
- * Paid Orders, newest first, found by Order Number or email (story 34), each with its newest Download Link, if it has one.
- * Only Admins read this, a handful of rows at a time, so it stops at the newest 50.
- */
 export const listPaidOrders = async (
   db: Database,
   search: OrderSearch | null,
@@ -175,7 +169,6 @@ export const listPaidOrders = async (
   const rows = await db
     .select({
       id: order.id,
-      // order_paid_check guarantees both on a paid Order.
       number: sql<number>`${order.number}`,
       paidAt: sql`${order.paidAt}`.mapWith(order.paidAt),
       email: order.customerEmail,
