@@ -1,22 +1,16 @@
 import type { Database } from "@garage-comics/db";
-import { edition } from "@garage-comics/db/schema/editions";
 import {
   FIRST_ORDER_NUMBER,
   order,
   orderItem,
   transfer,
 } from "@garage-comics/db/schema/orders";
-import { and, asc, eq, exists, inArray, isNull, sql } from "drizzle-orm";
+import { and, eq, exists, inArray, sql } from "drizzle-orm";
 import { log } from "evlog";
 
-import {
-  cancellableStatuses,
-  orderTotalCentavos,
-  payableStatuses,
-} from "@/lib/order";
-import { formatOrderNumber } from "@/lib/order-number";
+import { cancellableStatuses, payableStatuses } from "@/lib/order";
 import type { PaidOrder } from "@/lib/stripe-events";
-import { orderConfirmationEmail, sendEmail } from "@/server/email";
+import { ensureDelivered } from "@/server/downloads";
 import { sendTransfers } from "@/server/transfers";
 import type { TransferStripe } from "@/server/transfers";
 
@@ -67,56 +61,6 @@ const ensurePaid = async (db: Database, paid: PaidOrder, now: Date) => {
   ]);
 };
 
-/**
- * Sends the confirmation once the Order is paid. The email goes out before it is marked sent, so a crash in between sends it twice rather than never.
- * It throws when the send fails, which makes the webhook answer 500 and Stripe deliver the event again.
- */
-const ensureConfirmed = async (db: Database, orderId: string, now: Date) => {
-  const found = await db
-    .select({
-      status: order.status,
-      number: order.number,
-      email: order.customerEmail,
-      confirmationSentAt: order.confirmationSentAt,
-      editionName: edition.name,
-    })
-    .from(order)
-    .innerJoin(edition, eq(edition.id, order.editionId))
-    .where(eq(order.id, orderId))
-    .get();
-
-  if (found?.status !== "paid" || found.number === null) {
-    throw new Error(
-      `Order ${orderId} is not paid after its payment was recorded.`
-    );
-  }
-
-  if (found.confirmationSentAt !== null) {
-    return;
-  }
-
-  const items = await db
-    .select({ title: orderItem.title, priceCentavos: orderItem.priceCentavos })
-    .from(orderItem)
-    .where(eq(orderItem.orderId, orderId))
-    .orderBy(asc(orderItem.title));
-
-  await sendEmail({
-    to: found.email,
-    ...orderConfirmationEmail({
-      orderNumber: formatOrderNumber(found.number),
-      editionName: found.editionName,
-      items,
-      totalCentavos: orderTotalCentavos(items),
-    }),
-  });
-
-  await db
-    .update(order)
-    .set({ confirmationSentAt: now })
-    .where(and(eq(order.id, orderId), isNull(order.confirmationSentAt)));
-};
-
 /** Sends the Author's Transfers; throws while some are unsent and worth retrying, so the webhook answers 500 and Stripe delivers the event again. */
 const ensureTransfers = async (
   db: Database,
@@ -134,8 +78,9 @@ const ensureTransfers = async (
 };
 
 /**
- * Brings an Order to paid, confirmed and transferred. Safe to repeat in any order and after a crash at any point: each step checks its own saved state.
- * Payment is saved first. Only then do the email and the Transfers run, independently, so an email outage never holds back an Author's money and a Stripe error never holds back the email.
+ * Brings an Order to paid, delivered and transferred. Safe to repeat in any order and after a crash at any point: each step checks its own saved state.
+ * Payment is saved first. Only then do the delivery (the confirmation with its Download Link, then the watermarked copies) and the Transfers run,
+ * independently, so an email or container outage never holds back an Author's money and a Stripe error never holds back the comics.
  * It never reads the sales phase or the active Edition, so an OXXO Order paid after the window closed is honoured (story 29).
  * It throws when a step needs a retry.
  */
@@ -169,7 +114,7 @@ export const fulfillOrder = async (
   await ensurePaid(db, paid, now);
 
   const steps = await Promise.allSettled([
-    ensureConfirmed(db, paid.orderId, now),
+    ensureDelivered(db, paid.orderId, now),
     ensureTransfers(db, stripe, paid.orderId, now),
   ]);
 

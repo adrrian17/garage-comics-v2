@@ -43,9 +43,17 @@ const downloads = Cloudflare.R2.Bucket("downloads", {
   ],
 });
 
-// Stamps the Customer's email and Order Number on every page (containers/watermarker). Its Durable Object class is exported from
-// apps/web/src/server.ts. The class stays untyped here on purpose: apps/web/cloudflare-env.d.ts types the binding, so infra never imports app code.
-const watermarker = Cloudflare.Container("Watermarker", {
+/**
+ * What the Watermarker Durable Object answers over RPC. The class in apps/web/src/server/watermarker.ts implements it.
+ * Declared here, not taken from the class: typing the binding with the class makes `Cloudflare.Env` depend on itself,
+ * which silently turns other bindings into `any`.
+ */
+export interface WatermarkerRpc {
+  prepare: (downloadLinkId: string) => Promise<void>;
+}
+
+// Stamps the Customer's email and Order Number on every page (containers/watermarker). Its class is exported from apps/web/src/server.ts.
+const watermarker = Cloudflare.Container<WatermarkerRpc>("Watermarker", {
   context: "../../containers/watermarker",
   className: "Watermarker",
   instanceType: "standard-1",
@@ -97,7 +105,6 @@ export const web = Cloudflare.Website.Vite("web", {
   },
 });
 
-// Types every binding but WATERMARKER, which apps/web/cloudflare-env.d.ts names with the class the app owns.
 export type WebEnv = Cloudflare.InferEnv<typeof web>;
 
 export default Alchemy.Stack(
