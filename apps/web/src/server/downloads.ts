@@ -235,6 +235,7 @@ export const readDownloadLink = async (
       title: orderItem.title,
       readyAt: downloadCopy.readyAt,
       attempts: sql<number>`coalesce(${downloadCopy.attempts}, 0)`,
+      lastError: downloadCopy.lastError,
     })
     .from(orderItem)
     .leftJoin(

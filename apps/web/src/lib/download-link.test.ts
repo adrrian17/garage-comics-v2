@@ -34,13 +34,26 @@ describe(viewDownloadLink, () => {
   const link = { orderNumber: 1042, expiresAt: downloadLinkExpiry(sentAt) };
 
   const copies = [
-    { orderItemId: "a", title: "Uno", readyAt: at(0.1), attempts: 1 },
-    { orderItemId: "b", title: "Dos", readyAt: null, attempts: 1 },
+    {
+      orderItemId: "a",
+      title: "Uno",
+      readyAt: at(0.1),
+      attempts: 1,
+      lastError: null,
+    },
+    {
+      orderItemId: "b",
+      title: "Dos",
+      readyAt: null,
+      attempts: 1,
+      lastError: "timeout",
+    },
     {
       orderItemId: "c",
       title: "Tres",
       readyAt: null,
       attempts: MAX_COPY_ATTEMPTS,
+      lastError: "timeout",
     },
   ];
 
@@ -70,19 +83,45 @@ describe(viewDownloadLink, () => {
 
 describe(copyState, () => {
   it("counts a comic with no copy row yet as preparing", () => {
-    expect(copyState({ readyAt: null, attempts: 0 })).toBe("preparing");
-  });
-
-  it("keeps a copy preparing until its last attempt is used", () => {
-    expect(copyState({ readyAt: null, attempts: MAX_COPY_ATTEMPTS - 1 })).toBe(
+    expect(copyState({ readyAt: null, attempts: 0, lastError: null })).toBe(
       "preparing"
     );
   });
 
+  it("keeps a copy preparing after a failure while attempts are left", () => {
+    expect(
+      copyState({
+        readyAt: null,
+        attempts: MAX_COPY_ATTEMPTS - 1,
+        lastError: "timeout",
+      })
+    ).toBe("preparing");
+  });
+
+  it("keeps a copy preparing while its last attempt runs", () => {
+    expect(
+      copyState({ readyAt: null, attempts: MAX_COPY_ATTEMPTS, lastError: null })
+    ).toBe("preparing");
+  });
+
+  it("fails a copy once its last attempt ends in an error", () => {
+    expect(
+      copyState({
+        readyAt: null,
+        attempts: MAX_COPY_ATTEMPTS,
+        lastError: "interrupted",
+      })
+    ).toBe("failed");
+  });
+
   it("calls a copy ready whatever its attempts", () => {
-    expect(copyState({ readyAt: sentAt, attempts: MAX_COPY_ATTEMPTS })).toBe(
-      "ready"
-    );
+    expect(
+      copyState({
+        readyAt: sentAt,
+        attempts: MAX_COPY_ATTEMPTS,
+        lastError: null,
+      })
+    ).toBe("ready");
   });
 });
 

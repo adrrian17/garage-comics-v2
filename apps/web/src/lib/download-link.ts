@@ -20,15 +20,19 @@ export const isDownloadLinkOpen = (expiresAt: Date, now: Date) =>
 
 export type CopyState = "ready" | "preparing" | "failed";
 
+/** A copy fails only once its last attempt has ended in an error: an attempt clears `lastError` when it starts, so one still running reads as preparing. */
 export const copyState = (copy: {
   readyAt: Date | null;
   attempts: number;
+  lastError: string | null;
 }): CopyState => {
   if (copy.readyAt !== null) {
     return "ready";
   }
 
-  return copy.attempts >= MAX_COPY_ATTEMPTS ? "failed" : "preparing";
+  return copy.attempts >= MAX_COPY_ATTEMPTS && copy.lastError !== null
+    ? "failed"
+    : "preparing";
 };
 
 /** What the Customer sees at the Download Link. The expiry wins over every copy: an expired link lists no comics, ready or not. */
@@ -48,6 +52,7 @@ export const viewDownloadLink = (
     title: string;
     readyAt: Date | null;
     attempts: number;
+    lastError: string | null;
   }[],
   now: Date
 ): DownloadLinkView => {

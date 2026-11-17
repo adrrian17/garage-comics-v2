@@ -55,6 +55,7 @@ const unreadyCopies = async (db: Database, downloadLinkId: string, now: Date) =>
       downloadLinkId: downloadCopy.downloadLinkId,
       orderItemId: downloadCopy.orderItemId,
       attempts: downloadCopy.attempts,
+      lastError: downloadCopy.lastError,
       pdfKey: editionComic.pdfKey,
       email: order.customerEmail,
       orderNumber: order.number,
@@ -90,36 +91,6 @@ const markReady = async (db: Database, job: CopyJob) => {
 };
 
 /**
- * The next copy to hand to the container, or undefined when none is left. On the way, adopts every copy an earlier attempt
- * finished: R2 writes a key whole or not at all and the key is this link's alone, so a copy in the bucket is a finished copy,
- * even when the wake-up that wrote it crashed before saving `readyAt`.
- */
-const nextJob = async (db: Database, downloadLinkId: string, now: Date) => {
-  const copies = await unreadyCopies(db, downloadLinkId, now);
-
-  // A copy never handed to the container cannot be in the bucket, so only attempted ones are looked up.
-  const finished = await Promise.all(
-    copies.map(
-      async (job) =>
-        job.attempts > 0 &&
-        (await env.DOWNLOADS.head(
-          copyKey(job.downloadLinkId, job.orderItemId)
-        )) !== null
-    )
-  );
-
-  await Promise.all(
-    copies.flatMap((job, index) =>
-      finished[index] ? [markReady(db, job)] : []
-    )
-  );
-
-  return copies.find(
-    (job, index) => !finished[index] && job.attempts < MAX_COPY_ATTEMPTS
-  );
-};
-
-/**
  * Saves why a copy failed and says how long to wait before the next wake-up: the backoff, counted from now because a long
  * attempt may outlast the alarm armed before it, or nothing once the copy is given up on, so the link's other copies go next.
  */
@@ -142,6 +113,42 @@ const recordFailure = async (db: Database, job: CopyJob, error: string) => {
   });
 
   return 0;
+};
+
+/**
+ * The next copy to hand to the container, or undefined when none is left. On the way, adopts every copy an earlier attempt
+ * finished: R2 writes a key whole or not at all and the key is this link's alone, so a copy in the bucket is a finished copy,
+ * even when the wake-up that wrote it crashed before saving `readyAt`.
+ * A last attempt that left neither a copy nor an error crashed: the runtime runs one alarm at a time per Durable Object, so it is
+ * not still running. It is given up on, or the Customer's page would show it preparing forever.
+ */
+const nextJob = async (db: Database, downloadLinkId: string, now: Date) => {
+  const copies = await unreadyCopies(db, downloadLinkId, now);
+
+  // A copy never handed to the container cannot be in the bucket, so only attempted ones are looked up.
+  const finished = await Promise.all(
+    copies.map(
+      async (job) =>
+        job.attempts > 0 &&
+        (await env.DOWNLOADS.head(
+          copyKey(job.downloadLinkId, job.orderItemId)
+        )) !== null
+    )
+  );
+
+  await Promise.all(
+    copies.map(async (job, index) => {
+      if (finished[index]) {
+        await markReady(db, job);
+      } else if (job.attempts >= MAX_COPY_ATTEMPTS && job.lastError === null) {
+        await recordFailure(db, job, "interrupted");
+      }
+    })
+  );
+
+  return copies.find(
+    (job, index) => !finished[index] && job.attempts < MAX_COPY_ATTEMPTS
+  );
 };
 
 /** Starts the container if needed and waits until its server answers. Capacity and start errors throw before any attempt is counted. */
@@ -302,9 +309,10 @@ export class Watermarker extends DurableObject implements WatermarkerRpc {
       return;
     }
 
+    // Cleared so the Customer's page reads a last attempt as preparing until it ends.
     await db
       .update(downloadCopy)
-      .set({ attempts: sql`${downloadCopy.attempts} + 1` })
+      .set({ attempts: sql`${downloadCopy.attempts} + 1`, lastError: null })
       .where(unready(job));
 
     try {
