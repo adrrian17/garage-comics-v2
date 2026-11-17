@@ -1,0 +1,224 @@
+"""Stamps a footer on every page of a PDF without decoding any image.
+
+Each page gets its own placement, computed from that page's visible box, /Rotate and /UserUnit, so the footer sits at the
+bottom of the page as a reader sees it, at the same physical size, whatever the page size, box offset or rotation.
+"""
+
+import sys
+import unicodedata
+
+import pikepdf
+from pikepdf import Dictionary, Name
+
+FONT_SIZE = 7.0
+MIN_FONT_SIZE = 5.0
+MARGIN = 10.0
+LEADING = 1.2
+# The white outline's width, relative to the font size.
+OUTLINE = 0.2
+# Where a footer that does not fit on one line breaks first (stampText in apps/web/src/lib/download-link.ts).
+SEPARATOR = " · "
+FONT_NAME = Name("/GarageStamp")
+
+# Helvetica advance widths in 1/1000 em for WinAnsi codes 32 to 126, from Adobe's standard AFM.
+ASCII_WIDTHS = (
+    278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584, 278, 333, 278, 278,
+    556, 556, 556, 556, 556, 556, 556, 556, 556, 556,
+    278, 278, 584, 584, 584, 556, 1015,
+    667, 667, 722, 722, 667, 611, 778, 722, 278, 500, 667, 556, 833,
+    722, 778, 667, 778, 722, 667, 611, 722, 667, 944, 667, 667, 611,
+    278, 278, 278, 469, 556, 333,
+    556, 556, 500, 556, 556, 278, 556, 556, 222, 222, 500, 222, 833,
+    556, 556, 556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500,
+    334, 260, 334, 584,
+)
+NON_ASCII_WIDTHS = {"·": 278}
+# No WinAnsi glyph of Helvetica is wider, so a character missing above can only shrink the footer, never push it off the page.
+WIDEST = 1000
+
+
+class StampError(ValueError):
+    """The footer cannot be drawn faithfully, so no copy is made."""
+
+
+def char_width(char):
+    if char in NON_ASCII_WIDTHS:
+        return NON_ASCII_WIDTHS[char]
+    # Accented Latin letters are as wide as their base letter in Helvetica.
+    base = ord(unicodedata.normalize("NFD", char)[0])
+    return ASCII_WIDTHS[base - 32] if 32 <= base <= 126 else WIDEST
+
+
+def text_width(text, size):
+    return sum(char_width(char) for char in text) * size / 1000
+
+
+def break_line(text, room, size):
+    """Splits a line with no space to break at (an email) into as many lines as it takes. Never drops a character."""
+    lines, line = [], ""
+    for char in text:
+        if line and text_width(line + char, size) > room:
+            lines.append(line)
+            line = ""
+        line += char
+    return [*lines, line]
+
+
+def layout(text, width):
+    """The footer's lines, top to bottom, and its font size, for a page `width` points wide as the reader sees it.
+
+    One line at 7 pt; else one line per part at the largest size down to 5 pt that fits; else the parts broken wherever
+    needed at 5 pt. Never truncated.
+    """
+    room = width - 2 * MARGIN
+    if text_width(text, FONT_SIZE) <= room:
+        return [text], FONT_SIZE
+    parts = text.split(SEPARATOR)
+    size = min(FONT_SIZE, room / max(text_width(part, 1) for part in parts))
+    if size >= MIN_FONT_SIZE:
+        return parts, size
+    return [line for part in parts for line in break_line(part, room, MIN_FONT_SIZE)], MIN_FONT_SIZE
+
+
+def visible_box(page):
+    """The part of the page a reader sees and keeps: TrimBox (falling back to CropBox, MediaBox) clipped to CropBox."""
+    t = [float(v) for v in page.trimbox]
+    c = [float(v) for v in page.cropbox]
+    t = [min(t[0], t[2]), min(t[1], t[3]), max(t[0], t[2]), max(t[1], t[3])]
+    c = [min(c[0], c[2]), min(c[1], c[3]), max(c[0], c[2]), max(c[1], c[3])]
+    box = [max(t[0], c[0]), max(t[1], c[1]), min(t[2], c[2]), min(t[3], c[3])]
+    return box if box[0] < box[2] and box[1] < box[3] else c
+
+
+def footer_matrix(box, rotation):
+    """Maps "reader space" (origin at the bottom-left corner the reader sees, x to the right, y up) to page space.
+
+    Returns the cm matrix and the width of the page as the reader sees it.
+    """
+    llx, lly, urx, ury = box
+    width, height = urx - llx, ury - lly
+    rotation = rotation % 360
+    if rotation == 90:
+        return (0, 1, -1, 0, urx, lly), height
+    if rotation == 180:
+        return (-1, 0, 0, -1, urx, ury), width
+    if rotation == 270:
+        return (0, -1, 1, 0, llx, ury), height
+    return (1, 0, 0, 1, llx, lly), width
+
+
+def pdf_string(text):
+    """The text as a PDF string in WinAnsi, the encoding of the base-14 font. Refuses what WinAnsi cannot show."""
+    try:
+        raw = text.encode("cp1252")
+    except UnicodeEncodeError as error:
+        raise StampError(f"Cannot stamp {text[error.start:error.end]!r}: Helvetica has no glyph for it.") from error
+    return b"(" + raw.replace(b"\\", b"\\\\").replace(b"(", b"\\(").replace(b")", b"\\)") + b")"
+
+
+def footer_ops(text, box, rotation, user_unit):
+    matrix, reader_width = footer_matrix(box, rotation)
+    width = reader_width * user_unit
+    lines, size = layout(text, width)
+    # Reader space in points: a /UserUnit page scales every unit, so undo it to keep the footer the same physical size.
+    cm = b" ".join(b"%.4f" % v for v in matrix) + b" cm %.6f 0 0 %.6f 0 0 cm" % (1 / user_unit, 1 / user_unit)
+    placed = [
+        b"1 0 0 1 %.2f %.2f Tm %s Tj"
+        % ((width - text_width(line, size)) / 2, MARGIN + row * size * LEADING, pdf_string(line))
+        for row, line in enumerate(reversed(lines))
+    ]
+    # Outlines first, then every fill on top: a white outline under dark text keeps the footer readable over any artwork.
+    return (
+        b"q %s\n" % cm
+        + b"BT /GarageStamp %.2f Tf 1 1 1 RG %.2f w 1 Tr %s ET\n" % (size, OUTLINE * size, b" ".join(placed))
+        + b"BT /GarageStamp %.2f Tf 0.15 g 0 Tr %s ET\n" % (size, b" ".join(placed))
+        + b"Q\n"
+    )
+
+
+def unclosed_saves(page):
+    """How many q the page's own content leaves open; the stamp closes them to start from a clean graphics state."""
+    depth = 0
+    for instruction in pikepdf.parse_content_stream(page, "q Q"):
+        depth += 1 if str(instruction.operator) == "q" else -1
+    return max(depth, 0)
+
+
+def stamp(source, destination, text):
+    pdf_string(text)
+    with pikepdf.open(source) as pdf:
+        font = pdf.make_indirect(
+            Dictionary(
+                Type=Name.Font,
+                Subtype=Name.Type1,
+                BaseFont=Name.Helvetica,
+                Encoding=Name.WinAnsiEncoding,
+            )
+        )
+        for page in pdf.pages:
+            page.add_resource(font, Name.Font, FONT_NAME)
+            closing = b"Q\n" * (unclosed_saves(page) + 1)
+            user_unit = float(page.obj.get(Name.UserUnit, 1))
+            page.contents_add(b"q\n", prepend=True)
+            page.contents_add(closing + footer_ops(text, visible_box(page), page.rotation, user_unit), prepend=False)
+        # Image streams are copied byte for byte: nothing is decoded, recompressed or re-encoded.
+        pdf.save(
+            destination,
+            stream_decode_level=pikepdf.StreamDecodeLevel.none,
+            recompress_flate=False,
+            object_stream_mode=pikepdf.ObjectStreamMode.preserve,
+        )
+
+
+def self_check():
+    """Run by the Dockerfile: the image does not build if the footer would land anywhere but the reader's bottom edge,
+    or if its layout could drop a character."""
+
+    def apply(m, x, y):
+        a, b, c, d, e, f = m
+        return (a * x + c * y + e, b * x + d * y + f)
+
+    box = (100, 200, 712, 992)  # offset origin, 612 x 792
+    # rotation -> where the middle of the reader's bottom edge is in page space, and which way "up" points
+    expected = {
+        0: ((406, 200), (0, 1)),
+        90: ((712, 596), (-1, 0)),
+        180: ((406, 992), (0, -1)),
+        270: ((100, 596), (1, 0)),
+    }
+    for rotation, (bottom_middle, up) in expected.items():
+        matrix, reader_width = footer_matrix(box, rotation)
+        assert apply(matrix, reader_width / 2, 0) == bottom_middle, (rotation, apply(matrix, reader_width / 2, 0))
+        origin = apply(matrix, 0, 0)
+        tip = apply(matrix, 0, 1)
+        assert (tip[0] - origin[0], tip[1] - origin[1]) == up, rotation
+    assert footer_matrix(box, -90) == footer_matrix(box, 270)
+
+    short = "Compra GRG-1042 · ana@example.com"
+    assert layout(short, 612) == ([short], FONT_SIZE), "a short footer is one 7 pt line on Letter"
+    lines, size = layout(short, 140)
+    assert lines == ["Compra GRG-1042", "ana@example.com"] and MIN_FONT_SIZE <= size <= FONT_SIZE, (lines, size)
+
+    email = "a" * 64 + "@" + ".".join(["b" * 63, "c" * 63, "d" * 61])
+    assert len(email) == 254
+    lines, size = layout(f"Compra GRG-1042 · {email}", 200)
+    assert size == MIN_FONT_SIZE, "a long email breaks at 5 pt instead of shrinking further"
+    assert "".join(lines) == "Compra GRG-1042" + email, "no character is dropped"
+    assert all(text_width(line, size) <= 200 - 2 * MARGIN for line in lines), "every line fits"
+
+    assert pdf_string("a(b)\\c") == b"(a\\(b\\)\\\\c)"
+    assert pdf_string("José · ñ") == b"(Jos\xe9 \xb7 \xf1)"
+    try:
+        pdf_string("ana@例え.jp")
+    except StampError:
+        pass
+    else:
+        raise AssertionError("text outside WinAnsi must fail, never be replaced")
+    print("stamp self-check passed")
+
+
+if __name__ == "__main__":
+    if sys.argv[1:] == ["--self-check"]:
+        self_check()
+    else:
+        stamp(sys.argv[1], sys.argv[2], sys.argv[3])
