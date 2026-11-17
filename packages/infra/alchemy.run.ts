@@ -30,6 +30,29 @@ const comics = Cloudflare.R2.Bucket("comics", {
   ],
 });
 
+// Watermarked copies and nothing else, so its delete rule can never reach an original, which lives in `comics`.
+// A Download Link's 24 hours are enforced in D1; this rule only cleans up, and R2 may run it up to a day late.
+const downloads = Cloudflare.R2.Bucket("downloads", {
+  lifecycleRules: [
+    {
+      id: "delete-copies-after-a-day",
+      deleteObjectsTransition: {
+        condition: { type: "Age", maxAge: 60 * 60 * 24 },
+      },
+    },
+  ],
+});
+
+// Stamps the Customer's email and Order Number on every page (containers/watermarker). Its Durable Object class is exported from
+// apps/web/src/server.ts. The class stays untyped here on purpose: apps/web/cloudflare-env.d.ts types the binding, so infra never imports app code.
+const watermarker = Cloudflare.Container("Watermarker", {
+  context: "../../containers/watermarker",
+  className: "Watermarker",
+  instanceType: "standard-1",
+  // One container per Download Link being prepared; more Links than this wait for a slot, and their alarm retries.
+  maxInstances: 5,
+});
+
 // Under `alchemy dev` this writes each message as an .eml file to .alchemy/local/email.
 const email = Cloudflare.Email.SendEmail("EMAIL");
 
@@ -38,6 +61,13 @@ const portlessUrl = process.env.PORTLESS_URL;
 
 export const web = Cloudflare.Website.Vite("web", {
   rootDir: "../../apps/web",
+  // Names the entry that exports the Watermarker class next to Start's handler, instead of relying on Start's virtual entry to re-export it.
+  main: "src/server.ts",
+  compatibility: {
+    // Pending I/O (a container call of minutes for a 500 MB PDF) keeps a Durable Object alive. A flag, not a newer
+    // compatibility date, which would change every other runtime behaviour of the app at once.
+    flags: ["durable_object_io_tasks_prevent_eviction"],
+  },
   env: {
     DB: db,
     BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
@@ -57,6 +87,8 @@ export const web = Cloudflare.Website.Vite("web", {
     EMAIL: email,
     COMICS: comics,
     COMICS_S3: Cloudflare.R2.S3Credentials(comics, { access: "read-write" }),
+    DOWNLOADS: downloads,
+    WATERMARKER: watermarker,
   },
   dev: {
     // portless assigns the port; see the dev script in package.json.
@@ -65,6 +97,7 @@ export const web = Cloudflare.Website.Vite("web", {
   },
 });
 
+// Types every binding but WATERMARKER, which apps/web/cloudflare-env.d.ts names with the class the app owns.
 export type WebEnv = Cloudflare.InferEnv<typeof web>;
 
 export default Alchemy.Stack(
