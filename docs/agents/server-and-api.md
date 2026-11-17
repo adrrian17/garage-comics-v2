@@ -2,7 +2,7 @@
 
 Server code lives inside the TanStack Start app in `apps/web`; there is no separate API Worker.
 
-- `apps/web/src/server.ts`: the Worker entry. Wraps Start's handler with evlog request logging and Better Auth user identification.
+- `apps/web/src/server.ts`: the Worker entry. Wraps Start's handler with evlog request logging and Better Auth user identification, and exports the `Watermarker` Durable Object (`server/watermarker.ts`), which makes the watermarked copies.
 - `apps/web/src/server/services.ts`: builds Better Auth and the database from the `cloudflare:workers` env. Only server code imports it.
 - `apps/web/src/functions/`: server functions (`createServerFn`). Read the session with `getRequest().headers`; reject unauthenticated calls inside the handler.
 - `apps/web/src/routes/api/`: server routes, such as the Better Auth handler at `/api/auth/$`.
