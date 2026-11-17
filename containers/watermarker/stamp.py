@@ -145,12 +145,13 @@ def footer_ops(text, box, rotation, user_unit):
     )
 
 
-def unclosed_saves(page):
-    """How many q the page's own content leaves open; the stamp closes them to start from a clean graphics state."""
-    depth = 0
+def save_depths(page):
+    """How many Q the page's own content runs beyond the q it opened, at its lowest, and how many q it leaves open at its end."""
+    depth = lowest = 0
     for instruction in pikepdf.parse_content_stream(page, "q Q"):
         depth += 1 if str(instruction.operator) == "q" else -1
-    return max(depth, 0)
+        lowest = min(lowest, depth)
+    return -lowest, depth
 
 
 def stamp(source, destination, text):
@@ -168,10 +169,15 @@ def stamp(source, destination, text):
         pdf.flatten_annotations()
         for page in pdf.pages:
             page.add_resource(font, Name.Font, FONT_NAME)
-            closing = b"Q\n" * (unclosed_saves(page) + 1)
+            # One q more than the page ever pops, so a stray Q cannot undo the isolation, and a Q after it for every q still
+            # open, so the footer always starts from the default graphics state.
+            extra_closes, left_open = save_depths(page)
+            opened = 1 + extra_closes
             user_unit = float(page.obj.get(Name.UserUnit, 1))
-            page.contents_add(b"q\n", prepend=True)
-            page.contents_add(closing + footer_ops(text, visible_box(page), page.rotation, user_unit), prepend=False)
+            page.contents_add(b"q\n" * opened, prepend=True)
+            page.contents_add(
+                b"Q\n" * (opened + left_open) + footer_ops(text, visible_box(page), page.rotation, user_unit), prepend=False
+            )
         # Image streams are copied byte for byte: nothing is decoded, recompressed or re-encoded.
         pdf.save(
             destination,

@@ -88,6 +88,8 @@ def build(path, workdir):
     add([0, 0, 612, 792], "Opaque annotation", Annots=Array([pdf.make_indirect(annotation)]))
     # Readers clip the CropBox to the MediaBox, so the visible page is the MediaBox here.
     add([0, 0, 612, 792], "Oversized CropBox", CropBox=Array([-100, -100, 712, 892]))
+    # One Q more than the page opened, then a transform and a clip, like a producer that closes a state it never saved.
+    add([0, 0, 612, 792], "Extra Q", b"Q 0.02 0 0 0.02 0 0 cm 0 0 1 1 re W n\n")
     pdf.save(workdir / "flat.pdf")
 
     # Last page: MediaBox, Rotate and Resources inherited from an intermediate Pages node.
