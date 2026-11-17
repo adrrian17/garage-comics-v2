@@ -7,6 +7,8 @@ export { comic, comicSlots, comicStatuses, editionComic } from "./comics";
 
 export type { Collaborator, ComicSlot, ComicStatus } from "./comics";
 
+export { downloadCopy, downloadLink } from "./downloads";
+
 export { edition, proposal, proposalStatuses, registration } from "./editions";
 
 export type { ProposalStatus } from "./editions";
