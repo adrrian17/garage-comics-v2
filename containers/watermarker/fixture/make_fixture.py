@@ -86,6 +86,8 @@ def build(path, workdir):
     )
     annotation = Dictionary(Type=Name.Annot, Subtype=Name.Square, Rect=Array([0, 0, 612, 80]), F=4, AP=Dictionary(N=cover))
     add([0, 0, 612, 792], "Opaque annotation", Annots=Array([pdf.make_indirect(annotation)]))
+    # Readers clip the CropBox to the MediaBox, so the visible page is the MediaBox here.
+    add([0, 0, 612, 792], "Oversized CropBox", CropBox=Array([-100, -100, 712, 892]))
     pdf.save(workdir / "flat.pdf")
 
     # Last page: MediaBox, Rotate and Resources inherited from an intermediate Pages node.

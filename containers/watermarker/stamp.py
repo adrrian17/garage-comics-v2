@@ -80,14 +80,23 @@ def layout(text, width):
     return [line for part in parts for line in break_line(part, room, MIN_FONT_SIZE)], MIN_FONT_SIZE
 
 
+def normalized(box):
+    a, b, c, d = (float(v) for v in box)
+    return [min(a, c), min(b, d), max(a, c), max(b, d)]
+
+
 def visible_box(page):
-    """The part of the page a reader sees and keeps: TrimBox (falling back to CropBox, MediaBox) clipped to CropBox."""
-    t = [float(v) for v in page.trimbox]
-    c = [float(v) for v in page.cropbox]
-    t = [min(t[0], t[2]), min(t[1], t[3]), max(t[0], t[2]), max(t[1], t[3])]
-    c = [min(c[0], c[2]), min(c[1], c[3]), max(c[0], c[2]), max(c[1], c[3])]
-    box = [max(t[0], c[0]), max(t[1], c[1]), min(t[2], c[2]), min(t[3], c[3])]
-    return box if box[0] < box[2] and box[1] < box[3] else c
+    """The part of the page a reader sees and keeps: the MediaBox clipped to the CropBox, as readers do, then to the TrimBox.
+
+    A box that does not overlap what is left is ignored.
+    """
+    box = normalized(page.mediabox)
+    for other in (page.cropbox, page.trimbox):
+        o = normalized(other)
+        clipped = [max(box[0], o[0]), max(box[1], o[1]), min(box[2], o[2]), min(box[3], o[3])]
+        if clipped[0] < clipped[2] and clipped[1] < clipped[3]:
+            box = clipped
+    return box
 
 
 def footer_matrix(box, rotation):
