@@ -4,7 +4,7 @@ import { downloadCopy, downloadLink } from "@garage-comics/db/schema/downloads";
 import { order, orderItem } from "@garage-comics/db/schema/orders";
 import type { WatermarkerRpc } from "@garage-comics/infra/alchemy.run";
 import { DurableObject, env } from "cloudflare:workers";
-import { and, asc, eq, gt, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, gt, isNotNull, isNull, or, sql } from "drizzle-orm";
 import { log } from "evlog";
 
 import {
@@ -30,7 +30,11 @@ const STARTUP_POLLS = 40;
 
 const STARTUP_POLL_MS = 250;
 
-/** Creates the copy rows of a Download Link: one per comic of its Order. Safe to repeat. */
+/**
+ * Creates the copy rows of a Download Link: one per comic of its Order. Safe to repeat.
+ * A payment link gets none until its confirmation is marked sent: until then a Stripe retry can move its expiry, and a copy
+ * written earlier could be deleted by the bucket's one-day rule while the link still works. A resent link's expiry never moves.
+ */
 const createCopies = async (db: Database, downloadLinkId: string) => {
   await db
     .insert(downloadCopy)
@@ -38,8 +42,17 @@ const createCopies = async (db: Database, downloadLinkId: string) => {
       db
         .select({ downloadLinkId: downloadLink.id, orderItemId: orderItem.id })
         .from(downloadLink)
+        .innerJoin(order, eq(order.id, downloadLink.orderId))
         .innerJoin(orderItem, eq(orderItem.orderId, downloadLink.orderId))
-        .where(eq(downloadLink.id, downloadLinkId))
+        .where(
+          and(
+            eq(downloadLink.id, downloadLinkId),
+            or(
+              isNotNull(downloadLink.resentBy),
+              isNotNull(order.confirmationSentAt)
+            )
+          )
+        )
     )
     .onConflictDoNothing();
 };

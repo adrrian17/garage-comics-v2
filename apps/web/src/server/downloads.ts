@@ -76,8 +76,8 @@ const openPaymentDownloadLink = async (
 /**
  * Sends the Order confirmation with its Download Link, then starts the watermarked copies it points to (stories 30, 32, 33).
  * The email goes out before it is marked sent, so a crash sends it twice rather than never, both times with the same link.
- * The copies start only after the email, once the link's 24 hours have started, so every copy is written after its link's clock started
- * and the `downloads` bucket's one-day lifecycle never deletes a copy its link still serves, however late the email went out.
+ * The Watermarker makes no copy before the confirmation is marked sent, the last write that can move the link's 24 hours, so every copy
+ * is written after its link's clock is final and the `downloads` bucket's one-day lifecycle never deletes a copy its link still serves.
  * Throws when a step needs a retry, which makes the webhook answer 500 and Stripe deliver the event again.
  */
 export const ensureDelivered = async (
