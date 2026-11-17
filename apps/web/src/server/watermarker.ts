@@ -119,6 +119,31 @@ const nextJob = async (db: Database, downloadLinkId: string, now: Date) => {
   );
 };
 
+/**
+ * Saves why a copy failed and says how long to wait before the next wake-up: the backoff, counted from now because a long
+ * attempt may outlast the alarm armed before it, or nothing once the copy is given up on, so the link's other copies go next.
+ */
+const recordFailure = async (db: Database, job: CopyJob, error: string) => {
+  await db.update(downloadCopy).set({ lastError: error }).where(unready(job));
+
+  if (job.attempts + 1 < MAX_COPY_ATTEMPTS) {
+    return retryDelayMs(job.attempts + 1);
+  }
+
+  // Like a stuck Transfer: a person looks. The Customer's page shows this comic as failed; an Admin resend starts a fresh set.
+  log.error({
+    action: "make_download_copy",
+    reason: "gave_up",
+    downloadLinkId: job.downloadLinkId,
+    orderItemId: job.orderItemId,
+    orderNumber:
+      job.orderNumber === null ? null : formatOrderNumber(job.orderNumber),
+    error,
+  });
+
+  return 0;
+};
+
 /** Starts the container if needed and waits until its server answers. Capacity and start errors throw before any attempt is counted. */
 const startContainer = async (container: Container) => {
   if (!container.running) {
@@ -289,30 +314,13 @@ export class Watermarker extends DurableObject implements WatermarkerRpc {
       // The next copy, right away, in the container that is already warm.
       await this.ctx.storage.setAlarm(Date.now());
     } catch (error) {
-      await db
-        .update(downloadCopy)
-        .set({
-          lastError: error instanceof Error ? error.message : String(error),
-        })
-        .where(unready(job));
+      const delay = await recordFailure(
+        db,
+        job,
+        error instanceof Error ? error.message : String(error)
+      );
 
-      if (job.attempts + 1 >= MAX_COPY_ATTEMPTS) {
-        // Like a stuck Transfer: a person looks. The Customer's page shows this comic as failed; an Admin resend starts a fresh set.
-        log.error({
-          action: "make_download_copy",
-          reason: "gave_up",
-          downloadLinkId,
-          orderItemId: job.orderItemId,
-          orderNumber:
-            job.orderNumber === null
-              ? null
-              : formatOrderNumber(job.orderNumber),
-          error: error instanceof Error ? error.message : String(error),
-        });
-
-        // Move on to the link's other copies now instead of after the backoff.
-        await this.ctx.storage.setAlarm(Date.now());
-      }
+      await this.ctx.storage.setAlarm(Date.now() + delay);
     }
   }
 }
