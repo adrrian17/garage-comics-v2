@@ -1,3 +1,5 @@
+import { centavosToPesos } from "@/lib/money";
+
 // Garage Cómics runs on Mexico City time, on the server and in every browser.
 const TIME_ZONE = "America/Mexico_City";
 
@@ -35,3 +37,12 @@ export const formatShortDateTime = (date: Date) =>
 export const formatDate = (date: Date) => dateFormat.format(date);
 
 export const formatMxn = (pesos: number) => mxnFormat.format(pesos);
+
+// A Commission can have centavos ($7.50 of $75); rounding each column to pesos would make price, Commission and share stop adding up.
+const centavosFormat = new Intl.NumberFormat("es-MX", {
+  style: "currency",
+  currency: "MXN",
+});
+
+export const formatCentavos = (centavos: number) =>
+  centavosFormat.format(centavosToPesos(centavos));
