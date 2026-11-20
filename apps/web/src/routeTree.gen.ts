@@ -18,6 +18,7 @@ import { Route as PropuestaRouteImport } from './routes/propuesta'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin/administradores'
 import { Route as AdminComicsRouteImport } from './routes/admin/comics'
+import { Route as AdminComprasRouteImport } from './routes/admin/compras'
 import { Route as AdminEdicionesRouteImport } from './routes/admin/ediciones'
 import { Route as AdminMisComicsRouteImport } from './routes/admin/mis-comics'
 import { Route as AdminPagosRouteImport } from './routes/admin/pagos'
@@ -29,11 +30,13 @@ import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
 import { Route as CompraListaRouteImport } from './routes/compra.lista'
+import { Route as DescargasDownloadLinkIdRouteImport } from './routes/descargas.$downloadLinkId'
 import { Route as InscripcionProposalIdRouteImport } from './routes/inscripcion.$proposalId'
 import { Route as PortadasComicIdRouteImport } from './routes/portadas.$comicId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiStripeConnectWebhookRouteImport } from './routes/api/stripe/connect-webhook'
 import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe/webhook'
+import { Route as DescargasDownloadLinkIdOrderItemIdRouteImport } from './routes/descargas.$downloadLinkId_.$orderItemId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -78,6 +81,11 @@ const AdminAdministradoresRoute = AdminAdministradoresRouteImport.update({
 const AdminComicsRoute = AdminComicsRouteImport.update({
   id: '/comics',
   path: '/comics',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminComprasRoute = AdminComprasRouteImport.update({
+  id: '/compras',
+  path: '/compras',
   getParentRoute: () => AdminRouteRoute,
 } as any)
 const AdminEdicionesRoute = AdminEdicionesRouteImport.update({
@@ -135,6 +143,11 @@ const CompraListaRoute = CompraListaRouteImport.update({
   path: '/compra/lista',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DescargasDownloadLinkIdRoute = DescargasDownloadLinkIdRouteImport.update({
+  id: '/descargas/$downloadLinkId',
+  path: '/descargas/$downloadLinkId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InscripcionProposalIdRoute = InscripcionProposalIdRouteImport.update({
   id: '/inscripcion/$proposalId',
   path: '/inscripcion/$proposalId',
@@ -160,6 +173,12 @@ const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
   path: '/api/stripe/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DescargasDownloadLinkIdOrderItemIdRoute =
+  DescargasDownloadLinkIdOrderItemIdRouteImport.update({
+    id: '/descargas/$downloadLinkId_/$orderItemId',
+    path: '/descargas/$downloadLinkId/$orderItemId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -170,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/comics': typeof AdminComicsRoute
+  '/admin/compras': typeof AdminComprasRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/mis-comics': typeof AdminMisComicsRoute
   '/admin/pagos': typeof AdminPagosRoute
@@ -180,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/compra/lista': typeof CompraListaRoute
+  '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -187,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/descargas/$downloadLinkId/$orderItemId': typeof DescargasDownloadLinkIdOrderItemIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -195,6 +217,7 @@ export interface FileRoutesByTo {
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/comics': typeof AdminComicsRoute
+  '/admin/compras': typeof AdminComprasRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/mis-comics': typeof AdminMisComicsRoute
   '/admin/pagos': typeof AdminPagosRoute
@@ -205,6 +228,7 @@ export interface FileRoutesByTo {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/compra/lista': typeof CompraListaRoute
+  '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin': typeof AdminIndexRoute
@@ -212,6 +236,7 @@ export interface FileRoutesByTo {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/descargas/$downloadLinkId/$orderItemId': typeof DescargasDownloadLinkIdOrderItemIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -223,6 +248,7 @@ export interface FileRoutesById {
   '/propuesta': typeof PropuestaRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/comics': typeof AdminComicsRoute
+  '/admin/compras': typeof AdminComprasRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/mis-comics': typeof AdminMisComicsRoute
   '/admin/pagos': typeof AdminPagosRoute
@@ -233,6 +259,7 @@ export interface FileRoutesById {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/compra/lista': typeof CompraListaRoute
+  '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -240,6 +267,7 @@ export interface FileRoutesById {
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
+  '/descargas/$downloadLinkId_/$orderItemId': typeof DescargasDownloadLinkIdOrderItemIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -252,6 +280,7 @@ export interface FileRouteTypes {
     | '/propuesta'
     | '/admin/administradores'
     | '/admin/comics'
+    | '/admin/compras'
     | '/admin/ediciones'
     | '/admin/mis-comics'
     | '/admin/pagos'
@@ -262,6 +291,7 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autores/$slug'
     | '/compra/lista'
+    | '/descargas/$downloadLinkId'
     | '/inscripcion/$proposalId'
     | '/portadas/$comicId'
     | '/admin/'
@@ -269,6 +299,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
+    | '/descargas/$downloadLinkId/$orderItemId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -277,6 +308,7 @@ export interface FileRouteTypes {
     | '/propuesta'
     | '/admin/administradores'
     | '/admin/comics'
+    | '/admin/compras'
     | '/admin/ediciones'
     | '/admin/mis-comics'
     | '/admin/pagos'
@@ -287,6 +319,7 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autores/$slug'
     | '/compra/lista'
+    | '/descargas/$downloadLinkId'
     | '/inscripcion/$proposalId'
     | '/portadas/$comicId'
     | '/admin'
@@ -294,6 +327,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
+    | '/descargas/$downloadLinkId/$orderItemId'
   id:
     | '__root__'
     | '/'
@@ -304,6 +338,7 @@ export interface FileRouteTypes {
     | '/propuesta'
     | '/admin/administradores'
     | '/admin/comics'
+    | '/admin/compras'
     | '/admin/ediciones'
     | '/admin/mis-comics'
     | '/admin/pagos'
@@ -314,6 +349,7 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autores/$slug'
     | '/compra/lista'
+    | '/descargas/$downloadLinkId'
     | '/inscripcion/$proposalId'
     | '/portadas/$comicId'
     | '/admin/'
@@ -321,6 +357,7 @@ export interface FileRouteTypes {
     | '/api/auth/$'
     | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
+    | '/descargas/$downloadLinkId_/$orderItemId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -332,11 +369,13 @@ export interface RootRouteChildren {
   PropuestaRoute: typeof PropuestaRoute
   AutoresSlugRoute: typeof AutoresSlugRoute
   CompraListaRoute: typeof CompraListaRoute
+  DescargasDownloadLinkIdRoute: typeof DescargasDownloadLinkIdRoute
   InscripcionProposalIdRoute: typeof InscripcionProposalIdRoute
   PortadasComicIdRoute: typeof PortadasComicIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiStripeConnectWebhookRoute: typeof ApiStripeConnectWebhookRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
+  DescargasDownloadLinkIdOrderItemIdRoute: typeof DescargasDownloadLinkIdOrderItemIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -402,6 +441,13 @@ declare module '@tanstack/react-router' {
       path: '/comics'
       fullPath: '/admin/comics'
       preLoaderRoute: typeof AdminComicsRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/compras': {
+      id: '/admin/compras'
+      path: '/compras'
+      fullPath: '/admin/compras'
+      preLoaderRoute: typeof AdminComprasRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/ediciones': {
@@ -481,6 +527,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompraListaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/descargas/$downloadLinkId': {
+      id: '/descargas/$downloadLinkId'
+      path: '/descargas/$downloadLinkId'
+      fullPath: '/descargas/$downloadLinkId'
+      preLoaderRoute: typeof DescargasDownloadLinkIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inscripcion/$proposalId': {
       id: '/inscripcion/$proposalId'
       path: '/inscripcion/$proposalId'
@@ -516,12 +569,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/descargas/$downloadLinkId_/$orderItemId': {
+      id: '/descargas/$downloadLinkId_/$orderItemId'
+      path: '/descargas/$downloadLinkId/$orderItemId'
+      fullPath: '/descargas/$downloadLinkId/$orderItemId'
+      preLoaderRoute: typeof DescargasDownloadLinkIdOrderItemIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AdminRouteRouteChildren {
   AdminAdministradoresRoute: typeof AdminAdministradoresRoute
   AdminComicsRoute: typeof AdminComicsRoute
+  AdminComprasRoute: typeof AdminComprasRoute
   AdminEdicionesRoute: typeof AdminEdicionesRoute
   AdminMisComicsRoute: typeof AdminMisComicsRoute
   AdminPagosRoute: typeof AdminPagosRoute
@@ -533,6 +594,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAdministradoresRoute: AdminAdministradoresRoute,
   AdminComicsRoute: AdminComicsRoute,
+  AdminComprasRoute: AdminComprasRoute,
   AdminEdicionesRoute: AdminEdicionesRoute,
   AdminMisComicsRoute: AdminMisComicsRoute,
   AdminPagosRoute: AdminPagosRoute,
@@ -572,11 +634,14 @@ const rootRouteChildren: RootRouteChildren = {
   PropuestaRoute: PropuestaRoute,
   AutoresSlugRoute: AutoresSlugRoute,
   CompraListaRoute: CompraListaRoute,
+  DescargasDownloadLinkIdRoute: DescargasDownloadLinkIdRoute,
   InscripcionProposalIdRoute: InscripcionProposalIdRoute,
   PortadasComicIdRoute: PortadasComicIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiStripeConnectWebhookRoute: ApiStripeConnectWebhookRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,
+  DescargasDownloadLinkIdOrderItemIdRoute:
+    DescargasDownloadLinkIdOrderItemIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

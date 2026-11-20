@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { useDashboardHome } from "@/lib/use-dashboard-home";
 
-const PageMessage = ({
+export const PageMessage = ({
   title,
   description,
   action,

@@ -1,4 +1,5 @@
 import type { Database } from "@garage-comics/db";
+import { downloadLink } from "@garage-comics/db/schema/downloads";
 import { edition } from "@garage-comics/db/schema/editions";
 import {
   FIRST_ORDER_NUMBER,
@@ -6,19 +7,19 @@ import {
   orderItem,
   transfer,
 } from "@garage-comics/db/schema/orders";
-import { and, asc, eq, exists, inArray, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, exists, inArray, max, sql } from "drizzle-orm";
 import { log } from "evlog";
 
-import {
-  cancellableStatuses,
-  orderTotalCentavos,
-  payableStatuses,
-} from "@/lib/order";
+import { isDownloadLinkOpen } from "@/lib/download-link";
+import { cancellableStatuses, payableStatuses } from "@/lib/order";
 import { formatOrderNumber } from "@/lib/order-number";
+import type { OrderSearch } from "@/lib/order-number";
 import type { PaidOrder } from "@/lib/stripe-events";
-import { orderConfirmationEmail, sendEmail } from "@/server/email";
+import { ensureDelivered } from "@/server/downloads";
 import { sendTransfers } from "@/server/transfers";
 import type { TransferStripe } from "@/server/transfers";
+
+const PAID_ORDERS_PAGE = 50;
 
 /**
  * Marks the Order paid, gives it the next Order Number and creates the rows for the Transfers it owes, in one batch.
@@ -67,56 +68,6 @@ const ensurePaid = async (db: Database, paid: PaidOrder, now: Date) => {
   ]);
 };
 
-/**
- * Sends the confirmation once the Order is paid. The email goes out before it is marked sent, so a crash in between sends it twice rather than never.
- * It throws when the send fails, which makes the webhook answer 500 and Stripe deliver the event again.
- */
-const ensureConfirmed = async (db: Database, orderId: string, now: Date) => {
-  const found = await db
-    .select({
-      status: order.status,
-      number: order.number,
-      email: order.customerEmail,
-      confirmationSentAt: order.confirmationSentAt,
-      editionName: edition.name,
-    })
-    .from(order)
-    .innerJoin(edition, eq(edition.id, order.editionId))
-    .where(eq(order.id, orderId))
-    .get();
-
-  if (found?.status !== "paid" || found.number === null) {
-    throw new Error(
-      `Order ${orderId} is not paid after its payment was recorded.`
-    );
-  }
-
-  if (found.confirmationSentAt !== null) {
-    return;
-  }
-
-  const items = await db
-    .select({ title: orderItem.title, priceCentavos: orderItem.priceCentavos })
-    .from(orderItem)
-    .where(eq(orderItem.orderId, orderId))
-    .orderBy(asc(orderItem.title));
-
-  await sendEmail({
-    to: found.email,
-    ...orderConfirmationEmail({
-      orderNumber: formatOrderNumber(found.number),
-      editionName: found.editionName,
-      items,
-      totalCentavos: orderTotalCentavos(items),
-    }),
-  });
-
-  await db
-    .update(order)
-    .set({ confirmationSentAt: now })
-    .where(and(eq(order.id, orderId), isNull(order.confirmationSentAt)));
-};
-
 /** Sends the Author's Transfers; throws while some are unsent and worth retrying, so the webhook answers 500 and Stripe delivers the event again. */
 const ensureTransfers = async (
   db: Database,
@@ -134,8 +85,7 @@ const ensureTransfers = async (
 };
 
 /**
- * Brings an Order to paid, confirmed and transferred. Safe to repeat in any order and after a crash at any point: each step checks its own saved state.
- * Payment is saved first. Only then do the email and the Transfers run, independently, so an email outage never holds back an Author's money and a Stripe error never holds back the email.
+ * Brings an Order to paid, delivered and transferred. Safe to repeat in any order and after a crash at any point: each step checks its own saved state.
  * It never reads the sales phase or the active Edition, so an OXXO Order paid after the window closed is honoured (story 29).
  * It throws when a step needs a retry.
  */
@@ -169,7 +119,7 @@ export const fulfillOrder = async (
   await ensurePaid(db, paid, now);
 
   const steps = await Promise.allSettled([
-    ensureConfirmed(db, paid.orderId, now),
+    ensureDelivered(db, paid.orderId, now),
     ensureTransfers(db, stripe, paid.orderId, now),
   ]);
 
@@ -204,4 +154,49 @@ export const cancelOrder = async (
         inArray(order.status, cancellableStatuses)
       )
     );
+};
+
+const matchesSearch = (search: OrderSearch) =>
+  "number" in search
+    ? eq(order.number, search.number)
+    : eq(sql`lower(${order.customerEmail})`, search.email);
+
+export const listPaidOrders = async (
+  db: Database,
+  search: OrderSearch | null,
+  now: Date
+) => {
+  const rows = await db
+    .select({
+      id: order.id,
+      number: sql<number>`${order.number}`,
+      paidAt: sql`${order.paidAt}`.mapWith(order.paidAt),
+      email: order.customerEmail,
+      editionName: edition.name,
+      latestExpiresAt: max(downloadLink.expiresAt),
+    })
+    .from(order)
+    .innerJoin(edition, eq(edition.id, order.editionId))
+    .leftJoin(downloadLink, eq(downloadLink.orderId, order.id))
+    .where(
+      and(
+        eq(order.status, "paid"),
+        search === null ? undefined : matchesSearch(search)
+      )
+    )
+    .groupBy(order.id)
+    .orderBy(desc(order.number))
+    .limit(PAID_ORDERS_PAGE);
+
+  return rows.map(({ number, latestExpiresAt, ...row }) => ({
+    ...row,
+    orderNumber: formatOrderNumber(number),
+    downloadLink:
+      latestExpiresAt === null
+        ? null
+        : {
+            expiresAt: latestExpiresAt,
+            open: isDownloadLinkOpen(latestExpiresAt, now),
+          },
+  }));
 };

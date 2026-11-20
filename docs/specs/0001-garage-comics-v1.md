@@ -104,8 +104,8 @@ A web app with three kinds of people. Anyone can send a Proposal for the open Ed
 ### Comic files and watermarking
 
 - Authors upload PDFs straight to R2 through presigned multipart URLs; files never pass through the Worker, whose request bodies are capped at 100 MB.
-- Watermarking runs in a Cloudflare Container, because PDFs of up to 500 MB do not fit in a Worker's 128 MB of memory. It uses qpdf to overlay a one-page stamp (Customer email and Order Number) on every page without decoding the images. Start with the `standard-1` instance (4 GiB memory, 8 GB disk) and confirm by measuring a 500 MB PDF.
-- Watermarked copies live in R2 and are deleted 24 hours after creation by an R2 lifecycle rule. Resending a Download Link regenerates them.
+- Watermarking runs in a Cloudflare Container, because PDFs of up to 500 MB do not fit in a Worker's 128 MB of memory. It uses pikepdf (Python bindings over libqpdf) to append a footer (Customer email and Order Number) to every page, placed from that page's own visible box, rotation and UserUnit, without decoding the images. Annotations are flattened into the page content first, because a viewer draws them above it and an opaque one would hide the footer. A single stamp page overlaid with `qpdf --overlay` placed the footer right on only 8 of 12 hazard pages: qpdf centres and shrinks one fixed-size stamp into each page, so on other page sizes the footer floats up. Start with the `standard-1` instance (4 GiB memory, 8 GB disk) and confirm by measuring a 500 MB PDF.
+- Watermarked copies live in their own R2 bucket, `downloads`, whose lifecycle rule deletes each copy a day after it is written; originals live in `comics`, out of the rule's reach. The rule only cleans up: a Download Link's 24 hours are enforced in D1. Resending a Download Link makes a new link with new copies.
 - The Download Link streams the watermarked copy from R2.
 
 ### Rules worth stating precisely

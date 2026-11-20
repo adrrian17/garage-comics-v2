@@ -30,6 +30,34 @@ const comics = Cloudflare.R2.Bucket("comics", {
   ],
 });
 
+// A Download Link's 24 hours are enforced in D1; this rule only cleans up, and R2 may run it up to a day late.
+const downloads = Cloudflare.R2.Bucket("downloads", {
+  lifecycleRules: [
+    {
+      id: "delete-copies-after-a-day",
+      deleteObjectsTransition: {
+        condition: { type: "Age", maxAge: 60 * 60 * 24 },
+      },
+    },
+  ],
+});
+
+/**
+ * What the Watermarker Durable Object answers over RPC. The class in apps/web/src/server/watermarker.ts implements it.
+ * Declared here, not taken from the class: typing the binding with the class makes `Cloudflare.Env` depend on itself,
+ * which silently turns other bindings into `any`.
+ */
+export interface WatermarkerRpc {
+  prepare: (downloadLinkId: string) => Promise<void>;
+}
+
+const watermarker = Cloudflare.Container<WatermarkerRpc>("Watermarker", {
+  context: "../../containers/watermarker",
+  className: "Watermarker",
+  instanceType: "standard-1",
+  maxInstances: 5,
+});
+
 // Under `alchemy dev` this writes each message as an .eml file to .alchemy/local/email.
 const email = Cloudflare.Email.SendEmail("EMAIL");
 
@@ -38,6 +66,13 @@ const portlessUrl = process.env.PORTLESS_URL;
 
 export const web = Cloudflare.Website.Vite("web", {
   rootDir: "../../apps/web",
+  // Names the entry that exports the Watermarker class next to Start's handler, instead of relying on Start's virtual entry to re-export it.
+  main: "src/server.ts",
+  compatibility: {
+    // Pending I/O (a container call of minutes for a 500 MB PDF) keeps a Durable Object alive. A flag, not a newer
+    // compatibility date, which would change every other runtime behaviour of the app at once.
+    flags: ["durable_object_io_tasks_prevent_eviction"],
+  },
   env: {
     DB: db,
     BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
@@ -57,6 +92,8 @@ export const web = Cloudflare.Website.Vite("web", {
     EMAIL: email,
     COMICS: comics,
     COMICS_S3: Cloudflare.R2.S3Credentials(comics, { access: "read-write" }),
+    DOWNLOADS: downloads,
+    WATERMARKER: watermarker,
   },
   dev: {
     // portless assigns the port; see the dev script in package.json.

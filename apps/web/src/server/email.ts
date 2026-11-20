@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { log } from "evlog";
 
-import { formatMxn } from "@/lib/format";
+import { formatDateTime, formatMxn } from "@/lib/format";
 import { centavosToPesos } from "@/lib/money";
 
 interface Email {
@@ -84,16 +84,23 @@ export const comicRejectedEmail = ({
   text: `Revisamos tu cómic "${comicTitle}" y esta vez no lo pudimos aprobar.\n\nMotivo:\n${reason}\n\nCorrígelo desde Mis cómics y vuelve a enviarlo a revisión.`,
 });
 
+const downloadLinkParagraph = (downloadUrl: string, expiresAt: Date) =>
+  `Descarga tus cómics en tu Link de descarga:\n\n${downloadUrl}\n\nFunciona hasta el ${formatDateTime(expiresAt)}, sin límite de descargas. Cada PDF lleva tu correo y tu Número de compra al pie de cada página. Si al abrirlo tus cómics aún se están preparando, la página se actualiza sola.`;
+
 export const orderConfirmationEmail = ({
   orderNumber,
   editionName,
   items,
   totalCentavos,
+  downloadUrl,
+  expiresAt,
 }: {
   orderNumber: string;
   editionName: string;
   items: { title: string; priceCentavos: number }[];
   totalCentavos: number;
+  downloadUrl: string;
+  expiresAt: Date;
 }) => ({
   subject: `Tu Compra ${orderNumber} en Garage Cómics`,
   text: `¡Gracias por tu Compra en ${editionName}! Ya confirmamos tu pago.\n\nNúmero de compra: ${orderNumber}\n\nTus cómics:\n${items
@@ -103,5 +110,18 @@ export const orderConfirmationEmail = ({
     )
     .join(
       "\n"
-    )}\n\nTotal: ${formatMxn(centavosToPesos(totalCentavos))}\n\nTu Link de descarga te llega en un correo aparte. Guarda tu Número de compra por si necesitas ayuda.`,
+    )}\n\nTotal: ${formatMxn(centavosToPesos(totalCentavos))}\n\n${downloadLinkParagraph(downloadUrl, expiresAt)}\n\nGuarda tu Número de compra por si necesitas ayuda.`,
+});
+
+export const downloadLinkResentEmail = ({
+  orderNumber,
+  downloadUrl,
+  expiresAt,
+}: {
+  orderNumber: string;
+  downloadUrl: string;
+  expiresAt: Date;
+}) => ({
+  subject: `Tu nuevo Link de descarga de la Compra ${orderNumber}`,
+  text: `Te mandamos un nuevo Link de descarga para tu Compra ${orderNumber}.\n\n${downloadLinkParagraph(downloadUrl, expiresAt)}`,
 });

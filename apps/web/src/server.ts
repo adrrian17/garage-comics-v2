@@ -4,6 +4,9 @@ import { initWorkersLogger, withEvlog } from "evlog/workers";
 
 import { createAuth } from "@/server/services";
 
+// The Worker entry (`main` in packages/infra/alchemy.run.ts). Cloudflare finds a Durable Object class only among this module's exports.
+export { Watermarker } from "@/server/watermarker";
+
 initWorkersLogger({
   env: { service: "garage-comics" },
 });

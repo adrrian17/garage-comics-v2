@@ -20,10 +20,10 @@ const OrderPlacedPage = () => {
         Estamos confirmando tu pago
       </h1>
       <p className="text-muted-foreground mt-2">
-        En cuanto se confirme, te mandamos por correo tu Número de compra. Si
-        elegiste OXXO, la confirmación llega cuando pagues en la tienda y se
-        registre tu pago. Si no pagas a tiempo, la Compra se cancela y no se te
-        cobra nada.
+        En cuanto se confirme, te mandamos por correo tu Número de compra y tu
+        Link de descarga. Si elegiste OXXO, la confirmación llega cuando pagues
+        en la tienda y se registre tu pago. Si no pagas a tiempo, la Compra se
+        cancela y no se te cobra nada.
       </p>
       <Link to="/" className={buttonVariants({ className: "mt-8" })}>
         Volver al catálogo
