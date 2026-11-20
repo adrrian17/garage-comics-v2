@@ -32,6 +32,8 @@ export const getPayoutSetup = createServerFn({ method: "GET" })
       status,
       publishableKey: env.STRIPE_PUBLISHABLE_KEY,
       salesOpenAt: activeEdition?.salesOpenAt ?? null,
+      // Apart from `status`: Stripe can ask an active account for more details, and its balance and Payouts must stay visible meanwhile.
+      hasBalance: account?.details_submitted === true,
       sales,
     };
   });

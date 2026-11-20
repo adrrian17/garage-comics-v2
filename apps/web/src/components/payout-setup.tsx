@@ -185,6 +185,7 @@ export const PayoutSetup = ({
   status,
   publishableKey,
   salesOpenAt,
+  hasBalance,
   sales,
 }: PayoutSetupData) => {
   const router = useRouter();
@@ -231,18 +232,18 @@ export const PayoutSetup = ({
           </CardContent>
         </Card>
       )}
-      {status !== "needs_details" && (
+      {hasBalance && (
         <Card>
           <CardContent>
             {isClient && (
-              <ConnectEmbed userId={userId} publishableKey={publishableKey}>
-                {(handlers) => (
-                  <div className="flex flex-col gap-6">
-                    <ConnectBalances {...handlers} />
-                    <ConnectPayoutsList {...handlers} />
-                  </div>
-                )}
-              </ConnectEmbed>
+              <div className="flex flex-col gap-6">
+                <ConnectEmbed userId={userId} publishableKey={publishableKey}>
+                  {(handlers) => <ConnectBalances {...handlers} />}
+                </ConnectEmbed>
+                <ConnectEmbed userId={userId} publishableKey={publishableKey}>
+                  {(handlers) => <ConnectPayoutsList {...handlers} />}
+                </ConnectEmbed>
+              </div>
             )}
           </CardContent>
         </Card>
