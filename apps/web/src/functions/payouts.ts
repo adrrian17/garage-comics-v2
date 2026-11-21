@@ -54,14 +54,15 @@ export const createPayoutSession = createServerFn({ method: "POST" })
           enabled: true,
           features: { external_account_collection: true },
         },
-        // Read-only on purpose: the account has `controller.fees.payer: "application"`, so Garage Cómics would pay for instant or manual payouts, and the weekly Monday schedule is a product rule.
+        // No payouts from here: the account has `controller.fees.payer: "application"`, so Garage Cómics would pay for instant or manual payouts, and the weekly Monday schedule is a product rule.
         balances: {
           enabled: true,
           features: {
             instant_payouts: false,
             standard_payouts: false,
             edit_payout_schedule: false,
-            external_account_collection: false,
+            // Stripe rejects the session unless this matches `account_onboarding`.
+            external_account_collection: true,
           },
         },
         payouts_list: { enabled: true },
