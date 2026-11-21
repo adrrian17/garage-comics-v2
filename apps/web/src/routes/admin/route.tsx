@@ -8,6 +8,7 @@ import {
   Library,
   Receipt,
   ShieldCheck,
+  TrendingUp,
   UserRound,
 } from "lucide-react";
 
@@ -23,6 +24,7 @@ const sections = [
   { to: "/admin/administradores", label: "Administradores", icon: ShieldCheck },
   { to: "/admin/perfil", label: "Mi perfil", icon: UserRound },
   { to: "/admin/mis-comics", label: "Mis cómics", icon: Library },
+  { to: "/admin/mis-ventas", label: "Mis ventas", icon: TrendingUp },
   { to: "/admin/pagos", label: "Mis pagos", icon: Landmark },
 ] as const satisfies readonly [DashboardSection, ...DashboardSection[]];
 

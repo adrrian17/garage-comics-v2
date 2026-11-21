@@ -9,6 +9,7 @@ import {
   findStripeAccount,
   recordPayoutStatus,
 } from "@/server/payouts";
+import { listAuthorSales } from "@/server/sales";
 import { createDatabase, createStripe } from "@/server/services";
 
 export const getPayoutSetup = createServerFn({ method: "GET" })
@@ -16,9 +17,10 @@ export const getPayoutSetup = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const db = createDatabase();
 
-    const [account, activeEdition] = await Promise.all([
+    const [account, activeEdition, sales] = await Promise.all([
       findStripeAccount(db, context.session.user.id),
       findActiveEdition(db),
+      listAuthorSales(db, context.session.user.id),
     ]);
 
     const status = payoutSetupStatus(account);
@@ -30,6 +32,9 @@ export const getPayoutSetup = createServerFn({ method: "GET" })
       status,
       publishableKey: env.STRIPE_PUBLISHABLE_KEY,
       salesOpenAt: activeEdition?.salesOpenAt ?? null,
+      // Apart from `status`: Stripe can ask an active account for more details, and its balance and Payouts must stay visible meanwhile.
+      hasBalance: account?.details_submitted === true,
+      sales,
     };
   });
 
@@ -49,6 +54,17 @@ export const createPayoutSession = createServerFn({ method: "POST" })
           enabled: true,
           features: { external_account_collection: true },
         },
+        // Read-only on purpose: the account has `controller.fees.payer: "application"`, so Garage Cómics would pay for instant or manual payouts, and the weekly Monday schedule is a product rule.
+        balances: {
+          enabled: true,
+          features: {
+            instant_payouts: false,
+            standard_payouts: false,
+            edit_payout_schedule: false,
+            external_account_collection: false,
+          },
+        },
+        payouts_list: { enabled: true },
       },
     });
 

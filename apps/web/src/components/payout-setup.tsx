@@ -8,14 +8,25 @@ import {
   CardTitle,
 } from "@garage-comics/ui/components/card";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@garage-comics/ui/components/table";
+import {
   ConnectAccountOnboarding,
+  ConnectBalances,
   ConnectComponentsProvider,
+  ConnectPayoutsList,
 } from "@stripe/react-connect-js";
 import { useRouter } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 import type { getPayoutSetup } from "@/functions/payouts";
-import { formatDateTime } from "@/lib/format";
+import { formatCentavos, formatDateTime } from "@/lib/format";
 import type { PayoutSetupStatus } from "@/lib/payout-setup";
 import { getConnect } from "@/lib/stripe-connect";
 import { useIsClient } from "@/lib/use-is-client";
@@ -74,23 +85,28 @@ const LOAD_ERROR =
 // A blocked or failed Connect.js download never reaches `onLoadError`, so a loader that has not started by then counts as a failure.
 const LOADER_START_TIMEOUT_MS = 20_000;
 
-const ConnectOnboarding = ({
+/** Hosts Stripe's embedded components on the page's one Connect instance, and shows one error if they fail to load. */
+const ConnectEmbed = ({
   userId,
   publishableKey,
+  children,
 }: {
   userId: string;
   publishableKey: string;
+  children: (handlers: {
+    onLoaderStart: () => void;
+    onLoadError: () => void;
+  }) => ReactNode;
 }) => {
-  const router = useRouter();
-  const [failed, setFailed] = useState(false);
-  const started = useRef(false);
+  const [phase, setPhase] = useState<"loading" | "started" | "failed">(
+    "loading"
+  );
+
   const connect = getConnect(userId, publishableKey);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      if (!started.current) {
-        setFailed(true);
-      }
+      setPhase((current) => (current === "loading" ? "failed" : current));
     }, LOADER_START_TIMEOUT_MS);
 
     return () => {
@@ -98,7 +114,7 @@ const ConnectOnboarding = ({
     };
   }, []);
 
-  if (failed) {
+  if (phase === "failed") {
     return (
       <Alert variant="destructive">
         <AlertDescription>{LOAD_ERROR}</AlertDescription>
@@ -108,20 +124,60 @@ const ConnectOnboarding = ({
 
   return (
     <ConnectComponentsProvider connectInstance={connect}>
-      <ConnectAccountOnboarding
-        onLoaderStart={() => {
-          started.current = true;
-        }}
-        onLoadError={() => {
-          setFailed(true);
-        }}
-        onExit={() => {
-          void router.invalidate();
-        }}
-      />
+      {children({
+        onLoaderStart: () => {
+          setPhase((current) => (current === "failed" ? current : "started"));
+        },
+        onLoadError: () => {
+          setPhase("failed");
+        },
+      })}
     </ConnectComponentsProvider>
   );
 };
+
+const TransfersCard = ({ sales }: { sales: PayoutSetupData["sales"] }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle>
+        <h2 className="text-base font-semibold">Envíos de fondos</h2>
+      </CardTitle>
+      <CardDescription>
+        Tu parte de cada cómic vendido, enviada a tu cuenta de Stripe.
+      </CardDescription>
+    </CardHeader>
+    <CardContent>
+      {sales.length === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          Todavía no tienes Envíos de fondos.
+        </p>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Número de compra</TableHead>
+              <TableHead>Cómic</TableHead>
+              <TableHead>Monto</TableHead>
+              <TableHead>Estado</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sales.map((sale) => (
+              <TableRow key={sale.orderItemId}>
+                <TableCell>{sale.orderNumber}</TableCell>
+                <TableCell>{sale.title}</TableCell>
+                <TableCell>{formatCentavos(sale.shareCentavos)}</TableCell>
+                <TableCell>
+                  {sale.transferSent ? "Enviado" : "En camino"}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </CardContent>
+  </Card>
+);
 
 /** The payouts page body, shared by the Author area and an Admin's own area. */
 export const PayoutSetup = ({
@@ -129,7 +185,10 @@ export const PayoutSetup = ({
   status,
   publishableKey,
   salesOpenAt,
+  hasBalance,
+  sales,
 }: PayoutSetupData) => {
+  const router = useRouter();
   const copy = statusCopy[status];
   // Connect.js only runs in the browser, so onboarding starts after hydration, never during server rendering.
   const isClient = useIsClient();
@@ -159,14 +218,37 @@ export const PayoutSetup = ({
         <Card>
           <CardContent>
             {isClient && (
-              <ConnectOnboarding
-                userId={userId}
-                publishableKey={publishableKey}
-              />
+              <ConnectEmbed userId={userId} publishableKey={publishableKey}>
+                {(handlers) => (
+                  <ConnectAccountOnboarding
+                    {...handlers}
+                    onExit={() => {
+                      void router.invalidate();
+                    }}
+                  />
+                )}
+              </ConnectEmbed>
             )}
           </CardContent>
         </Card>
       )}
+      {hasBalance && (
+        <Card>
+          <CardContent>
+            {isClient && (
+              <div className="flex flex-col gap-6">
+                <ConnectEmbed userId={userId} publishableKey={publishableKey}>
+                  {(handlers) => <ConnectBalances {...handlers} />}
+                </ConnectEmbed>
+                <ConnectEmbed userId={userId} publishableKey={publishableKey}>
+                  {(handlers) => <ConnectPayoutsList {...handlers} />}
+                </ConnectEmbed>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+      <TransfersCard sales={sales} />
     </div>
   );
 };

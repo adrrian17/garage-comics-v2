@@ -21,6 +21,7 @@ import { Route as AdminComicsRouteImport } from './routes/admin/comics'
 import { Route as AdminComprasRouteImport } from './routes/admin/compras'
 import { Route as AdminEdicionesRouteImport } from './routes/admin/ediciones'
 import { Route as AdminMisComicsRouteImport } from './routes/admin/mis-comics'
+import { Route as AdminMisVentasRouteImport } from './routes/admin/mis-ventas'
 import { Route as AdminPagosRouteImport } from './routes/admin/pagos'
 import { Route as AdminPerfilRouteImport } from './routes/admin/perfil'
 import { Route as AdminPropuestasRouteImport } from './routes/admin/propuestas'
@@ -28,6 +29,7 @@ import { Route as AutorIndexRouteImport } from './routes/autor/index'
 import { Route as AutorComicsRouteImport } from './routes/autor/comics'
 import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
+import { Route as AutorVentasRouteImport } from './routes/autor/ventas'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
 import { Route as CompraListaRouteImport } from './routes/compra.lista'
 import { Route as DescargasDownloadLinkIdRouteImport } from './routes/descargas.$downloadLinkId'
@@ -98,6 +100,11 @@ const AdminMisComicsRoute = AdminMisComicsRouteImport.update({
   path: '/mis-comics',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminMisVentasRoute = AdminMisVentasRouteImport.update({
+  id: '/mis-ventas',
+  path: '/mis-ventas',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminPagosRoute = AdminPagosRouteImport.update({
   id: '/pagos',
   path: '/pagos',
@@ -131,6 +138,11 @@ const AutorPagosRoute = AutorPagosRouteImport.update({
 const AutorPerfilRoute = AutorPerfilRouteImport.update({
   id: '/perfil',
   path: '/perfil',
+  getParentRoute: () => AutorRouteRoute,
+} as any)
+const AutorVentasRoute = AutorVentasRouteImport.update({
+  id: '/ventas',
+  path: '/ventas',
   getParentRoute: () => AutorRouteRoute,
 } as any)
 const AutoresSlugRoute = AutoresSlugRouteImport.update({
@@ -192,12 +204,14 @@ export interface FileRoutesByFullPath {
   '/admin/compras': typeof AdminComprasRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/mis-comics': typeof AdminMisComicsRoute
+  '/admin/mis-ventas': typeof AdminMisVentasRoute
   '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
   '/autor/comics': typeof AutorComicsRoute
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
+  '/autor/ventas': typeof AutorVentasRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/compra/lista': typeof CompraListaRoute
   '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
@@ -220,12 +234,14 @@ export interface FileRoutesByTo {
   '/admin/compras': typeof AdminComprasRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/mis-comics': typeof AdminMisComicsRoute
+  '/admin/mis-ventas': typeof AdminMisVentasRoute
   '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
   '/autor/comics': typeof AutorComicsRoute
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
+  '/autor/ventas': typeof AutorVentasRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/compra/lista': typeof CompraListaRoute
   '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
@@ -251,12 +267,14 @@ export interface FileRoutesById {
   '/admin/compras': typeof AdminComprasRoute
   '/admin/ediciones': typeof AdminEdicionesRoute
   '/admin/mis-comics': typeof AdminMisComicsRoute
+  '/admin/mis-ventas': typeof AdminMisVentasRoute
   '/admin/pagos': typeof AdminPagosRoute
   '/admin/perfil': typeof AdminPerfilRoute
   '/admin/propuestas': typeof AdminPropuestasRoute
   '/autor/comics': typeof AutorComicsRoute
   '/autor/pagos': typeof AutorPagosRoute
   '/autor/perfil': typeof AutorPerfilRoute
+  '/autor/ventas': typeof AutorVentasRoute
   '/autores/$slug': typeof AutoresSlugRoute
   '/compra/lista': typeof CompraListaRoute
   '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
@@ -283,12 +301,14 @@ export interface FileRouteTypes {
     | '/admin/compras'
     | '/admin/ediciones'
     | '/admin/mis-comics'
+    | '/admin/mis-ventas'
     | '/admin/pagos'
     | '/admin/perfil'
     | '/admin/propuestas'
     | '/autor/comics'
     | '/autor/pagos'
     | '/autor/perfil'
+    | '/autor/ventas'
     | '/autores/$slug'
     | '/compra/lista'
     | '/descargas/$downloadLinkId'
@@ -311,12 +331,14 @@ export interface FileRouteTypes {
     | '/admin/compras'
     | '/admin/ediciones'
     | '/admin/mis-comics'
+    | '/admin/mis-ventas'
     | '/admin/pagos'
     | '/admin/perfil'
     | '/admin/propuestas'
     | '/autor/comics'
     | '/autor/pagos'
     | '/autor/perfil'
+    | '/autor/ventas'
     | '/autores/$slug'
     | '/compra/lista'
     | '/descargas/$downloadLinkId'
@@ -341,12 +363,14 @@ export interface FileRouteTypes {
     | '/admin/compras'
     | '/admin/ediciones'
     | '/admin/mis-comics'
+    | '/admin/mis-ventas'
     | '/admin/pagos'
     | '/admin/perfil'
     | '/admin/propuestas'
     | '/autor/comics'
     | '/autor/pagos'
     | '/autor/perfil'
+    | '/autor/ventas'
     | '/autores/$slug'
     | '/compra/lista'
     | '/descargas/$downloadLinkId'
@@ -464,6 +488,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMisComicsRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/mis-ventas': {
+      id: '/admin/mis-ventas'
+      path: '/mis-ventas'
+      fullPath: '/admin/mis-ventas'
+      preLoaderRoute: typeof AdminMisVentasRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/pagos': {
       id: '/admin/pagos'
       path: '/pagos'
@@ -511,6 +542,13 @@ declare module '@tanstack/react-router' {
       path: '/perfil'
       fullPath: '/autor/perfil'
       preLoaderRoute: typeof AutorPerfilRouteImport
+      parentRoute: typeof AutorRouteRoute
+    }
+    '/autor/ventas': {
+      id: '/autor/ventas'
+      path: '/ventas'
+      fullPath: '/autor/ventas'
+      preLoaderRoute: typeof AutorVentasRouteImport
       parentRoute: typeof AutorRouteRoute
     }
     '/autores/$slug': {
@@ -585,6 +623,7 @@ interface AdminRouteRouteChildren {
   AdminComprasRoute: typeof AdminComprasRoute
   AdminEdicionesRoute: typeof AdminEdicionesRoute
   AdminMisComicsRoute: typeof AdminMisComicsRoute
+  AdminMisVentasRoute: typeof AdminMisVentasRoute
   AdminPagosRoute: typeof AdminPagosRoute
   AdminPerfilRoute: typeof AdminPerfilRoute
   AdminPropuestasRoute: typeof AdminPropuestasRoute
@@ -597,6 +636,7 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminComprasRoute: AdminComprasRoute,
   AdminEdicionesRoute: AdminEdicionesRoute,
   AdminMisComicsRoute: AdminMisComicsRoute,
+  AdminMisVentasRoute: AdminMisVentasRoute,
   AdminPagosRoute: AdminPagosRoute,
   AdminPerfilRoute: AdminPerfilRoute,
   AdminPropuestasRoute: AdminPropuestasRoute,
@@ -611,6 +651,7 @@ interface AutorRouteRouteChildren {
   AutorComicsRoute: typeof AutorComicsRoute
   AutorPagosRoute: typeof AutorPagosRoute
   AutorPerfilRoute: typeof AutorPerfilRoute
+  AutorVentasRoute: typeof AutorVentasRoute
   AutorIndexRoute: typeof AutorIndexRoute
 }
 
@@ -618,6 +659,7 @@ const AutorRouteRouteChildren: AutorRouteRouteChildren = {
   AutorComicsRoute: AutorComicsRoute,
   AutorPagosRoute: AutorPagosRoute,
   AutorPerfilRoute: AutorPerfilRoute,
+  AutorVentasRoute: AutorVentasRoute,
   AutorIndexRoute: AutorIndexRoute,
 }
 
