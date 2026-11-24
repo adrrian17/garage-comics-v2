@@ -1,0 +1,44 @@
+diff --git a/lib/Workers/Sources/Vite.js b/lib/Workers/Sources/Vite.js
+index 8396f04a4283514df80c65bfb3e3bc6aeed161f1..1daa6f6a1eac56502906749419afadd1ce86a3dd 100644
+--- a/lib/Workers/Sources/Vite.js
++++ b/lib/Workers/Sources/Vite.js
+@@ -25,6 +25,7 @@ import { resolveViteMain } from "../ViteMain.js";
+ import { isSelfUrl } from "../Worker.js";
+ import { isContainerDecl } from "../WorkerAsyncBindings.js";
+ import { isWorkerLoader } from "../WorkerLoader.js";
++import { isS3Credentials } from "../../R2/S3CredentialsBinding.js";
+ /**
+  * This module statically imports `@alchemy.run/cloudflare-runtime/vite`
+  * (~0.5s to load), which is only needed for vite-based workers. Importers
+@@ -263,6 +264,9 @@ const resolveViteEnv = (env, selfUrl) => Effect.gen(function* () {
+                                         // the started-instance tag, which only exists inside
+                                         // a Durable Object (#997).
+                                         isContainerDecl(value)
++                                            ? undefined
++                                            : // `R2.S3Credentials` is an Effect-shaped binding too; yielding it needs WorkerEnvironment.
++                                            isS3Credentials(value)
+                                             ? undefined
+                                             : Effect.isEffect(value)
+                                                 ? yield* value
+diff --git a/src/Workers/Sources/Vite.ts b/src/Workers/Sources/Vite.ts
+index b0f752af8856c9696df541eb58294b5116f6a867..2375443c1d154c3115640fe72e9ffe644e06b002 100644
+--- a/src/Workers/Sources/Vite.ts
++++ b/src/Workers/Sources/Vite.ts
+@@ -21,6 +21,7 @@ import { resolveViteMain } from "../ViteMain.ts";
+ import { isSelfUrl, type ViteOptions } from "../Worker.ts";
+ import { isContainerDecl } from "../WorkerAsyncBindings.ts";
+ import { isWorkerLoader } from "../WorkerLoader.ts";
++import { isS3Credentials } from "../../R2/S3CredentialsBinding.ts";
+ 
+ /**
+  * This module statically imports `@alchemy.run/cloudflare-runtime/vite`
+@@ -316,6 +317,9 @@ const resolveViteEnv = (env: Record<string, unknown>, selfUrl: string | undefine
+                       // a Durable Object (#997).
+                       isContainerDecl(value)
+                       ? undefined
++                      : // `R2.S3Credentials` is an Effect-shaped binding too; yielding it needs WorkerEnvironment.
++                        isS3Credentials(value)
++                        ? undefined
+                       : Effect.isEffect(value)
+                         ? yield* value as any as Effect.Effect<any>
+                         : undefined,
