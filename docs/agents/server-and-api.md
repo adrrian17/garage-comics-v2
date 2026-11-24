@@ -20,7 +20,7 @@ Server code lives inside the TanStack Start app in `apps/web`; there is no separ
 - `checkout.session.async_payment_failed`: an OXXO voucher expired unpaid; the Order is cancelled silently.
 - `checkout.session.expired`: a Checkout Session lapsed; the Order is cancelled silently.
 
-A second endpoint, `/api/stripe/connect-webhook`, receives events from connected accounts, subscribed to `account.updated`; it has its own signing secret, `STRIPE_CONNECT_WEBHOOK_SECRET`, which the deploy binds like the first. Each event re-reads the Author's account from Stripe and saves its payout setup status, which the catalog filters on. Locally, `stripe listen --forward-connect-to <url>/api/stripe/connect-webhook` forwards these events; put the signing secret it prints in `STRIPE_WEBHOOK_SECRET` in `.env`, which `STRIPE_CONNECT_WEBHOOK_SECRET` reuses in development.
+A second endpoint, `/api/stripe/connect-webhook`, receives events from connected accounts, subscribed to `account.updated`; it has its own signing secret, `STRIPE_CONNECT_WEBHOOK_SECRET`, which the deploy passes to the Worker like the first. Each event re-reads the Author's account from Stripe and saves its payout setup status, which the catalog filters on. Locally, `stripe listen --forward-connect-to <url>/api/stripe/connect-webhook` forwards these events; put the signing secret it prints in `STRIPE_WEBHOOK_SECRET` in `.env`, which `STRIPE_CONNECT_WEBHOOK_SECRET` reuses in development.
 
 Checkout Sessions carry `metadata.kind` (`order` or `registration`) so the webhook can tell them apart. OXXO must also be enabled as a payment method in the Dashboard for the Checkout page to offer it.
 

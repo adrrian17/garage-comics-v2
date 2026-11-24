@@ -66,6 +66,8 @@ jobs:
           APP_ENV: production
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # The account's workers.dev subdomain: a deployed Worker's URL, and so its Stripe webhook URLs, are known before it exists.
+          CLOUDFLARE_WORKERS_SUBDOMAIN: ${{ vars.CLOUDFLARE_WORKERS_SUBDOMAIN }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
