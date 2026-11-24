@@ -123,10 +123,20 @@ export const finishUpload = async ({
     };
   }
 
-  // A retry after a lost reply finds the object already assembled.
-  const stored =
-    (await env.COMICS.head(key)) ??
-    (await env.COMICS.resumeMultipartUpload(key, uploadId).complete(parts));
+  // A retry after a lost reply finds the object already assembled. Read it back after completing: the object
+  // `complete()` returns on deployed R2 carries no httpMetadata, so its content type would read as empty.
+  if ((await env.COMICS.head(key)) === null) {
+    await env.COMICS.resumeMultipartUpload(key, uploadId).complete(parts);
+  }
+
+  const stored = await env.COMICS.head(key);
+
+  if (stored === null) {
+    return {
+      status: "invalid" as const,
+      message: notRecognized[kind],
+    };
+  }
 
   const size = planParts(
     kind,

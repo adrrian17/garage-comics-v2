@@ -13,12 +13,24 @@ interface Email {
 const SIGNATURE = "\n\nGarage Cómics";
 
 export const sendEmail = async ({ to, subject, text }: Email) => {
-  await env.EMAIL.send({
-    from: { name: "Garage Cómics", email: env.EMAIL_FROM },
-    to,
-    subject,
-    text: text + SIGNATURE,
-  });
+  try {
+    await env.EMAIL.send({
+      from: { name: "Garage Cómics", email: env.EMAIL_FROM },
+      to,
+      subject,
+      text: text + SIGNATURE,
+    });
+  } catch (error) {
+    // Callers such as Better Auth log only the stack; Email Service puts the cause (E_SENDER_DOMAIN_NOT_AVAILABLE, …) in `code`.
+    log.error({
+      action: "send_email",
+      subject,
+      code: error instanceof Error && "code" in error ? error.code : undefined,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    throw error;
+  }
 };
 
 // The change it reports is already saved, so a failed send is logged instead of shown as a failed save.
