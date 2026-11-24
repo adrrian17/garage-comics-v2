@@ -13,14 +13,14 @@ Server code lives inside the TanStack Start app in `apps/web`; there is no separ
 
 ## Stripe webhook events
 
-Subscribe the endpoint (`/api/stripe/webhook`) to these events in the Stripe Dashboard; any other event is ignored.
+`/api/stripe/webhook` handles these events; any other event is ignored. Each deployed stage gets its endpoint from `alchemy.run.ts`, subscribed to exactly this list, so a new event goes in `routeCheckoutEvent` and in that list (see [deployment](deployment.md)). Do not create endpoints by hand in the Dashboard.
 
 - `checkout.session.completed`: a card payment, a Registration, or an OXXO voucher being issued (unpaid, ignored).
 - `checkout.session.async_payment_succeeded`: an OXXO voucher paid.
 - `checkout.session.async_payment_failed`: an OXXO voucher expired unpaid; the Order is cancelled silently.
 - `checkout.session.expired`: a Checkout Session lapsed; the Order is cancelled silently.
 
-Create a second endpoint for events from connected accounts, `/api/stripe/connect-webhook`, subscribed to `account.updated`; it has its own signing secret, `STRIPE_CONNECT_WEBHOOK_SECRET`. Each event re-reads the Author's account from Stripe and saves its payout setup status, which the catalog filters on. Locally, `stripe listen --forward-connect-to <url>/api/stripe/connect-webhook` forwards these events; put the signing secret it prints in `STRIPE_WEBHOOK_SECRET` in `.env`, which `STRIPE_CONNECT_WEBHOOK_SECRET` reuses in development.
+A second endpoint, `/api/stripe/connect-webhook`, receives events from connected accounts, subscribed to `account.updated`; it has its own signing secret, `STRIPE_CONNECT_WEBHOOK_SECRET`, which the deploy binds like the first. Each event re-reads the Author's account from Stripe and saves its payout setup status, which the catalog filters on. Locally, `stripe listen --forward-connect-to <url>/api/stripe/connect-webhook` forwards these events; put the signing secret it prints in `STRIPE_WEBHOOK_SECRET` in `.env`, which `STRIPE_CONNECT_WEBHOOK_SECRET` reuses in development.
 
 Checkout Sessions carry `metadata.kind` (`order` or `registration`) so the webhook can tell them apart. OXXO must also be enabled as a payment method in the Dashboard for the Checkout page to offer it.
 

@@ -1,8 +1,15 @@
 // oxlint-disable sonarjs/no-wildcard-import -- Alchemy and Effect modules are used as namespaces.
 import * as Cloudflare from "@alchemy.run/cloudflare";
+import * as GitHub from "@alchemy.run/github";
+import * as Stripe from "@alchemy.run/stripe";
 import * as Alchemy from "alchemy";
+import { AlchemyContext } from "alchemy/AlchemyContext";
+import * as Output from "alchemy/Output";
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
+import * as Layer from "effect/Layer";
+import * as Option from "effect/Option";
+import * as Redacted from "effect/Redacted";
 import "varlock/auto-load";
 // oxlint-enable sonarjs/no-wildcard-import
 
@@ -81,10 +88,14 @@ export const web = Cloudflare.Website.Vite("web", {
     EMAIL_FROM: Config.String("EMAIL_FROM"),
     STRIPE_SECRET_KEY: Config.Redacted("STRIPE_SECRET_KEY"),
     STRIPE_PUBLISHABLE_KEY: Config.String("STRIPE_PUBLISHABLE_KEY"),
-    STRIPE_WEBHOOK_SECRET: Config.Redacted("STRIPE_WEBHOOK_SECRET"),
+    // Only `alchemy dev` sets these (from .env). A deployed stage creates its own webhook endpoints and binds their
+    // signing secrets over these empty placeholders (see the stack below); the keys stay here so `WebEnv` types them.
+    STRIPE_WEBHOOK_SECRET: Config.Redacted("STRIPE_WEBHOOK_SECRET").pipe(
+      Config.withDefault(Redacted.make(""))
+    ),
     STRIPE_CONNECT_WEBHOOK_SECRET: Config.Redacted(
       "STRIPE_CONNECT_WEBHOOK_SECRET"
-    ),
+    ).pipe(Config.withDefault(Redacted.make(""))),
     // Empty outside development, where the Stripe SDK talks to Stripe itself.
     STRIPE_API_URL: Config.String("STRIPE_API_URL").pipe(
       Config.withDefault("")
@@ -104,14 +115,74 @@ export const web = Cloudflare.Website.Vite("web", {
 
 export type WebEnv = Cloudflare.InferEnv<typeof web>;
 
+// Every event `routeCheckoutEvent` (apps/web/src/lib/stripe-events.ts) handles; Stripe never sends the rest.
+const checkoutEvents = [
+  "checkout.session.completed",
+  "checkout.session.async_payment_succeeded",
+  "checkout.session.async_payment_failed",
+  "checkout.session.expired",
+];
+
 export default Alchemy.Stack(
   "garage-comics",
   {
-    providers: Cloudflare.providers(),
+    // Stripe.providers() provides its own credentials from STRIPE_API_KEY, which no sibling layer can replace, so the
+    // workflows set it to the app's STRIPE_SECRET_KEY. Credentials resolve lazily, so `alchemy dev` needs no key.
+    providers: Layer.mergeAll(
+      Cloudflare.providers(),
+      GitHub.providers(),
+      Stripe.providers()
+    ),
     state: Cloudflare.state(),
   },
   Effect.gen(function* deployStack() {
     const webWorker = yield* web;
+
+    // Stripe only delivers to public URLs, so `alchemy dev` creates no endpoints and keeps the secrets from .env.
+    const alchemyContext = yield* Effect.serviceOption(AlchemyContext);
+
+    if (!(Option.isSome(alchemyContext) && alchemyContext.value.dev)) {
+      const webhook = yield* Stripe.WebhookEndpoint("webhook", {
+        url: Output.interpolate`${webWorker.url}/api/stripe/webhook`,
+        enabledEvents: checkoutEvents,
+      });
+
+      const connectWebhook = yield* Stripe.WebhookEndpoint("connect-webhook", {
+        url: Output.interpolate`${webWorker.url}/api/stripe/connect-webhook`,
+        enabledEvents: ["account.updated"],
+        connect: true,
+      });
+
+      // A binding, not an env prop: the endpoints depend on the Worker's URL.
+      yield* webWorker.bind("stripe-webhook-secrets", {
+        env: {
+          STRIPE_WEBHOOK_SECRET: webhook.secret,
+          STRIPE_CONNECT_WEBHOOK_SECRET: connectWebhook.secret,
+        },
+      });
+    }
+
+    // Set only in GitHub Actions; `pr` only when the workflow passes PULL_REQUEST.
+    const github = yield* GitHub.GitHubEnv;
+
+    if (github?.pr !== undefined) {
+      yield* GitHub.Comment("preview-comment", {
+        owner: github.owner,
+        repository: github.repository,
+        issueNumber: github.pr,
+        // Destroying the preview stage removes the comment with it.
+        allowDelete: true,
+        body: Output.interpolate`
+          ## Preview
+
+          **Web:** ${webWorker.url}
+
+          Commit \`${(process.env.PR_HEAD_SHA ?? github.sha).slice(0, 7)}\`
+
+          _Este comentario se actualiza con cada push._
+        `,
+      });
+    }
 
     return {
       web: webWorker.url,
