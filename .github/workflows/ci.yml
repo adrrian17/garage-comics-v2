@@ -70,8 +70,13 @@ jobs:
         run: |
           action=deploy
           if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
-            state=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json state --jq .state)
-            [[ "$state" == OPEN ]] || action=destroy
+            # A rerun keeps its original commit, so an open PR whose head moved on is skipped instead of redeploying an older one.
+            pr=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json state,headRefOid --jq '.state + " " + .headRefOid')
+            if [[ "${pr% *}" != OPEN ]]; then
+              action=destroy
+            elif [[ "${pr#* }" != "$PR_HEAD_SHA" ]]; then
+              action=skip
+            fi
           else
             main_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
             [[ "$main_sha" == "$GITHUB_SHA" ]] || action=skip
@@ -81,6 +86,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
 
       - name: Checkout
         if: steps.plan.outputs.action != 'skip'

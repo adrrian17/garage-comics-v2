@@ -13,12 +13,17 @@ import * as Redacted from "effect/Redacted";
 import "varlock/auto-load";
 // oxlint-enable sonarjs/no-wildcard-import
 
+// STAGE is set only by the CI workflows. A PR preview's files are disposable, so destroying it may empty its buckets;
+// every other stage keeps R2's refusal to delete a bucket that still holds objects.
+const isPreview = /^pr-\d+$/u.test(process.env.STAGE ?? "");
+
 export const db = Cloudflare.D1.Database("database", {
   migrations: "../../packages/db/src/migrations",
 });
 
 // Browsers PUT file parts straight to this bucket through presigned URLs, so it allows any origin: the signature is the credential.
 const comics = Cloudflare.R2.Bucket("comics", {
+  forceDestroy: isPreview,
   cors: [
     {
       allowedMethods: ["GET", "PUT"],
@@ -39,6 +44,7 @@ const comics = Cloudflare.R2.Bucket("comics", {
 
 // A Download Link's 24 hours are enforced in D1; this rule only cleans up, and R2 may run it up to a day late.
 const downloads = Cloudflare.R2.Bucket("downloads", {
+  forceDestroy: isPreview,
   lifecycleRules: [
     {
       id: "delete-copies-after-a-day",
