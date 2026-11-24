@@ -1,6 +1,7 @@
 import { createAuth as createConfiguredAuth } from "@garage-comics/auth";
 import { createDb } from "@garage-comics/db";
 import { env } from "cloudflare:workers";
+import { log } from "evlog";
 import { Stripe } from "stripe";
 
 import { magicLinkEmail, sendEmail } from "@/server/email";
@@ -40,7 +41,15 @@ export const readStripeEvent = async (request: Request, secret: string) => {
       undefined,
       Stripe.createSubtleCryptoProvider()
     );
-  } catch {
+  } catch (error) {
+    // Whether a signing secret is bound, never its value: tells a missing or misbound secret apart from a forged request.
+    log.warn({
+      action: "stripe_signature",
+      secretBound: secret.startsWith("whsec_"),
+      secretEmpty: secret === "",
+      error: error instanceof Error ? error.message : String(error),
+    });
+
     return null;
   }
 };
