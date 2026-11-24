@@ -5,6 +5,7 @@ import * as Stripe from "@alchemy.run/stripe";
 import * as Alchemy from "alchemy";
 import { AlchemyContext } from "alchemy/AlchemyContext";
 import * as Output from "alchemy/Output";
+import { Stage } from "alchemy/Stage";
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -13,47 +14,57 @@ import * as Redacted from "effect/Redacted";
 import "varlock/auto-load";
 // oxlint-enable sonarjs/no-wildcard-import
 
-// STAGE is set only by the CI workflows. A PR preview's files are disposable, so destroying it may empty its buckets;
-// every other stage keeps R2's refusal to delete a bucket that still holds objects.
-const isPreview = /^pr-\d+$/u.test(process.env.STAGE ?? "");
+// A PR preview's files are disposable, so destroying it may empty its buckets; every other stage keeps R2's refusal to
+// delete a bucket that still holds objects. Read from the stage Alchemy resolved (--stage, then $ALCHEMY_STAGE), so the
+// flag saved with the bucket always matches the stage it belongs to.
+const bucketProps = (props: Cloudflare.R2.BucketProps) =>
+  Effect.gen(function* withForceDestroy() {
+    const stage = yield* Stage;
+
+    return { ...props, forceDestroy: /^pr-\d+$/u.test(stage) };
+  });
 
 export const db = Cloudflare.D1.Database("database", {
   migrations: "../../packages/db/src/migrations",
 });
 
 // Browsers PUT file parts straight to this bucket through presigned URLs, so it allows any origin: the signature is the credential.
-const comics = Cloudflare.R2.Bucket("comics", {
-  forceDestroy: isPreview,
-  cors: [
-    {
-      allowedMethods: ["GET", "PUT"],
-      allowedOrigins: ["*"],
-      allowedHeaders: ["content-type"],
-      exposeHeaders: ["etag"],
-    },
-  ],
-  lifecycleRules: [
-    {
-      id: "abort-stale-uploads",
-      abortMultipartUploadsTransition: {
-        condition: { type: "Age", maxAge: 60 * 60 * 24 },
+const comics = Cloudflare.R2.Bucket(
+  "comics",
+  bucketProps({
+    cors: [
+      {
+        allowedMethods: ["GET", "PUT"],
+        allowedOrigins: ["*"],
+        allowedHeaders: ["content-type"],
+        exposeHeaders: ["etag"],
       },
-    },
-  ],
-});
+    ],
+    lifecycleRules: [
+      {
+        id: "abort-stale-uploads",
+        abortMultipartUploadsTransition: {
+          condition: { type: "Age", maxAge: 60 * 60 * 24 },
+        },
+      },
+    ],
+  })
+);
 
 // A Download Link's 24 hours are enforced in D1; this rule only cleans up, and R2 may run it up to a day late.
-const downloads = Cloudflare.R2.Bucket("downloads", {
-  forceDestroy: isPreview,
-  lifecycleRules: [
-    {
-      id: "delete-copies-after-a-day",
-      deleteObjectsTransition: {
-        condition: { type: "Age", maxAge: 60 * 60 * 24 },
+const downloads = Cloudflare.R2.Bucket(
+  "downloads",
+  bucketProps({
+    lifecycleRules: [
+      {
+        id: "delete-copies-after-a-day",
+        deleteObjectsTransition: {
+          condition: { type: "Age", maxAge: 60 * 60 * 24 },
+        },
       },
-    },
-  ],
-});
+    ],
+  })
+);
 
 /**
  * What the Watermarker Durable Object answers over RPC. The class in apps/web/src/server/watermarker.ts implements it.
