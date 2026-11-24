@@ -161,11 +161,13 @@ export default Alchemy.Stack(
     if (!(Option.isSome(alchemyContext) && alchemyContext.value.dev)) {
       const webhook = yield* Stripe.WebhookEndpoint("webhook", {
         url: Output.interpolate`${webWorker.url}/api/stripe/webhook`,
+        description: "Garage Cómics: pagos de Compras e Inscripciones",
         enabledEvents: checkoutEvents,
       });
 
       const connectWebhook = yield* Stripe.WebhookEndpoint("connect-webhook", {
         url: Output.interpolate`${webWorker.url}/api/stripe/connect-webhook`,
+        description: "Garage Cómics: cuentas de Autores",
         enabledEvents: ["account.updated"],
         connect: true,
       });
