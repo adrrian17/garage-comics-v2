@@ -9,6 +9,7 @@ import { CheckoutForm } from "@/components/checkout-form";
 import { ComicCover } from "@/components/comic-grid";
 import {
   PageIcon,
+  SectionRule,
   pageHeadingClass,
   pageLeadClass,
 } from "@/components/page-intro";
@@ -39,7 +40,7 @@ const CartMessage = ({
   icon: ReactNode;
   children: ReactNode;
 }) => (
-  <div className="mx-auto max-w-xl py-4 sm:py-12">
+  <div className="max-w-xl py-4 sm:py-12">
     <PageIcon>{icon}</PageIcon>
     <Heading>{title}</Heading>
     {children}
@@ -151,12 +152,13 @@ const CartPage = () => {
 
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2 border-b pb-6">
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2">
         <Heading>Tu carrito</Heading>
         <p className="text-muted-foreground text-sm">
           {comics.length === 1 ? "1 cómic" : `${comics.length} cómics`}
         </p>
       </div>
+      <SectionRule />
       {notice}
       {failed ? (
         <Alert variant="destructive" className="mt-6">
@@ -175,7 +177,7 @@ const CartPage = () => {
             >
               <ComicCover
                 comic={comic}
-                className="ring-foreground/10 w-16 shrink-0 ring-1 sm:w-20"
+                className="ring-foreground/15 w-16 shrink-0 rounded-md ring-1 sm:w-20"
               />
               <div className="min-w-0 flex-1">
                 <p className="font-display text-lg leading-snug font-semibold tracking-tight wrap-anywhere">

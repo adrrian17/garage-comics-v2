@@ -9,6 +9,7 @@ import { createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowUpRight } from "lucide-react";
 
 import { ComicGrid } from "@/components/comic-grid";
+import { SectionRule } from "@/components/page-intro";
 import { getAuthorPage } from "@/functions/authors";
 import { initials, isBlankProfile } from "@/lib/author";
 
@@ -75,10 +76,11 @@ const AuthorPage = () => {
       <section aria-labelledby="comics-del-autor" className="mt-20 lg:mt-28">
         <h2
           id="comics-del-autor"
-          className="font-display border-b pb-6 text-3xl font-semibold tracking-tight sm:text-4xl"
+          className="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
         >
           Cómics en esta Edición
         </h2>
+        <SectionRule />
         {comics.length === 0 ? (
           <div className="border-foreground/20 mt-10 rounded-2xl border border-dashed">
             <Empty>

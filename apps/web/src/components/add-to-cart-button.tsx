@@ -16,7 +16,7 @@ export const AddToCartButton = ({
 
   if (ids.includes(comicId)) {
     return (
-      <Button variant="secondary" size="sm" disabled>
+      <Button variant="outline" size="sm" disabled>
         <Check data-icon="inline-start" />
         En el carrito
       </Button>

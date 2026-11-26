@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-/** The column every single-purpose public page (sign-in, Proposal, messages) sits in. */
+/** Single-purpose public pages (sign-in, Proposal, messages): a readable column on the store's left edge. */
 export const narrowPageClass =
-  "mx-auto w-full max-w-xl px-4 py-16 sm:px-6 sm:py-24";
+  "mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24 *:max-w-xl";
 
 export const pageHeadingClass =
   "font-display text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl";
@@ -18,4 +18,9 @@ export const PageIcon = ({ children }: { children: ReactNode }) => (
   >
     {children}
   </div>
+);
+
+/** The wavy ink rule that closes a section title. */
+export const SectionRule = () => (
+  <div aria-hidden className="rule-wave text-foreground mt-4 w-full" />
 );

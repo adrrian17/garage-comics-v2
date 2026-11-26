@@ -4,9 +4,11 @@ import { ArrowDown, ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { ComicGrid } from "@/components/comic-grid";
+import { SectionRule } from "@/components/page-intro";
 import { getCatalog } from "@/functions/catalog";
 import { getActiveEdition } from "@/functions/editions";
 import { formatDate, formatDateTime } from "@/lib/format";
+import type { SellableComic } from "@/server/catalog";
 
 type ActiveEdition = Awaited<ReturnType<typeof getActiveEdition>>;
 
@@ -26,33 +28,41 @@ const Status = ({ live, children }: { live: boolean; children: string }) => (
   </p>
 );
 
-const DateRange = ({
-  label,
-  from,
-  to,
-  current,
-}: {
+interface Fact {
   label: string;
-  from: Date;
-  to: Date;
-  current: boolean;
-}) => (
-  <div className="lg:first:pl-column-edge flex flex-col gap-2 px-4 py-7 sm:px-6 lg:first:pr-14 lg:last:px-14">
-    <dt className="text-muted-foreground flex items-center gap-2 text-sm">
-      {label}
-      {current ? (
-        <span className="bg-print text-print-foreground rounded-full px-2 py-0.5 text-xs font-semibold">
-          Ahora
-        </span>
-      ) : null}
-    </dt>
-    <dd className="font-display max-w-xs text-2xl leading-tight font-semibold tracking-tight text-balance">
-      {formatDate(from)} al {formatDate(to)}
-    </dd>
+  value: string;
+  current?: boolean;
+}
+
+/** Two facts about the Edition as a print-red band under the hero, hanging a scalloped edge like the poster's awning. */
+const FactBand = ({ facts }: { facts: [Fact, Fact] }) => (
+  <div className="text-print">
+    <div className="bg-print text-print-foreground">
+      <dl className="mx-auto grid w-full max-w-6xl gap-x-16 gap-y-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)]">
+        {facts.map((fact) => (
+          <div key={fact.label} className="flex flex-col gap-2">
+            <dt className="text-print-foreground/80 flex items-center gap-2 text-sm">
+              {fact.label}
+              {fact.current === true ? (
+                <span className="bg-print-foreground text-print rounded-full px-2 py-0.5 text-xs font-semibold">
+                  Ahora
+                </span>
+              ) : null}
+            </dt>
+            <dd className="font-display max-w-sm text-2xl leading-tight font-semibold tracking-tight text-balance">
+              {fact.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+    <div aria-hidden className="scallop-edge" />
   </div>
 );
 
-/** The Edition's two windows as a ruled strip under the hero, on the hero's own columns so the rules line up. */
+const dateRange = (from: Date, to: Date) =>
+  `${formatDate(from)} al ${formatDate(to)}`;
+
 const EditionDates = ({
   edition,
   current,
@@ -60,26 +70,26 @@ const EditionDates = ({
   edition: OpenEdition;
   current?: EditionWindow;
 }) => (
-  <dl className="grid max-lg:divide-y lg:grid-cols-2 lg:divide-x">
-    <DateRange
-      label="Propuestas"
-      from={edition.proposalsOpenAt}
-      to={edition.proposalsCloseAt}
-      current={current === "proposals"}
-    />
-    <DateRange
-      label="Venta"
-      from={edition.salesOpenAt}
-      to={edition.salesCloseAt}
-      current={current === "sales"}
-    />
-  </dl>
+  <FactBand
+    facts={[
+      {
+        label: "Propuestas",
+        value: dateRange(edition.proposalsOpenAt, edition.proposalsCloseAt),
+        current: current === "proposals",
+      },
+      {
+        label: "Venta",
+        value: dateRange(edition.salesOpenAt, edition.salesCloseAt),
+        current: current === "sales",
+      },
+    ]}
+  />
 );
 
-/**
- * The landing's opening spread: copy on the left, the poster bleeding off the right edge like a splash page.
- * `poster-scene.webp` is the newsstand scene cut out of `poster.webp`, whose top and bottom boxes are placeholders.
- */
+const countLabel = (count: number, one: string, many: string) =>
+  count === 1 ? `1 ${one}` : `${count} ${many}`;
+
+/** The landing's opening spread: copy on the left and the whole poster, never cropped, on the right. */
 const Hero = ({
   status,
   live = false,
@@ -94,76 +104,53 @@ const Hero = ({
   dates?: ReactNode;
 }) => (
   <>
-    <section className="border-b">
-      <div className="lg:min-h-hero grid lg:grid-cols-2">
-        <div className="lg:pl-column-edge flex flex-col justify-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:py-16 lg:pr-14">
-          <Status live={live}>{status}</Status>
-          <h1 className="font-display text-hero font-semibold text-balance">
-            {title}
-          </h1>
-          <div className="text-muted-foreground [&_strong]:text-foreground flex max-w-lg flex-col items-start gap-10 text-lg leading-relaxed text-pretty sm:text-xl [&_strong]:font-semibold">
-            {children}
-          </div>
-        </div>
-        <div className="bg-poster relative overflow-hidden max-lg:aspect-5/4 max-lg:border-t lg:border-l">
-          <img
-            src="/poster-scene.webp"
-            alt="Ilustración de un puesto de cómics en la calle, atendido por criaturas fantásticas y rodeado de lectores"
-            width={791}
-            height={740}
-            fetchPriority="high"
-            className="absolute inset-0 size-full object-cover"
-          />
+    <section className="mx-auto grid w-full max-w-6xl items-center gap-12 px-4 pt-10 pb-14 sm:px-6 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] lg:gap-16 lg:pb-20">
+      <div className="flex flex-col gap-10">
+        <Status live={live}>{status}</Status>
+        <h1 className="font-display text-hero font-semibold text-balance">
+          {title}
+        </h1>
+        <div className="text-muted-foreground [&_strong]:text-foreground flex max-w-lg flex-col items-start gap-10 text-lg leading-relaxed text-pretty sm:text-xl [&_strong]:font-semibold">
+          {children}
         </div>
       </div>
+      <img
+        src="/poster.webp"
+        alt="Póster de Garage Cómics: un puesto de cómics en la calle, atendido por criaturas fantásticas y rodeado de lectores"
+        width={791}
+        height={1222}
+        fetchPriority="high"
+        className="shadow-foreground/10 w-full rounded-4xl shadow-2xl"
+      />
     </section>
-    {dates === undefined ? null : <div className="border-b">{dates}</div>}
+    {dates}
   </>
 );
 
-const Catalogue = ({
-  edition,
-  catalog,
-}: {
-  edition: OpenEdition;
-  catalog: Catalog | null;
-}) => {
-  const comics = catalog?.status === "open" ? catalog.comics : [];
-  const authorCount = new Set(comics.map((comic) => comic.author.slug)).size;
-
-  return (
-    <section
-      id="catalogo"
-      aria-labelledby="catalogo-titulo"
-      className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6 lg:py-28"
+const Catalogue = ({ comics }: { comics: SellableComic[] }) => (
+  <section
+    id="catalogo"
+    aria-labelledby="catalogo-titulo"
+    className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 pt-20 sm:px-6 lg:pt-28"
+  >
+    <h2
+      id="catalogo-titulo"
+      className="font-display text-4xl font-semibold tracking-tight sm:text-5xl"
     >
-      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-b pb-6">
-        <h2
-          id="catalogo-titulo"
-          className="font-display text-4xl font-semibold tracking-tight sm:text-5xl"
-        >
-          Catálogo
-        </h2>
-        {comics.length === 0 ? null : (
-          <p className="text-muted-foreground text-sm">
-            {comics.length === 1 ? "1 cómic" : `${comics.length} cómics`} de{" "}
-            {authorCount === 1 ? "1 autor" : `${authorCount} autores`} · a la
-            venta hasta el {formatDate(edition.salesCloseAt)}
-          </p>
-        )}
+      Catálogo
+    </h2>
+    <SectionRule />
+    {comics.length > 0 ? (
+      <div className="mt-10">
+        <ComicGrid comics={comics} />
       </div>
-      {comics.length > 0 ? (
-        <div className="mt-10">
-          <ComicGrid comics={comics} />
-        </div>
-      ) : (
-        <p className="text-muted-foreground mt-8 text-lg">
-          Todavía no hay cómics a la venta. Vuelve en un rato.
-        </p>
-      )}
-    </section>
-  );
-};
+    ) : (
+      <p className="text-muted-foreground mt-8 text-lg">
+        Todavía no hay cómics a la venta. Vuelve en un rato.
+      </p>
+    )}
+  </section>
+);
 
 const Landing = ({
   edition,
@@ -236,9 +223,33 @@ const Landing = ({
     }
 
     case "sales": {
+      const comics = catalog?.status === "open" ? catalog.comics : [];
+
+      const authorCount = new Set(comics.map((comic) => comic.author.slug))
+        .size;
+
       return (
         <>
-          <Hero status="A la venta" live title={edition.name}>
+          <Hero
+            status="A la venta"
+            live
+            title={edition.name}
+            dates={
+              <FactBand
+                facts={[
+                  {
+                    label: "Venta",
+                    value: dateRange(edition.salesOpenAt, edition.salesCloseAt),
+                    current: true,
+                  },
+                  {
+                    label: "En el catálogo",
+                    value: `${countLabel(comics.length, "cómic", "cómics")} de ${countLabel(authorCount, "autor", "autores")}`,
+                  },
+                ]}
+              />
+            }
+          >
             <p>
               Cómics digitales de autores mexicanos. Esta Edición está a la
               venta hasta el{" "}
@@ -249,7 +260,7 @@ const Landing = ({
               <ArrowDown data-icon="inline-end" />
             </a>
           </Hero>
-          <Catalogue edition={edition} catalog={catalog} />
+          <Catalogue comics={comics} />
         </>
       );
     }
@@ -264,7 +275,7 @@ const HomePage = () => {
   const { edition, catalog } = Route.useLoaderData();
 
   return (
-    <main>
+    <main className="pb-20 lg:pb-28">
       <Landing edition={edition} catalog={catalog} />
     </main>
   );

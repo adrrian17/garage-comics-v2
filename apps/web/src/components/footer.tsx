@@ -22,8 +22,9 @@ const currentYear = new Date().getFullYear();
 
 const Footer = () => (
   <footer className="bg-foreground text-background">
+    <div aria-hidden className="scallop-edge text-background" />
     <div className="mx-auto grid w-full max-w-6xl gap-x-12 gap-y-8 px-4 pt-10 pb-8 sm:px-6 sm:pt-14 md:grid-cols-[1fr_auto]">
-      <p className="font-display max-w-md text-xl leading-tight font-semibold tracking-tight text-balance sm:text-3xl">
+      <p className="font-display max-w-md text-3xl leading-tight font-semibold tracking-tight text-balance max-sm:hidden">
         Cómics digitales de autores mexicanos, una Edición a la vez.
       </p>
       <nav

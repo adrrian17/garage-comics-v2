@@ -19,13 +19,14 @@ export const ComicCover = ({
       <div
         aria-hidden
         className={cn(
-          "bg-paper-deep @container flex aspect-2/3 w-full items-end",
+          "bg-paper-deep @container flex aspect-2/3 w-full flex-col justify-between",
           className
         )}
       >
-        <span className="font-display cover-title line-clamp-4 w-full leading-tight font-semibold tracking-tight wrap-anywhere">
+        <span className="font-display cover-title line-clamp-5 w-full leading-tight font-semibold tracking-tight wrap-anywhere">
           {comic.title}
         </span>
+        <span className="bg-print cover-rule" />
       </div>
     );
   }
@@ -52,25 +53,22 @@ const ComicCard = ({
   action?: ReactNode;
 }) => (
   <article className="group/comic flex w-full flex-col">
-    <div className="ring-foreground/10 group-hover/comic:print-offset overflow-hidden ring-1 transition duration-200 ease-out group-hover/comic:-translate-x-1 group-hover/comic:-translate-y-1 motion-reduce:transition-none motion-reduce:group-hover/comic:translate-0">
+    <div className="ring-foreground/15 group-hover/comic:print-offset overflow-hidden rounded-lg ring-1 transition duration-200 ease-out group-hover/comic:-translate-x-1 group-hover/comic:-translate-y-1 motion-reduce:transition-none motion-reduce:group-hover/comic:translate-0">
       <ComicCover comic={comic} />
     </div>
     <h3 className="font-display mt-4 text-lg leading-snug font-semibold tracking-tight text-pretty wrap-anywhere">
       {comic.title}
     </h3>
+    {showAuthor ? (
+      <Link
+        to="/autores/$slug"
+        params={{ slug: comic.author.slug }}
+        className="decoration-print mt-1 self-start text-sm font-medium decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+      >
+        {comic.author.displayName}
+      </Link>
+    ) : null}
     <p className="text-muted-foreground mt-1 text-sm">
-      {showAuthor && (
-        <>
-          <Link
-            to="/autores/$slug"
-            params={{ slug: comic.author.slug }}
-            className="text-foreground decoration-print decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
-          >
-            {comic.author.displayName}
-          </Link>
-          <span aria-hidden> · </span>
-        </>
-      )}
       {comic.genre} · {comic.pageCount} páginas
     </p>
     <div className="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-3 pt-4">

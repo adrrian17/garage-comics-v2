@@ -89,7 +89,7 @@
   --color-poster: var(--poster);
   --text-hero: clamp(3.25rem, 6.6vw, 6.25rem);
   --text-hero--line-height: 0.92;
-  --text-hero--letter-spacing: -0.035em;
+  --text-hero--letter-spacing: -0.025em;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -222,4 +222,30 @@
 /* The print-misregistration offset shown when a cover is hovered. */
 @utility print-offset {
   box-shadow: 6px 6px 0 0 var(--print);
+}
+
+/* The short print-red rule that closes a cover set as type. */
+@utility cover-rule {
+  margin: 0 9cqi 9cqi;
+  height: max(2px, 2cqi);
+  width: 22cqi;
+}
+
+/* The newsstand awning's scalloped edge from the poster, hanging from a band. Color comes from `text-*`. */
+@utility scallop-edge {
+  height: 0.875rem;
+  background: radial-gradient(
+      circle at 50% 0,
+      currentColor 0.875rem,
+      transparent calc(0.875rem + 0.5px)
+    )
+    0 0 / 1.75rem 0.875rem repeat-x;
+}
+
+/* A hand-drawn wavy rule under section titles, in `currentColor`. */
+@utility rule-wave {
+  height: 0.625rem;
+  background-color: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='10' viewBox='0 0 48 10'%3E%3Cpath d='M0 5 C8 1 16 1 24 5 S40 9 48 5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
+    0 0 / 3rem 0.625rem repeat-x;
 }
