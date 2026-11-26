@@ -49,10 +49,10 @@ const RootComponent = () => {
           <Outlet />
         ) : (
           <div className="storefront grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_1fr_auto]">
+            <SiteHeader />
             <div>
               <CountdownBar edition={edition} />
             </div>
-            <SiteHeader />
             <Outlet />
             <Footer />
           </div>
