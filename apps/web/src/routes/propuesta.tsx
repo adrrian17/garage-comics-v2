@@ -15,7 +15,7 @@ import type { SubmitEvent } from "react";
 
 import {
   PageIcon,
-  narrowPageClass,
+  SinglePage,
   pageHeadingClass,
   pageLeadClass,
 } from "@/components/page-intro";
@@ -197,7 +197,7 @@ const ClosedNotice = ({
     </PageIcon>
     <h1 className={pageHeadingClass}>Participa con tu cómic</h1>
     <p className={pageLeadClass}>No necesitas cuenta y no cuesta nada.</p>
-    <div className="border-foreground/25 mt-10 flex flex-col items-start gap-6 border border-dashed p-6 sm:p-8">
+    <div className="border-foreground/25 mt-10 flex flex-col items-start gap-6 rounded-2xl border border-dashed p-6 sm:p-8">
       <div className="flex flex-col gap-2">
         <h2 className="font-display text-xl font-semibold tracking-tight">
           {edition?.phase === "upcoming"
@@ -271,17 +271,15 @@ const ProposalPage = () => {
     );
   };
 
-  return (
-    <main
-      className={
-        edition?.phase === "proposals" && sentTo === undefined
-          ? "mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24"
-          : narrowPageClass
-      }
-    >
-      {content()}
-    </main>
-  );
+  if (edition?.phase === "proposals" && sentTo === undefined) {
+    return (
+      <main className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+        {content()}
+      </main>
+    );
+  }
+
+  return <SinglePage>{content()}</SinglePage>;
 };
 
 export const Route = createFileRoute("/propuesta")({

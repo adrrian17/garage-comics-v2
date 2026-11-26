@@ -49,7 +49,7 @@ const FactBand = ({ facts }: { facts: [Fact, Fact] }) => (
                 </span>
               ) : null}
             </dt>
-            <dd className="font-display max-w-sm text-2xl leading-tight font-semibold tracking-tight text-balance">
+            <dd className="font-display max-w-sm text-2xl leading-tight font-semibold tracking-tight text-balance lg:text-3xl">
               {fact.value}
             </dd>
           </div>
@@ -120,7 +120,7 @@ const Hero = ({
         width={791}
         height={1222}
         fetchPriority="high"
-        className="shadow-foreground/10 w-full rounded-4xl shadow-2xl"
+        className="shadow-foreground/15 lg:max-h-poster h-auto w-full rounded-4xl shadow-2xl lg:w-auto lg:justify-self-end"
       />
     </section>
     {dates}

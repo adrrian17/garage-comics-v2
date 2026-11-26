@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 import {
   PageIcon,
-  narrowPageClass,
+  SinglePage,
   pageHeadingClass,
   pageLeadClass,
 } from "@/components/page-intro";
@@ -20,7 +20,7 @@ const OrderPlacedPage = () => {
   }, [clear]);
 
   return (
-    <main className={narrowPageClass}>
+    <SinglePage>
       <PageIcon>
         <MailCheck />
       </PageIcon>
@@ -34,7 +34,7 @@ const OrderPlacedPage = () => {
       <Link to="/" className={buttonVariants({ className: "mt-10" })}>
         Volver al catálogo
       </Link>
-    </main>
+    </SinglePage>
   );
 };
 

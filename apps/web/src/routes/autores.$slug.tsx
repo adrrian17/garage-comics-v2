@@ -1,4 +1,3 @@
-import { buttonVariants } from "@garage-comics/ui/components/button";
 import {
   Empty,
   EmptyDescription,
@@ -30,7 +29,7 @@ const AuthorPage = () => {
       <header className="grid gap-8 sm:grid-cols-[auto_1fr] sm:gap-10 lg:gap-14">
         <div
           aria-hidden
-          className="bg-print text-print-foreground font-display grid size-24 place-items-center rounded-2xl text-4xl font-semibold tracking-tight sm:size-40 sm:text-6xl lg:size-48"
+          className="seal bg-print text-print-foreground font-display grid size-28 place-items-center text-4xl font-semibold tracking-tight sm:size-40 sm:text-6xl lg:size-48"
         >
           {initials(author.displayName)}
         </div>
@@ -46,21 +45,20 @@ const AuthorPage = () => {
             </h1>
           </div>
           {links.length === 0 ? null : (
-            <ul className="flex flex-wrap gap-2">
+            <ul className="flex flex-wrap gap-x-6 gap-y-2">
               {links.map((link) => (
                 <li key={link.label}>
                   <a
                     href={link.href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className={buttonVariants({
-                      variant: "outline",
-                      size: "sm",
-                      className: "border-foreground/15 bg-transparent",
-                    })}
+                    className="decoration-print inline-flex items-center gap-1 font-medium decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
                   >
                     {link.label}
-                    <ArrowUpRight data-icon="inline-end" />
+                    <ArrowUpRight
+                      aria-hidden
+                      className="text-muted-foreground size-4"
+                    />
                   </a>
                 </li>
               ))}

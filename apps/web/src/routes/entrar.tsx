@@ -15,7 +15,7 @@ import { z } from "zod";
 
 import {
   PageIcon,
-  narrowPageClass,
+  SinglePage,
   pageHeadingClass,
   pageLeadClass,
 } from "@/components/page-intro";
@@ -91,7 +91,7 @@ const SignInPage = () => {
   };
 
   return (
-    <main className={narrowPageClass}>
+    <SinglePage>
       {sentTo === undefined ? (
         <>
           <PageIcon>
@@ -141,7 +141,7 @@ const SignInPage = () => {
           }}
         />
       )}
-    </main>
+    </SinglePage>
   );
 };
 

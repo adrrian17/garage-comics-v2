@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import {
   PageIcon,
-  narrowPageClass,
+  SinglePage,
   pageHeadingClass,
   pageLeadClass,
 } from "@/components/page-intro";
@@ -181,7 +181,7 @@ const RegistrationPage = () => {
     }
   };
 
-  return <main className={narrowPageClass}>{content()}</main>;
+  return <SinglePage>{content()}</SinglePage>;
 };
 
 export const Route = createFileRoute("/inscripcion/$proposalId")({

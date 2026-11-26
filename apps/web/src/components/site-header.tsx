@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { CartLink } from "@/components/cart-link";
 
 const navLinkClass =
-  "text-muted-foreground hover:text-foreground data-[status=active]:text-foreground focus-visible:ring-ring/50 rounded-sm px-2 py-1 text-sm font-medium outline-none transition-colors focus-visible:ring-3";
+  "text-muted-foreground hover:text-foreground data-[status=active]:text-foreground data-[status=active]:decoration-print data-[status=active]:underline data-[status=active]:decoration-2 data-[status=active]:underline-offset-8 focus-visible:ring-ring/50 rounded-sm px-2 py-1 text-sm font-medium outline-none transition-colors focus-visible:ring-3";
 
 const SiteHeader = () => (
   <header className="bg-background/85 supports-backdrop-filter:bg-background/70 sticky top-0 z-40 border-b backdrop-blur-md">
@@ -17,7 +17,7 @@ const SiteHeader = () => (
           alt="Garage Cómics"
           width={130}
           height={56}
-          className="h-9 w-auto"
+          className="h-10 w-auto"
         />
       </Link>
       <nav aria-label="Principal" className="flex items-center gap-1 sm:gap-3">

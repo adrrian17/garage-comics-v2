@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 import {
   PageIcon,
-  narrowPageClass,
+  SinglePage,
   pageHeadingClass,
   pageLeadClass,
 } from "@/components/page-intro";
@@ -83,7 +83,7 @@ const DownloadLinkPage = () => {
   }
 
   return (
-    <main className={narrowPageClass}>
+    <SinglePage>
       <PageIcon>
         <PackageOpen />
       </PageIcon>
@@ -113,7 +113,7 @@ const DownloadLinkPage = () => {
           </li>
         ))}
       </ul>
-    </main>
+    </SinglePage>
   );
 };
 

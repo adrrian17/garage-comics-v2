@@ -16,7 +16,7 @@ export const AddToCartButton = ({
 
   if (ids.includes(comicId)) {
     return (
-      <Button variant="outline" size="sm" disabled>
+      <Button variant="outline" disabled>
         <Check data-icon="inline-start" />
         En el carrito
       </Button>
@@ -25,7 +25,6 @@ export const AddToCartButton = ({
 
   return (
     <Button
-      size="sm"
       aria-label={`Agregar ${title} al carrito`}
       onClick={() => {
         if (ids.length >= CART_MAX_ITEMS) {
