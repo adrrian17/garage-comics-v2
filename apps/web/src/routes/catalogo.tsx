@@ -1,6 +1,19 @@
-import { buttonVariants } from "@garage-comics/ui/components/button";
+import { Button, buttonVariants } from "@garage-comics/ui/components/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@garage-comics/ui/components/empty";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@garage-comics/ui/components/input-group";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, Search } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { z } from "zod";
 
 import { ComicGrid } from "@/components/comic-grid";
 import {
@@ -12,12 +25,26 @@ import {
 } from "@/components/page-intro";
 import { getCatalog } from "@/functions/catalog";
 import { getActiveEdition } from "@/functions/editions";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { catalogGenres, filterCatalog } from "@/lib/catalog-filter";
+import { formatDateTime } from "@/lib/format";
+import type { SellableComic } from "@/server/catalog";
 
 type ActiveEdition = Awaited<ReturnType<typeof getActiveEdition>>;
 
-const countLabel = (count: number, one: string, many: string) =>
-  count === 1 ? `1 ${one}` : `${count} ${many}`;
+const CATALOG_STALE_MS = 30_000;
+
+const SEARCH_URL_DELAY_MS = 300;
+
+// A malformed value in a shared link drops that filter instead of failing the page.
+const catalogSearch = z.object({
+  buscar: z.string().optional().catch(undefined),
+  genero: z.string().optional().catch(undefined),
+});
+
+type CatalogSearch = z.infer<typeof catalogSearch>;
+
+// With a single genre on sale the buttons would filter nothing.
+const MIN_GENRES_TO_FILTER = 2;
 
 /** Why there is nothing to buy right now, and when there will be. */
 const closedMessage = (edition: ActiveEdition) => {
@@ -52,34 +79,167 @@ const CatalogPage = () => {
     );
   }
 
-  const { comics } = catalog;
-  const authorCount = new Set(comics.map((comic) => comic.author.slug)).size;
-
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:pb-28">
       <p className="text-muted-foreground mb-3 flex items-center gap-2 text-sm font-medium">
         <span aria-hidden className="bg-print size-2 rounded-full" />
         {catalog.edition.name}
       </p>
-      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
-        <h1 className={pageHeadingClass}>Catálogo</h1>
-        <p className="text-muted-foreground">
-          {countLabel(comics.length, "cómic", "cómics")} de{" "}
-          {countLabel(authorCount, "autor", "autores")}
-          {edition === null
-            ? null
-            : ` · a la venta hasta el ${formatDate(edition.salesCloseAt)}`}
-        </p>
-      </div>
+      <h1 className={pageHeadingClass}>Catálogo</h1>
       <SectionRule />
-      <div className="mt-10">
-        <ComicGrid comics={comics} />
-      </div>
+      <FilteredCatalog comics={catalog.comics} />
     </main>
   );
 };
 
+const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
+  const { buscar = "", genero } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const genres = catalogGenres(comics);
+
+  // A genre from an old link may no longer be on sale; then the filter is off.
+  const genre =
+    genero !== undefined && genres.includes(genero) ? genero : undefined;
+
+  // The box filters as you type; the URL follows once typing pauses, since every navigation re-checks the session.
+  const [search, setSearch] = useState(buscar);
+  const urlTimer = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(
+    () => () => {
+      if (urlTimer.current !== null) {
+        clearTimeout(urlTimer.current);
+      }
+    },
+    []
+  );
+
+  const results = filterCatalog(comics, { search, genre });
+
+  // Clearing a filter passes null; empty filters stay out of the URL.
+  const update = (next: { buscar?: string | null; genero?: string | null }) => {
+    void navigate({
+      search: (previous) => {
+        const merged = { ...previous, ...next };
+        const params: CatalogSearch = {};
+
+        if (
+          merged.buscar !== undefined &&
+          merged.buscar !== null &&
+          merged.buscar !== ""
+        ) {
+          params.buscar = merged.buscar;
+        }
+
+        if (
+          merged.genero !== undefined &&
+          merged.genero !== null &&
+          merged.genero !== ""
+        ) {
+          params.genero = merged.genero;
+        }
+
+        return params;
+      },
+      replace: true,
+      resetScroll: false,
+    });
+  };
+
+  return (
+    <>
+      <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+        <InputGroup className="lg:max-w-sm">
+          <InputGroupInput
+            type="search"
+            aria-label="Buscar en el catálogo"
+            placeholder="Busca por título, autor o género"
+            value={search}
+            onChange={(event) => {
+              const { value } = event.target;
+
+              setSearch(value);
+
+              if (urlTimer.current !== null) {
+                clearTimeout(urlTimer.current);
+              }
+
+              urlTimer.current = setTimeout(() => {
+                update({ buscar: value });
+              }, SEARCH_URL_DELAY_MS);
+            }}
+          />
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+        </InputGroup>
+        {genres.length < MIN_GENRES_TO_FILTER ? null : (
+          <fieldset className="flex flex-wrap gap-2">
+            <legend className="sr-only">Filtrar por género</legend>
+            <Button
+              size="sm"
+              variant={genre === undefined ? "default" : "outline"}
+              aria-pressed={genre === undefined}
+              onClick={() => {
+                update({ genero: null });
+              }}
+            >
+              Todos
+            </Button>
+            {genres.map((item) => (
+              <Button
+                key={item}
+                size="sm"
+                variant={genre === item ? "default" : "outline"}
+                aria-pressed={genre === item}
+                onClick={() => {
+                  update({ genero: genre === item ? null : item });
+                }}
+              >
+                {item}
+              </Button>
+            ))}
+          </fieldset>
+        )}
+      </div>
+      <p aria-live="polite" className="sr-only">
+        {results.length === 1 ? "1 cómic" : `${results.length} cómics`}
+      </p>
+      {results.length > 0 ? (
+        <div className="mt-10">
+          <ComicGrid comics={results} />
+        </div>
+      ) : (
+        <div className="border-foreground/20 mt-10 rounded-2xl border border-dashed">
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>Ningún cómic coincide</EmptyTitle>
+              <EmptyDescription>
+                Prueba con otras palabras o quita los filtros.
+              </EmptyDescription>
+            </EmptyHeader>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (urlTimer.current !== null) {
+                  clearTimeout(urlTimer.current);
+                }
+
+                setSearch("");
+                update({ buscar: null, genero: null });
+              }}
+            >
+              Quitar filtros
+            </Button>
+          </Empty>
+        </div>
+      )}
+    </>
+  );
+};
+
 export const Route = createFileRoute("/catalogo")({
+  validateSearch: catalogSearch,
   loader: async () => {
     const [edition, catalog] = await Promise.all([
       getActiveEdition(),
@@ -88,6 +248,8 @@ export const Route = createFileRoute("/catalogo")({
 
     return { edition, catalog };
   },
+  // Typing in the search box rewrites the URL on every key; the comics on sale do not change that fast.
+  staleTime: CATALOG_STALE_MS,
   head: () => ({
     meta: [
       { title: "Catálogo · Garage Cómics" },

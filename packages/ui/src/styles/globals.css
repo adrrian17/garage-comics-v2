@@ -186,8 +186,16 @@
     font-size: 1rem;
   }
 
-  & [data-slot="input"] {
+  & :is([data-slot="input"], [data-slot="input-group"]) {
     height: 2.75rem;
+  }
+
+  & [data-slot="input-group"] {
+    background-color: var(--card);
+  }
+
+  & [data-slot="input-group-control"] {
+    font-size: 1rem;
   }
 }
 
