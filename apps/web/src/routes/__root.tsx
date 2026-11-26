@@ -8,13 +8,17 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
 
+import { CountdownBar } from "@/components/countdown-bar";
 import Footer from "@/components/footer";
 import SiteHeader from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { getActiveEdition } from "@/functions/editions";
 import { getSession } from "@/functions/session";
 import { useDashboardHome } from "@/lib/use-dashboard-home";
 
 import appCss from "../index.css?url";
+
+const EDITION_STALE_MS = 60_000;
 
 const RootDocument = ({ children }: { children: ReactNode }) => (
   <html lang="es-MX" suppressHydrationWarning>
@@ -31,6 +35,7 @@ const RootDocument = ({ children }: { children: ReactNode }) => (
 const RootComponent = () => {
   // The Admin and Author areas bring their own sidebar layout instead of the public chrome.
   const isDashboard = useDashboardHome() !== undefined;
+  const edition = Route.useLoaderData();
 
   return (
     <>
@@ -43,7 +48,10 @@ const RootComponent = () => {
         {isDashboard ? (
           <Outlet />
         ) : (
-          <div className="storefront grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto]">
+          <div className="storefront grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_auto_1fr_auto]">
+            <div>
+              <CountdownBar edition={edition} />
+            </div>
             <SiteHeader />
             <Outlet />
             <Footer />
@@ -60,6 +68,9 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
   component: RootComponent,
   beforeLoad: async () => ({ session: await getSession() }),
+  // The countdown on every public page needs the active Edition; a minute-old phase is close enough between navigations.
+  loader: async () => await getActiveEdition(),
+  staleTime: EDITION_STALE_MS,
   head: () => ({
     meta: [
       { charSet: "utf-8" },
