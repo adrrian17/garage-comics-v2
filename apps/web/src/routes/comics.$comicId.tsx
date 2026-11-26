@@ -9,16 +9,6 @@ import { formatMxn } from "@/lib/format";
 
 const DESCRIPTION_META_LENGTH = 160;
 
-// What every comic bought here comes with; the Download Link page and the order email say the same.
-const delivery = [
-  { label: "Formato", value: "PDF digital" },
-  { label: "Entrega", value: "Link de descarga a tu correo" },
-  {
-    label: "Marca de agua",
-    value: "Tu correo y tu Número de compra al pie de cada página",
-  },
-] as const;
-
 const ComicPage = () => {
   const { comic, moreByAuthor } = Route.useLoaderData();
 
@@ -64,19 +54,6 @@ const ComicPage = () => {
               {comic.description}
             </p>
           )}
-          <dl className="panel mt-10 divide-y px-5">
-            {delivery.map((item) => (
-              <div
-                key={item.label}
-                className="flex flex-wrap justify-between gap-x-6 gap-y-1 py-4"
-              >
-                <dt className="text-muted-foreground text-sm">{item.label}</dt>
-                <dd className="text-sm font-medium sm:text-right">
-                  {item.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
         </div>
       </article>
       {moreByAuthor.length === 0 ? null : (
