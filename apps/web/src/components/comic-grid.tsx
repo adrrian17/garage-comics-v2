@@ -53,11 +53,24 @@ const ComicCard = ({
   action?: ReactNode;
 }) => (
   <article className="group/comic flex w-full flex-col">
-    <div className="ring-foreground/15 group-hover/comic:print-offset overflow-hidden rounded-lg ring-1 transition duration-200 ease-out group-hover/comic:-translate-x-1 group-hover/comic:-translate-y-1 motion-reduce:transition-none motion-reduce:group-hover/comic:translate-0">
+    {/* The title link below is the one keyboards and screen readers use; the cover is a larger target for the pointer. */}
+    <Link
+      to="/comics/$comicId"
+      params={{ comicId: comic.id }}
+      tabIndex={-1}
+      aria-hidden
+      className="ring-foreground/15 group-hover/comic:print-offset overflow-hidden rounded-lg ring-1 transition duration-200 ease-out group-hover/comic:-translate-x-1 group-hover/comic:-translate-y-1 motion-reduce:transition-none motion-reduce:group-hover/comic:translate-0"
+    >
       <ComicCover comic={comic} />
-    </div>
+    </Link>
     <h3 className="font-display mt-4 text-lg leading-snug font-semibold tracking-tight text-pretty wrap-anywhere">
-      {comic.title}
+      <Link
+        to="/comics/$comicId"
+        params={{ comicId: comic.id }}
+        className="decoration-print decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+      >
+        {comic.title}
+      </Link>
     </h3>
     {showAuthor ? (
       <Link

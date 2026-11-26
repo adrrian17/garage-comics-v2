@@ -9,6 +9,35 @@ export const getCatalog = createServerFn({ method: "GET" }).handler(
   async () => await sellableComics(createDatabase(), new Date())
 );
 
+// Edition comic ids are UUIDs; anything longer is not one of ours.
+const COMIC_ID_MAX_LENGTH = 64;
+
+/** A comic on sale and the Author's other comics on sale, or null when it is not on sale (unknown, unapproved or outside sales). */
+export const getComicPage = createServerFn({ method: "GET" })
+  .validator(z.object({ id: z.string().max(COMIC_ID_MAX_LENGTH) }))
+  .handler(async ({ data }) => {
+    const db = createDatabase();
+    const now = new Date();
+    const found = await sellableComics(db, now, { ids: [data.id] });
+    const [comic] = found.status === "open" ? found.comics : [];
+
+    if (comic === undefined) {
+      return null;
+    }
+
+    const byAuthor = await sellableComics(db, now, {
+      authorSlug: comic.author.slug,
+    });
+
+    return {
+      comic,
+      moreByAuthor:
+        byAuthor.status === "open"
+          ? byAuthor.comics.filter((other) => other.id !== comic.id)
+          : [],
+    };
+  });
+
 /** What the cart holds that can still be bought, priced by the database, and the ids that can no longer be. */
 export const getCartLines = createServerFn({ method: "GET" })
   .validator(z.object({ ids: cartIds }))

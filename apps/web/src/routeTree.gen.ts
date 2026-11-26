@@ -32,6 +32,7 @@ import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
 import { Route as AutorVentasRouteImport } from './routes/autor/ventas'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
+import { Route as ComicsComicIdRouteImport } from './routes/comics.$comicId'
 import { Route as CompraListaRouteImport } from './routes/compra.lista'
 import { Route as DescargasDownloadLinkIdRouteImport } from './routes/descargas.$downloadLinkId'
 import { Route as InscripcionProposalIdRouteImport } from './routes/inscripcion.$proposalId'
@@ -156,6 +157,11 @@ const AutoresSlugRoute = AutoresSlugRouteImport.update({
   path: '/autores/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComicsComicIdRoute = ComicsComicIdRouteImport.update({
+  id: '/comics/$comicId',
+  path: '/comics/$comicId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CompraListaRoute = CompraListaRouteImport.update({
   id: '/compra/lista',
   path: '/compra/lista',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autor/ventas': typeof AutorVentasRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/comics/$comicId': typeof ComicsComicIdRoute
   '/compra/lista': typeof CompraListaRoute
   '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
@@ -251,6 +258,7 @@ export interface FileRoutesByTo {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autor/ventas': typeof AutorVentasRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/comics/$comicId': typeof ComicsComicIdRoute
   '/compra/lista': typeof CompraListaRoute
   '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autor/ventas': typeof AutorVentasRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/comics/$comicId': typeof ComicsComicIdRoute
   '/compra/lista': typeof CompraListaRoute
   '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
@@ -320,6 +329,7 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autor/ventas'
     | '/autores/$slug'
+    | '/comics/$comicId'
     | '/compra/lista'
     | '/descargas/$downloadLinkId'
     | '/inscripcion/$proposalId'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autor/ventas'
     | '/autores/$slug'
+    | '/comics/$comicId'
     | '/compra/lista'
     | '/descargas/$downloadLinkId'
     | '/inscripcion/$proposalId'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autor/ventas'
     | '/autores/$slug'
+    | '/comics/$comicId'
     | '/compra/lista'
     | '/descargas/$downloadLinkId'
     | '/inscripcion/$proposalId'
@@ -405,6 +417,7 @@ export interface RootRouteChildren {
   EntrarRoute: typeof EntrarRoute
   PropuestaRoute: typeof PropuestaRoute
   AutoresSlugRoute: typeof AutoresSlugRoute
+  ComicsComicIdRoute: typeof ComicsComicIdRoute
   CompraListaRoute: typeof CompraListaRoute
   DescargasDownloadLinkIdRoute: typeof DescargasDownloadLinkIdRoute
   InscripcionProposalIdRoute: typeof InscripcionProposalIdRoute
@@ -578,6 +591,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutoresSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/comics/$comicId': {
+      id: '/comics/$comicId'
+      path: '/comics/$comicId'
+      fullPath: '/comics/$comicId'
+      preLoaderRoute: typeof ComicsComicIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/compra/lista': {
       id: '/compra/lista'
       path: '/compra/lista'
@@ -696,6 +716,7 @@ const rootRouteChildren: RootRouteChildren = {
   EntrarRoute: EntrarRoute,
   PropuestaRoute: PropuestaRoute,
   AutoresSlugRoute: AutoresSlugRoute,
+  ComicsComicIdRoute: ComicsComicIdRoute,
   CompraListaRoute: CompraListaRoute,
   DescargasDownloadLinkIdRoute: DescargasDownloadLinkIdRoute,
   InscripcionProposalIdRoute: InscripcionProposalIdRoute,
