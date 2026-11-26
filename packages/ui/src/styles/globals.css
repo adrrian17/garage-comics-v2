@@ -146,8 +146,10 @@
 /*
  * The public store's look: warm paper, ink and one print red taken from the logo.
  * Only the storefront layout applies it, so the Admin and Author dashboards keep the neutral theme above.
+ * Menus render in a portal outside that layout, so on public pages they take the same tokens.
  */
-@utility storefront {
+.storefront,
+body:has(.storefront) [data-slot="dropdown-menu-content"] {
   --background: oklch(98.4% 0.006 75);
   --foreground: oklch(20% 0.014 45);
   --card: oklch(99.4% 0.003 75);
@@ -171,6 +173,9 @@
   /* The poster's own paper, so its illustration bleeds into the page without a seam. */
   --poster: oklch(87.6% 0.052 50);
   --radius: 0.75rem;
+}
+
+@utility storefront {
 
   background-color: var(--background);
   color: var(--foreground);

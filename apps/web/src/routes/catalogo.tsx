@@ -1,5 +1,12 @@
 import { Button, buttonVariants } from "@garage-comics/ui/components/button";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@garage-comics/ui/components/dropdown-menu";
+import {
   Empty,
   EmptyDescription,
   EmptyHeader,
@@ -11,7 +18,7 @@ import {
   InputGroupInput,
 } from "@garage-comics/ui/components/input-group";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { CalendarClock, Search } from "lucide-react";
+import { CalendarClock, ChevronDown, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
@@ -35,6 +42,9 @@ const CATALOG_STALE_MS = 30_000;
 
 const SEARCH_URL_DELAY_MS = 300;
 
+// The menu's value for "no genre filter"; no genre is named with an empty string.
+const ALL_GENRES = "";
+
 // A malformed value in a shared link drops that filter instead of failing the page.
 const catalogSearch = z.object({
   buscar: z.string().optional().catch(undefined),
@@ -43,7 +53,7 @@ const catalogSearch = z.object({
 
 type CatalogSearch = z.infer<typeof catalogSearch>;
 
-// With a single genre on sale the buttons would filter nothing.
+// With a single genre on sale the menu would filter nothing.
 const MIN_GENRES_TO_FILTER = 2;
 
 /** Why there is nothing to buy right now, and when there will be. */
@@ -148,8 +158,8 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
 
   return (
     <>
-      <div className="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
-        <InputGroup className="lg:max-w-sm">
+      <div className="mt-8 flex flex-wrap items-center gap-3">
+        <InputGroup className="min-w-60 flex-1 sm:max-w-md">
           <InputGroupInput
             type="search"
             aria-label="Buscar en el catálogo"
@@ -174,32 +184,33 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
           </InputGroupAddon>
         </InputGroup>
         {genres.length < MIN_GENRES_TO_FILTER ? null : (
-          <fieldset className="flex flex-wrap gap-2">
-            <legend className="sr-only">Filtrar por género</legend>
-            <Button
-              size="sm"
-              variant={genre === undefined ? "default" : "outline"}
-              aria-pressed={genre === undefined}
-              onClick={() => {
-                update({ genero: null });
-              }}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={<Button variant="outline" size="lg" />}
+              aria-label={`Filtrar por género: ${genre ?? "todos"}`}
             >
-              Todos
-            </Button>
-            {genres.map((item) => (
-              <Button
-                key={item}
-                size="sm"
-                variant={genre === item ? "default" : "outline"}
-                aria-pressed={genre === item}
-                onClick={() => {
-                  update({ genero: genre === item ? null : item });
+              <span className="text-muted-foreground">Género:</span>
+              {genre ?? "Todos"}
+              <ChevronDown data-icon="inline-end" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuRadioGroup
+                value={genre ?? ALL_GENRES}
+                onValueChange={(value: string) => {
+                  update({ genero: value === ALL_GENRES ? null : value });
                 }}
               >
-                {item}
-              </Button>
-            ))}
-          </fieldset>
+                <DropdownMenuRadioItem value={ALL_GENRES}>
+                  Todos
+                </DropdownMenuRadioItem>
+                {genres.map((item) => (
+                  <DropdownMenuRadioItem key={item} value={item}>
+                    {item}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
       <p aria-live="polite" className="sr-only">
