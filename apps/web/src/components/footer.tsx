@@ -1,17 +1,54 @@
 import { Link } from "@tanstack/react-router";
 
-const publicLinks = [
-  { to: "/", label: "Inicio" },
-  { to: "/propuesta", label: "Participa" },
+const linkGroups = [
+  {
+    title: "Tienda",
+    links: [
+      { to: "/", label: "Catálogo" },
+      { to: "/carrito", label: "Carrito" },
+    ],
+  },
+  {
+    title: "Autores",
+    links: [
+      { to: "/propuesta", label: "Manda tu propuesta" },
+      { to: "/entrar", label: "Entrar" },
+    ],
+  },
 ] as const;
 
 // Evaluated once per Worker isolate; the year only lags until the next deploy or restart.
 const currentYear = new Date().getFullYear();
 
 const Footer = () => (
-  <footer className="border-t">
-    <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-8 sm:px-6">
-      <div className="flex items-center gap-3">
+  <footer className="bg-foreground text-background">
+    <div className="mx-auto grid w-full max-w-6xl gap-x-12 gap-y-8 px-4 pt-10 pb-8 sm:px-6 sm:pt-14 md:grid-cols-[1fr_auto]">
+      <p className="font-display max-w-md text-xl leading-tight font-semibold tracking-tight text-balance sm:text-3xl">
+        Cómics digitales de autores mexicanos, una Edición a la vez.
+      </p>
+      <nav
+        aria-label="Pie de página"
+        className="grid grid-cols-2 gap-x-16 gap-y-8 max-sm:gap-x-8"
+      >
+        {linkGroups.map((group) => (
+          <div key={group.title} className="flex flex-col gap-3">
+            <h2 className="text-background/55 text-sm">{group.title}</h2>
+            <ul className="flex flex-col gap-2">
+              {group.links.map((link) => (
+                <li key={link.to}>
+                  <Link
+                    to={link.to}
+                    className="hover:text-print focus-visible:ring-print/60 rounded-sm text-sm transition-colors outline-none focus-visible:ring-3"
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </nav>
+      <div className="border-background/15 flex flex-wrap items-center justify-between gap-4 border-t pt-6 md:col-span-2 md:mt-4">
         <img
           src="/logo.webp"
           alt="Garage Cómics"
@@ -19,22 +56,10 @@ const Footer = () => (
           height={24}
           className="h-6 w-auto"
         />
-        <p className="text-muted-foreground text-sm">
-          © {currentYear} Garage Cómics
+        <p className="text-background/55 text-sm">
+          © {currentYear} Garage Cómics · Hecho en México
         </p>
       </div>
-      <nav aria-label="Pie de página" className="flex items-center gap-6">
-        {publicLinks.map((link) => (
-          <Link
-            key={link.to}
-            to={link.to}
-            activeOptions={{ exact: true }}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 rounded-sm text-sm outline-none focus-visible:ring-3"
-          >
-            {link.label}
-          </Link>
-        ))}
-      </nav>
     </div>
   </footer>
 );

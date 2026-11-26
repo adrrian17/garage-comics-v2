@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/figtree";
+@import "@fontsource-variable/bricolage-grotesque/opsz.css";
 @source "../../../apps/**/*.{ts,tsx}";
 @source "../**/*.{ts,tsx}";
 
@@ -81,6 +82,14 @@
 @theme inline {
   --font-sans: 'Figtree Variable', sans-serif;
   --font-heading: var(--font-sans);
+  --font-display: "Bricolage Grotesque Variable", var(--font-sans);
+  --color-print: var(--print);
+  --color-print-foreground: var(--print-foreground);
+  --color-paper-deep: var(--paper-deep);
+  --color-poster: var(--poster);
+  --text-hero: clamp(3.25rem, 6.6vw, 6.25rem);
+  --text-hero--line-height: 0.92;
+  --text-hero--letter-spacing: -0.035em;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -132,4 +141,85 @@
   html {
     @apply font-sans;
   }
+}
+
+/*
+ * The public store's look: warm paper, ink and one print red taken from the logo.
+ * Only the storefront layout applies it, so the Admin and Author dashboards keep the neutral theme above.
+ */
+@utility storefront {
+  --background: oklch(98.4% 0.006 75);
+  --foreground: oklch(20% 0.014 45);
+  --card: oklch(99.4% 0.003 75);
+  --card-foreground: var(--foreground);
+  --popover: oklch(99.4% 0.003 75);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(20% 0.014 45);
+  --primary-foreground: oklch(98.4% 0.006 75);
+  --secondary: oklch(95.2% 0.012 70);
+  --secondary-foreground: var(--foreground);
+  --muted: oklch(95.2% 0.012 70);
+  --muted-foreground: oklch(47% 0.018 50);
+  --accent: oklch(95.2% 0.012 70);
+  --accent-foreground: var(--foreground);
+  --border: oklch(88.5% 0.014 65);
+  --input: oklch(79% 0.02 60);
+  --ring: oklch(55% 0.19 32);
+  --print: oklch(55% 0.19 32);
+  --print-foreground: oklch(99% 0.004 75);
+  --paper-deep: oklch(93.5% 0.03 58);
+  /* The poster's own paper, so its illustration bleeds into the page without a seam. */
+  --poster: oklch(87.6% 0.052 50);
+  --radius: 0.75rem;
+
+  background-color: var(--background);
+  color: var(--foreground);
+
+  & ::selection {
+    background-color: color-mix(in oklch, var(--print) 22%, transparent);
+  }
+
+  /* Form controls get a roomier, touch-sized field on the public pages. */
+  & :is([data-slot="input"], [data-slot="textarea"]) {
+    background-color: var(--card);
+    padding-inline: 0.875rem;
+    font-size: 1rem;
+  }
+
+  & [data-slot="input"] {
+    height: 2.75rem;
+  }
+}
+
+@utility font-display {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+
+/* A quiet card: hairline border on paper, the store's one container shape. */
+@utility panel {
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  background-color: var(--card);
+}
+
+/* Starts content at the left edge of the centered 72rem column while its box bleeds to the viewport edge. */
+@utility pl-column-edge {
+  padding-left: max(1.5rem, calc((100vw - 72rem) / 2 + 1.5rem));
+}
+
+/* The landing hero fills the first screen under the header, up to a cap on tall screens. */
+@utility min-h-hero {
+  min-height: min(40rem, calc(100svh - 4rem));
+}
+
+/* A title set as a cover, sized to the cover's width wherever it is shown. Needs a size container parent. */
+@utility cover-title {
+  padding: 9cqi;
+  font-size: clamp(0.5rem, 13cqi, 1.6rem);
+}
+
+/* The print-misregistration offset shown when a cover is hovered. */
+@utility print-offset {
+  box-shadow: 6px 6px 0 0 var(--print);
 }

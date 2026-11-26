@@ -3,6 +3,12 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { MailCheck } from "lucide-react";
 import { useEffect } from "react";
 
+import {
+  PageIcon,
+  narrowPageClass,
+  pageHeadingClass,
+  pageLeadClass,
+} from "@/components/page-intro";
 import { useCart } from "@/lib/use-cart";
 
 const OrderPlacedPage = () => {
@@ -14,18 +20,18 @@ const OrderPlacedPage = () => {
   }, [clear]);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
-      <MailCheck aria-hidden className="mb-4 size-8" />
-      <h1 className="text-3xl font-bold tracking-tight">
-        Estamos confirmando tu pago
-      </h1>
-      <p className="text-muted-foreground mt-2">
+    <main className={narrowPageClass}>
+      <PageIcon>
+        <MailCheck />
+      </PageIcon>
+      <h1 className={pageHeadingClass}>Estamos confirmando tu pago</h1>
+      <p className={pageLeadClass}>
         En cuanto se confirme, te mandamos por correo tu Número de compra y tu
         Link de descarga. Si elegiste OXXO, la confirmación llega cuando pagues
         en la tienda y se registre tu pago. Si no pagas a tiempo, la Compra se
         cancela y no se te cobra nada.
       </p>
-      <Link to="/" className={buttonVariants({ className: "mt-8" })}>
+      <Link to="/" className={buttonVariants({ className: "mt-10" })}>
         Volver al catálogo
       </Link>
     </main>

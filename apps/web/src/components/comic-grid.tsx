@@ -1,16 +1,46 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@garage-comics/ui/components/card";
+import { cn } from "@garage-comics/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { formatMxn } from "@/lib/format";
 import type { SellableComic } from "@/server/catalog";
+
+/** A cover, or the title set as type when the Author has not uploaded one. The title beside it names the comic, so the stand-in is hidden. */
+export const ComicCover = ({
+  comic,
+  className,
+}: {
+  comic: Pick<SellableComic, "id" | "title" | "hasCover">;
+  className?: string;
+}) => {
+  if (!comic.hasCover) {
+    return (
+      <div
+        aria-hidden
+        className={cn(
+          "bg-paper-deep @container flex aspect-2/3 w-full items-end",
+          className
+        )}
+      >
+        <span className="font-display cover-title line-clamp-4 w-full leading-tight font-semibold tracking-tight wrap-anywhere">
+          {comic.title}
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={`/portadas/${comic.id}`}
+      alt={`Portada de ${comic.title}`}
+      width={400}
+      height={600}
+      loading="lazy"
+      className={cn("bg-muted aspect-2/3 w-full object-cover", className)}
+    />
+  );
+};
 
 const ComicCard = ({
   comic,
@@ -21,52 +51,38 @@ const ComicCard = ({
   showAuthor: boolean;
   action?: ReactNode;
 }) => (
-  <Card size="sm" className="w-full">
-    {comic.hasCover ? (
-      <img
-        src={`/portadas/${comic.id}`}
-        alt={`Portada de ${comic.title}`}
-        width={400}
-        height={600}
-        loading="lazy"
-        className="aspect-[2/3] w-full object-cover"
-      />
-    ) : (
-      <div
-        aria-hidden
-        className="bg-muted text-muted-foreground flex aspect-[2/3] w-full items-center justify-center text-sm"
-      >
-        Sin portada
-      </div>
-    )}
-    <CardHeader>
-      <CardTitle className="wrap-anywhere">{comic.title}</CardTitle>
-      <CardDescription>
-        {showAuthor && (
-          <>
-            <Link
-              to="/autores/$slug"
-              params={{ slug: comic.author.slug }}
-              className="underline"
-            >
-              {comic.author.displayName}
-            </Link>
-            {" · "}
-          </>
-        )}
-        {comic.genre} · {comic.pageCount} páginas
-      </CardDescription>
-    </CardHeader>
-    <CardContent className="mt-auto">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-base font-semibold">{formatMxn(comic.priceMxn)}</p>
-        {action}
-      </div>
-    </CardContent>
-  </Card>
+  <article className="group/comic flex w-full flex-col">
+    <div className="ring-foreground/10 group-hover/comic:print-offset overflow-hidden ring-1 transition duration-200 ease-out group-hover/comic:-translate-x-1 group-hover/comic:-translate-y-1 motion-reduce:transition-none motion-reduce:group-hover/comic:translate-0">
+      <ComicCover comic={comic} />
+    </div>
+    <h3 className="font-display mt-4 text-lg leading-snug font-semibold tracking-tight text-pretty wrap-anywhere">
+      {comic.title}
+    </h3>
+    <p className="text-muted-foreground mt-1 text-sm">
+      {showAuthor && (
+        <>
+          <Link
+            to="/autores/$slug"
+            params={{ slug: comic.author.slug }}
+            className="text-foreground decoration-print decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+          >
+            {comic.author.displayName}
+          </Link>
+          <span aria-hidden> · </span>
+        </>
+      )}
+      {comic.genre} · {comic.pageCount} páginas
+    </p>
+    <div className="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-3 pt-4">
+      <p className="font-display text-lg font-semibold tabular-nums">
+        {formatMxn(comic.priceMxn)}
+      </p>
+      {action}
+    </div>
+  </article>
 );
 
-/** The comics on sale as cards: cover, title, Author, price. */
+/** The comics on sale: cover, title, Author, price. */
 export const ComicGrid = ({
   comics,
   showAuthor = true,
@@ -74,7 +90,7 @@ export const ComicGrid = ({
   comics: SellableComic[];
   showAuthor?: boolean;
 }) => (
-  <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+  <ul className="grid grid-cols-2 gap-x-4 gap-y-12 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 lg:gap-x-8">
     {comics.map((comic) => (
       <li key={comic.id} className="flex">
         <ComicCard

@@ -1,10 +1,16 @@
 import { Alert, AlertDescription } from "@garage-comics/ui/components/alert";
 import { Button, buttonVariants } from "@garage-comics/ui/components/button";
 import { Link, createFileRoute, useRouter } from "@tanstack/react-router";
-import { MailCheck } from "lucide-react";
+import { BadgeCheck, CalendarX, MailCheck, Ticket } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 
+import {
+  PageIcon,
+  narrowPageClass,
+  pageHeadingClass,
+  pageLeadClass,
+} from "@/components/page-intro";
 import {
   getRegistrationOffer,
   startRegistrationCheckout,
@@ -13,17 +19,17 @@ import { formatDateTime, formatMxn } from "@/lib/format";
 
 type Offer = Awaited<ReturnType<typeof getRegistrationOffer>>;
 
-const headingClass = "text-3xl font-bold tracking-tight";
-
 const Heading = ({ children }: { children: string }) => (
-  <h1 className={headingClass}>{children}</h1>
+  <h1 className={pageHeadingClass}>{children}</h1>
 );
 
 const CheckEmail = () => (
   <>
-    <MailCheck aria-hidden className="mb-4 size-8" />
+    <PageIcon>
+      <MailCheck />
+    </PageIcon>
     <Heading>Revisa tu correo</Heading>
-    <p className="text-muted-foreground mt-2">
+    <p className={pageLeadClass}>
       Estamos confirmando tu pago. En unos minutos te mandaremos un link para
       entrar a Garage Cómics y armar tu perfil.
     </p>
@@ -69,23 +75,26 @@ const Pay = ({
 
   return (
     <>
+      <PageIcon>
+        <Ticket />
+      </PageIcon>
       <Heading>Paga tu Inscripción</Heading>
-      <p className="text-muted-foreground mt-2">
+      <p className={pageLeadClass}>
         Tu propuesta para {offer.editionName} fue aceptada. Paga tu Inscripción
         para asegurar tu lugar. Tu cuenta de Autor usará{" "}
         <strong className="text-foreground wrap-anywhere">{offer.email}</strong>
         .
       </p>
-      <dl className="mt-8 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-xl border p-4">
+      <dl className="mt-10 grid gap-3 sm:grid-cols-2">
+        <div className="panel p-5">
           <dt className="text-muted-foreground text-sm">Inscripción</dt>
-          <dd className="text-base font-semibold">
+          <dd className="font-display mt-1 text-3xl font-semibold tracking-tight tabular-nums">
             {formatMxn(offer.priceMxn)}
           </dd>
         </div>
-        <div className="rounded-xl border p-4">
+        <div className="panel p-5">
           <dt className="text-muted-foreground text-sm">Págala antes del</dt>
-          <dd className="text-base font-semibold">
+          <dd className="font-display mt-1 text-lg leading-snug font-semibold tracking-tight">
             {formatDateTime(offer.deadline)}
           </dd>
         </div>
@@ -97,7 +106,7 @@ const Pay = ({
       )}
       <Button
         size="lg"
-        className="mt-8"
+        className="mt-10"
         disabled={isPending}
         onClick={() => {
           void pay();
@@ -111,11 +120,12 @@ const Pay = ({
 
 const Registered = () => (
   <>
+    <PageIcon>
+      <BadgeCheck />
+    </PageIcon>
     <Heading>Tu Inscripción ya está pagada</Heading>
-    <p className="text-muted-foreground mt-2">
-      Entra con tu correo para ver tu cuenta.
-    </p>
-    <Link to="/entrar" className={buttonVariants({ className: "mt-8" })}>
+    <p className={pageLeadClass}>Entra con tu correo para ver tu cuenta.</p>
+    <Link to="/entrar" className={buttonVariants({ className: "mt-10" })}>
       Entrar
     </Link>
   </>
@@ -123,15 +133,18 @@ const Registered = () => (
 
 const Expired = () => (
   <>
+    <PageIcon>
+      <CalendarX />
+    </PageIcon>
     <Heading>Este link ya no funciona</Heading>
-    <p className="text-muted-foreground mt-2">
+    <p className={pageLeadClass}>
       El plazo para pagar esta Inscripción terminó o el link no es válido. Si
       todavía quieres participar, manda una nueva propuesta mientras la
       convocatoria siga abierta.
     </p>
     <Link
       to="/propuesta"
-      className={buttonVariants({ variant: "outline", className: "mt-8" })}
+      className={buttonVariants({ variant: "outline", className: "mt-10" })}
     >
       Ir a propuestas
     </Link>
@@ -168,11 +181,7 @@ const RegistrationPage = () => {
     }
   };
 
-  return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
-      {content()}
-    </main>
-  );
+  return <main className={narrowPageClass}>{content()}</main>;
 };
 
 export const Route = createFileRoute("/inscripcion/$proposalId")({

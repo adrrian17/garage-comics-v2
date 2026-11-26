@@ -2,6 +2,11 @@ import { Button, buttonVariants } from "@garage-comics/ui/components/button";
 import { Link, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
+import {
+  narrowPageClass,
+  pageHeadingClass,
+  pageLeadClass,
+} from "@/components/page-intro";
 import { useDashboardHome } from "@/lib/use-dashboard-home";
 
 export const PageMessage = ({
@@ -20,15 +25,27 @@ export const PageMessage = ({
 
   return (
     <Wrapper
-      className={
-        dashboardHome === undefined
-          ? "mx-auto w-full max-w-2xl px-4 py-12 sm:px-6"
-          : "max-w-2xl"
-      }
+      className={dashboardHome === undefined ? narrowPageClass : "max-w-2xl"}
     >
-      <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-      <p className="text-muted-foreground mt-2">{description}</p>
-      <div className="mt-8 flex flex-wrap gap-2">
+      <h1
+        className={
+          dashboardHome === undefined
+            ? pageHeadingClass
+            : "text-3xl font-bold tracking-tight"
+        }
+      >
+        {title}
+      </h1>
+      <p
+        className={
+          dashboardHome === undefined
+            ? pageLeadClass
+            : "text-muted-foreground mt-2"
+        }
+      >
+        {description}
+      </p>
+      <div className="mt-10 flex flex-wrap gap-2">
         {action}
         <Link
           to={dashboardHome ?? "/"}

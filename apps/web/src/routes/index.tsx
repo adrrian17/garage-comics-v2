@@ -1,9 +1,8 @@
 import { buttonVariants } from "@garage-comics/ui/components/button";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { SquarePen } from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { CartLink } from "@/components/cart-link";
 import { ComicGrid } from "@/components/comic-grid";
 import { getCatalog } from "@/functions/catalog";
 import { getActiveEdition } from "@/functions/editions";
@@ -11,62 +10,160 @@ import { formatDate, formatDateTime } from "@/lib/format";
 
 type ActiveEdition = Awaited<ReturnType<typeof getActiveEdition>>;
 
+type OpenEdition = NonNullable<ActiveEdition>;
+
 type Catalog = Awaited<ReturnType<typeof getCatalog>>;
 
-const Hero = ({
-  kicker,
-  title,
-  children,
-}: {
-  kicker: string;
-  title: string;
-  children: ReactNode;
-}) => (
-  <section className="grid items-center gap-12 lg:grid-cols-2">
-    <div className="flex flex-col gap-6">
-      <img
-        src="/logo.webp"
-        alt=""
-        width={130}
-        height={56}
-        className="h-14 w-auto self-start"
-      />
-      <p className="text-muted-foreground text-sm font-medium">{kicker}</p>
-      <h1 className="text-4xl leading-tight font-bold tracking-tight text-balance sm:text-5xl">
-        {title}
-      </h1>
-      <div className="text-muted-foreground flex max-w-prose flex-col gap-6 text-base">
-        {children}
-      </div>
-    </div>
-    <img
-      src="/poster.webp"
-      alt="Ilustración de un puesto de cómics en la calle, atendido por criaturas fantásticas y rodeado de lectores"
-      width={791}
-      height={1222}
-      fetchPriority="high"
-      className="mx-auto h-auto w-full max-w-md rounded-3xl shadow-xl lg:mr-0 lg:ml-auto"
+type EditionWindow = "proposals" | "sales";
+
+const Status = ({ live, children }: { live: boolean; children: string }) => (
+  <p className="flex items-center gap-2 text-sm font-medium">
+    <span
+      aria-hidden
+      className={`size-2 rounded-full ${live ? "bg-print" : "bg-muted-foreground/50"}`}
     />
-  </section>
+    {children}
+  </p>
 );
 
-const EditionDates = ({ edition }: { edition: NonNullable<ActiveEdition> }) => (
-  <dl className="grid gap-4 sm:grid-cols-2">
-    <div className="rounded-xl border p-4">
-      <dt className="text-muted-foreground text-sm">Propuestas</dt>
-      <dd className="text-foreground text-base font-semibold">
-        {formatDate(edition.proposalsOpenAt)} al{" "}
-        {formatDate(edition.proposalsCloseAt)}
-      </dd>
-    </div>
-    <div className="rounded-xl border p-4">
-      <dt className="text-muted-foreground text-sm">Venta</dt>
-      <dd className="text-foreground text-base font-semibold">
-        {formatDate(edition.salesOpenAt)} al {formatDate(edition.salesCloseAt)}
-      </dd>
-    </div>
+const DateRange = ({
+  label,
+  from,
+  to,
+  current,
+}: {
+  label: string;
+  from: Date;
+  to: Date;
+  current: boolean;
+}) => (
+  <div className="lg:first:pl-column-edge flex flex-col gap-2 px-4 py-7 sm:px-6 lg:first:pr-14 lg:last:px-14">
+    <dt className="text-muted-foreground flex items-center gap-2 text-sm">
+      {label}
+      {current ? (
+        <span className="bg-print text-print-foreground rounded-full px-2 py-0.5 text-xs font-semibold">
+          Ahora
+        </span>
+      ) : null}
+    </dt>
+    <dd className="font-display max-w-xs text-2xl leading-tight font-semibold tracking-tight text-balance">
+      {formatDate(from)} al {formatDate(to)}
+    </dd>
+  </div>
+);
+
+/** The Edition's two windows as a ruled strip under the hero, on the hero's own columns so the rules line up. */
+const EditionDates = ({
+  edition,
+  current,
+}: {
+  edition: OpenEdition;
+  current?: EditionWindow;
+}) => (
+  <dl className="grid max-lg:divide-y lg:grid-cols-2 lg:divide-x">
+    <DateRange
+      label="Propuestas"
+      from={edition.proposalsOpenAt}
+      to={edition.proposalsCloseAt}
+      current={current === "proposals"}
+    />
+    <DateRange
+      label="Venta"
+      from={edition.salesOpenAt}
+      to={edition.salesCloseAt}
+      current={current === "sales"}
+    />
   </dl>
 );
+
+/**
+ * The landing's opening spread: copy on the left, the poster bleeding off the right edge like a splash page.
+ * `poster-scene.webp` is the newsstand scene cut out of `poster.webp`, whose top and bottom boxes are placeholders.
+ */
+const Hero = ({
+  status,
+  live = false,
+  title,
+  children,
+  dates,
+}: {
+  status: string;
+  live?: boolean;
+  title: string;
+  children: ReactNode;
+  dates?: ReactNode;
+}) => (
+  <>
+    <section className="border-b">
+      <div className="lg:min-h-hero grid lg:grid-cols-2">
+        <div className="lg:pl-column-edge flex flex-col justify-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:py-16 lg:pr-14">
+          <Status live={live}>{status}</Status>
+          <h1 className="font-display text-hero font-semibold text-balance">
+            {title}
+          </h1>
+          <div className="text-muted-foreground [&_strong]:text-foreground flex max-w-lg flex-col items-start gap-10 text-lg leading-relaxed text-pretty sm:text-xl [&_strong]:font-semibold">
+            {children}
+          </div>
+        </div>
+        <div className="bg-poster relative overflow-hidden max-lg:aspect-5/4 max-lg:border-t lg:border-l">
+          <img
+            src="/poster-scene.webp"
+            alt="Ilustración de un puesto de cómics en la calle, atendido por criaturas fantásticas y rodeado de lectores"
+            width={791}
+            height={740}
+            fetchPriority="high"
+            className="absolute inset-0 size-full object-cover"
+          />
+        </div>
+      </div>
+    </section>
+    {dates === undefined ? null : <div className="border-b">{dates}</div>}
+  </>
+);
+
+const Catalogue = ({
+  edition,
+  catalog,
+}: {
+  edition: OpenEdition;
+  catalog: Catalog | null;
+}) => {
+  const comics = catalog?.status === "open" ? catalog.comics : [];
+  const authorCount = new Set(comics.map((comic) => comic.author.slug)).size;
+
+  return (
+    <section
+      id="catalogo"
+      aria-labelledby="catalogo-titulo"
+      className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 py-20 sm:px-6 lg:py-28"
+    >
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-3 border-b pb-6">
+        <h2
+          id="catalogo-titulo"
+          className="font-display text-4xl font-semibold tracking-tight sm:text-5xl"
+        >
+          Catálogo
+        </h2>
+        {comics.length === 0 ? null : (
+          <p className="text-muted-foreground text-sm">
+            {comics.length === 1 ? "1 cómic" : `${comics.length} cómics`} de{" "}
+            {authorCount === 1 ? "1 autor" : `${authorCount} autores`} · a la
+            venta hasta el {formatDate(edition.salesCloseAt)}
+          </p>
+        )}
+      </div>
+      {comics.length > 0 ? (
+        <div className="mt-10">
+          <ComicGrid comics={comics} />
+        </div>
+      ) : (
+        <p className="text-muted-foreground mt-8 text-lg">
+          Todavía no hay cómics a la venta. Vuelve en un rato.
+        </p>
+      )}
+    </section>
+  );
+};
 
 const Landing = ({
   edition,
@@ -77,7 +174,7 @@ const Landing = ({
 }) => {
   if (edition === null || edition.phase === "closed") {
     return (
-      <Hero kicker="Garage Cómics" title="La próxima Edición viene en camino">
+      <Hero status="Entre ediciones" title="La próxima Edición viene en camino">
         <p>
           Cómics digitales de autores mexicanos, a la venta por tiempo limitado.
           Vuelve pronto para conocer las fechas.
@@ -89,54 +186,51 @@ const Landing = ({
   switch (edition.phase) {
     case "proposals": {
       return (
-        <Hero kicker="Convocatoria abierta" title={edition.name}>
+        <Hero
+          status="Convocatoria abierta"
+          live
+          title={edition.name}
+          dates={<EditionDates edition={edition} current="proposals" />}
+        >
           <p>
             ¿Haces cómics? Manda tu propuesta para vender tu trabajo en esta
             Edición. Mandarla no cuesta nada y recibimos propuestas hasta el{" "}
-            <strong className="text-foreground">
-              {formatDateTime(edition.proposalsCloseAt)}
-            </strong>
-            .
+            <strong>{formatDateTime(edition.proposalsCloseAt)}</strong>.
           </p>
-          <Link
-            to="/propuesta"
-            className={buttonVariants({ className: "w-fit" })}
-          >
-            <SquarePen data-icon="inline-start" />
+          <Link to="/propuesta" className={buttonVariants({ size: "lg" })}>
             Manda tu propuesta
+            <ArrowRight data-icon="inline-end" />
           </Link>
-          <EditionDates edition={edition} />
         </Hero>
       );
     }
 
     case "upcoming": {
       return (
-        <Hero kicker="Próxima Edición" title={edition.name}>
+        <Hero
+          status="Próxima Edición"
+          title={edition.name}
+          dates={<EditionDates edition={edition} />}
+        >
           <p>
             Las propuestas abren el{" "}
-            <strong className="text-foreground">
-              {formatDateTime(edition.proposalsOpenAt)}
-            </strong>
-            .
+            <strong>{formatDateTime(edition.proposalsOpenAt)}</strong>.
           </p>
-          <EditionDates edition={edition} />
         </Hero>
       );
     }
 
     case "preparation": {
       return (
-        <Hero kicker="Ya casi" title={edition.name}>
+        <Hero
+          status="Ya casi"
+          title={edition.name}
+          dates={<EditionDates edition={edition} />}
+        >
           <p>
             Las propuestas cerraron y los autores preparan sus cómics. La venta
-            abre el{" "}
-            <strong className="text-foreground">
-              {formatDateTime(edition.salesOpenAt)}
-            </strong>
-            .
+            abre el <strong>{formatDateTime(edition.salesOpenAt)}</strong>.
           </p>
-          <EditionDates edition={edition} />
         </Hero>
       );
     }
@@ -144,32 +238,18 @@ const Landing = ({
     case "sales": {
       return (
         <>
-          <Hero kicker="A la venta" title={edition.name}>
+          <Hero status="A la venta" live title={edition.name}>
             <p>
-              Esta Edición está a la venta hasta el{" "}
-              <strong className="text-foreground">
-                {formatDateTime(edition.salesCloseAt)}
-              </strong>
-              .
+              Cómics digitales de autores mexicanos. Esta Edición está a la
+              venta hasta el{" "}
+              <strong>{formatDateTime(edition.salesCloseAt)}</strong>.
             </p>
+            <a href="#catalogo" className={buttonVariants({ size: "lg" })}>
+              Ver el catálogo
+              <ArrowDown data-icon="inline-end" />
+            </a>
           </Hero>
-          <section aria-labelledby="catalogo" className="mt-16 lg:mt-24">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h2 id="catalogo" className="text-2xl font-bold tracking-tight">
-                Catálogo
-              </h2>
-              <CartLink />
-            </div>
-            {catalog?.status === "open" && catalog.comics.length > 0 ? (
-              <div className="mt-6">
-                <ComicGrid comics={catalog.comics} />
-              </div>
-            ) : (
-              <p className="text-muted-foreground mt-2">
-                Todavía no hay cómics a la venta. Vuelve en un rato.
-              </p>
-            )}
-          </section>
+          <Catalogue edition={edition} catalog={catalog} />
         </>
       );
     }
@@ -184,7 +264,7 @@ const HomePage = () => {
   const { edition, catalog } = Route.useLoaderData();
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:py-20">
+    <main>
       <Landing edition={edition} catalog={catalog} />
     </main>
   );

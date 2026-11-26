@@ -9,10 +9,16 @@ import {
 import { Input } from "@garage-comics/ui/components/input";
 import { Textarea } from "@garage-comics/ui/components/textarea";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { PartyPopper } from "lucide-react";
+import { CalendarClock, PartyPopper } from "lucide-react";
 import { useState } from "react";
 import type { SubmitEvent } from "react";
 
+import {
+  PageIcon,
+  narrowPageClass,
+  pageHeadingClass,
+  pageLeadClass,
+} from "@/components/page-intro";
 import { getActiveEdition } from "@/functions/editions";
 import { submitProposal } from "@/functions/proposals";
 import { formatDateTime } from "@/lib/format";
@@ -161,19 +167,19 @@ const ProposalForm = ({
   );
 };
 
-const headingClass = "text-3xl font-bold tracking-tight";
-
 const Sent = ({ email }: { email: string }) => (
   <>
-    <PartyPopper aria-hidden className="mb-4 size-8" />
+    <PageIcon>
+      <PartyPopper />
+    </PageIcon>
     <h1
       ref={focusOnMount}
       tabIndex={-1}
-      className={`${headingClass} outline-none`}
+      className={`${pageHeadingClass} outline-none`}
     >
       ¡Recibimos tu propuesta!
     </h1>
-    <p className="text-muted-foreground mt-2">
+    <p className={pageLeadClass}>
       Cuando la revisemos te escribiremos a{" "}
       <strong className="text-foreground">{email}</strong>.
     </p>
@@ -186,18 +192,19 @@ const ClosedNotice = ({
   edition: Awaited<ReturnType<typeof getActiveEdition>>;
 }) => (
   <>
-    <h1 className={headingClass}>Participa con tu cómic</h1>
-    <p className="text-muted-foreground mt-2">
-      No necesitas cuenta y no cuesta nada.
-    </p>
-    <div className="mt-8 flex flex-col items-center gap-4 rounded-xl border border-dashed p-8 text-center">
-      <div className="flex flex-col gap-1">
-        <h2 className="font-medium">
+    <PageIcon>
+      <CalendarClock />
+    </PageIcon>
+    <h1 className={pageHeadingClass}>Participa con tu cómic</h1>
+    <p className={pageLeadClass}>No necesitas cuenta y no cuesta nada.</p>
+    <div className="border-foreground/25 mt-10 flex flex-col items-start gap-6 border border-dashed p-6 sm:p-8">
+      <div className="flex flex-col gap-2">
+        <h2 className="font-display text-xl font-semibold tracking-tight">
           {edition?.phase === "upcoming"
             ? "Las propuestas todavía no abren"
             : "Las propuestas están cerradas"}
         </h2>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-muted-foreground">
           {edition?.phase === "upcoming"
             ? `Las propuestas para ${edition.name} abren el ${formatDateTime(edition.proposalsOpenAt)}.`
             : "Anunciaremos la próxima convocatoria en la página de inicio."}
@@ -224,21 +231,54 @@ const ProposalPage = () => {
     }
 
     return (
-      <>
-        <h1 className={headingClass}>Participa con tu cómic</h1>
-        <p className="text-muted-foreground mt-2">
-          Para {edition.name}. No necesitas cuenta y no cuesta nada. Recibimos
-          propuestas hasta el {formatDateTime(edition.proposalsCloseAt)}.
-        </p>
-        <div className="mt-8">
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:gap-20">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <p className="text-muted-foreground mb-4 font-medium">
+            {edition.name}
+          </p>
+          <h1 className={pageHeadingClass}>Participa con tu cómic</h1>
+          <p className={pageLeadClass}>
+            Cuéntanos quién eres y qué cómic quieres vender. Si tu propuesta es
+            aceptada, te escribimos para que pagues tu Inscripción.
+          </p>
+          <dl className="mt-10 grid grid-cols-2 gap-3">
+            <div className="panel p-4">
+              <dt className="text-muted-foreground text-sm">Mandarla</dt>
+              <dd className="font-display mt-1 text-lg font-semibold tracking-tight">
+                No cuesta nada
+              </dd>
+            </div>
+            <div className="panel p-4">
+              <dt className="text-muted-foreground text-sm">Cuenta</dt>
+              <dd className="font-display mt-1 text-lg font-semibold tracking-tight">
+                No la necesitas
+              </dd>
+            </div>
+            <div className="panel col-span-2 p-4">
+              <dt className="text-muted-foreground text-sm">
+                Recibimos propuestas hasta el
+              </dt>
+              <dd className="font-display text-print mt-1 text-lg font-semibold tracking-tight">
+                {formatDateTime(edition.proposalsCloseAt)}
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <div className="panel p-6 sm:p-10">
           <ProposalForm editionName={edition.name} onSent={setSentTo} />
         </div>
-      </>
+      </div>
     );
   };
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
+    <main
+      className={
+        edition?.phase === "proposals" && sentTo === undefined
+          ? "mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24"
+          : narrowPageClass
+      }
+    >
       {content()}
     </main>
   );

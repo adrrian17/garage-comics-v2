@@ -9,6 +9,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { ReactNode } from "react";
 
 import Footer from "@/components/footer";
+import SiteHeader from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { getSession } from "@/functions/session";
 import { useDashboardHome } from "@/lib/use-dashboard-home";
@@ -42,7 +43,8 @@ const RootComponent = () => {
         {isDashboard ? (
           <Outlet />
         ) : (
-          <div className="grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[1fr_auto]">
+          <div className="storefront grid min-h-svh grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto]">
+            <SiteHeader />
             <Outlet />
             <Footer />
           </div>

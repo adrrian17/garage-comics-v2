@@ -1,10 +1,17 @@
 import { Alert, AlertDescription } from "@garage-comics/ui/components/alert";
 import { Button, buttonVariants } from "@garage-comics/ui/components/button";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Trash2 } from "lucide-react";
+import { CalendarX, ShoppingBag, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 
 import { CheckoutForm } from "@/components/checkout-form";
+import { ComicCover } from "@/components/comic-grid";
+import {
+  PageIcon,
+  pageHeadingClass,
+  pageLeadClass,
+} from "@/components/page-intro";
 import { getCartLines } from "@/functions/catalog";
 import { formatMxn } from "@/lib/format";
 import { useCart } from "@/lib/use-cart";
@@ -13,13 +20,30 @@ import { useIsClient } from "@/lib/use-is-client";
 type CartLines = Awaited<ReturnType<typeof getCartLines>>;
 
 const Heading = ({ children }: { children: string }) => (
-  <h1 className="text-3xl font-bold tracking-tight">{children}</h1>
+  <h1 className={pageHeadingClass}>{children}</h1>
 );
 
 const BackToCatalog = () => (
   <Link to="/" className={buttonVariants({ variant: "outline" })}>
     Ver el catálogo
   </Link>
+);
+
+/** A cart state with nothing to list: empty, closed or still loading. */
+const CartMessage = ({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: ReactNode;
+  children: ReactNode;
+}) => (
+  <div className="mx-auto max-w-xl py-4 sm:py-12">
+    <PageIcon>{icon}</PageIcon>
+    <Heading>{title}</Heading>
+    {children}
+  </div>
 );
 
 const CartPage = () => {
@@ -81,44 +105,41 @@ const CartPage = () => {
 
   if (ids.length === 0) {
     return (
-      <>
-        <Heading>Tu carrito está vacío</Heading>
-        <p className="text-muted-foreground mt-2">
+      <CartMessage title="Tu carrito está vacío" icon={<ShoppingBag />}>
+        <p className={pageLeadClass}>
           Agrega cómics del catálogo para comprarlos todos en una sola Compra.
         </p>
         {notice}
-        <div className="mt-8">
+        <div className="mt-10">
           <BackToCatalog />
         </div>
-      </>
+      </CartMessage>
     );
   }
 
   if (lines?.status === "closed") {
     return (
-      <>
-        <Heading>La venta no está abierta</Heading>
-        <p className="text-muted-foreground mt-2">
+      <CartMessage title="La venta no está abierta" icon={<CalendarX />}>
+        <p className={pageLeadClass}>
           Ahora no se pueden comprar cómics. Vuelve cuando abra la próxima
           Edición.
         </p>
-        <div className="mt-8">
+        <div className="mt-10">
           <BackToCatalog />
         </div>
-      </>
+      </CartMessage>
     );
   }
 
   if (lines === null) {
     return (
-      <>
-        <Heading>Tu carrito</Heading>
-        <p className="text-muted-foreground mt-2">
+      <CartMessage title="Tu carrito" icon={<ShoppingBag />}>
+        <p className={pageLeadClass}>
           {failed
             ? "No pudimos cargar tu carrito. Recarga la página en un momento."
             : "Cargando tu carrito…"}
         </p>
-      </>
+      </CartMessage>
     );
   }
 
@@ -130,7 +151,12 @@ const CartPage = () => {
 
   return (
     <>
-      <Heading>Tu carrito</Heading>
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-2 border-b pb-6">
+        <Heading>Tu carrito</Heading>
+        <p className="text-muted-foreground text-sm">
+          {comics.length === 1 ? "1 cómic" : `${comics.length} cómics`}
+        </p>
+      </div>
       {notice}
       {failed ? (
         <Alert variant="destructive" className="mt-6">
@@ -140,60 +166,69 @@ const CartPage = () => {
           </AlertDescription>
         </Alert>
       ) : null}
-      <ul className="mt-8 flex flex-col divide-y rounded-xl border">
-        {comics.map((comic) => (
-          <li key={comic.id} className="flex items-center gap-4 p-4">
-            {comic.hasCover ? (
-              <img
-                src={`/portadas/${comic.id}`}
-                alt=""
-                width={64}
-                height={96}
-                className="h-24 w-16 shrink-0 rounded-md object-cover"
-              />
-            ) : (
-              <div
-                aria-hidden
-                className="bg-muted h-24 w-16 shrink-0 rounded-md"
-              />
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="font-medium wrap-anywhere">{comic.title}</p>
-              <p className="text-muted-foreground text-sm wrap-anywhere">
-                {comic.author.displayName}
-              </p>
-            </div>
-            <p className="font-semibold">{formatMxn(comic.priceMxn)}</p>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={`Quitar ${comic.title} del carrito`}
-              onClick={() => {
-                remove([comic.id]);
-              }}
+      <div className="mt-2 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-16">
+        <ul className="flex flex-col divide-y">
+          {comics.map((comic) => (
+            <li
+              key={comic.id}
+              className="flex items-center gap-4 py-6 sm:gap-6"
             >
-              <Trash2 />
-            </Button>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-6 flex items-center justify-between text-lg font-semibold">
-        <span>Total</span>
-        <span>{formatMxn(total)}</span>
-      </p>
-      <CheckoutForm
-        ids={comics.map((comic) => comic.id)}
-        onChanged={(dropped) => {
-          remove(dropped);
-          setDroppedCount((count) => count + dropped.length);
-        }}
-      />
+              <ComicCover
+                comic={comic}
+                className="ring-foreground/10 w-16 shrink-0 ring-1 sm:w-20"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="font-display text-lg leading-snug font-semibold tracking-tight wrap-anywhere">
+                  {comic.title}
+                </p>
+                <p className="text-muted-foreground mt-1 text-sm wrap-anywhere">
+                  {comic.author.displayName}
+                </p>
+              </div>
+              <p className="font-display text-lg font-semibold tabular-nums">
+                {formatMxn(comic.priceMxn)}
+              </p>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`Quitar ${comic.title} del carrito`}
+                onClick={() => {
+                  remove([comic.id]);
+                }}
+              >
+                <X />
+              </Button>
+            </li>
+          ))}
+        </ul>
+        <section
+          aria-labelledby="resumen"
+          className="panel p-6 sm:p-8 lg:sticky lg:top-24 lg:mt-6"
+        >
+          <h2 id="resumen" className="sr-only">
+            Resumen de tu Compra
+          </h2>
+          <p className="flex items-baseline justify-between gap-4">
+            <span className="text-muted-foreground">Total</span>
+            <span className="font-display text-3xl font-semibold tracking-tight tabular-nums">
+              {formatMxn(total)}
+            </span>
+          </p>
+          <CheckoutForm
+            ids={comics.map((comic) => comic.id)}
+            onChanged={(dropped) => {
+              remove(dropped);
+              setDroppedCount((count) => count + dropped.length);
+            }}
+          />
+        </section>
+      </div>
     </>
   );
 };
 
 const CartRoute = () => (
-  <main className="mx-auto w-full max-w-3xl px-4 py-12 sm:px-6">
+  <main className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
     <CartPage />
   </main>
 );
