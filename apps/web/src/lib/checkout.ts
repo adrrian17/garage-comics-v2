@@ -5,7 +5,7 @@ import { cartIds } from "./cart";
 import { soonestCheckoutExpiry } from "./proposal";
 
 /** How long a Customer has to pay an OXXO voucher at a store (story 28). */
-const OXXO_VOUCHER_DAYS = 2;
+export const OXXO_VOUCHER_DAYS = 2;
 
 /** What a Customer sends to pay: ids and an email, never a price, because the server reads prices from the database. */
 export const checkoutInput = z.object({

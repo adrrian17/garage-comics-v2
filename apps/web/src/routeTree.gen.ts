@@ -15,7 +15,9 @@ import { Route as AutorRouteRouteImport } from './routes/autor/route'
 import { Route as CarritoRouteImport } from './routes/carrito'
 import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as FaqsRouteImport } from './routes/faqs'
 import { Route as PropuestaRouteImport } from './routes/propuesta'
+import { Route as ReglasRouteImport } from './routes/reglas'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin/administradores'
 import { Route as AdminComicsRouteImport } from './routes/admin/comics'
@@ -72,9 +74,19 @@ const EntrarRoute = EntrarRouteImport.update({
   path: '/entrar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqsRoute = FaqsRouteImport.update({
+  id: '/faqs',
+  path: '/faqs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PropuestaRoute = PropuestaRouteImport.update({
   id: '/propuesta',
   path: '/propuesta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglasRoute = ReglasRouteImport.update({
+  id: '/reglas',
+  path: '/reglas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -211,7 +223,9 @@ export interface FileRoutesByFullPath {
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
   '/entrar': typeof EntrarRoute
+  '/faqs': typeof FaqsRoute
   '/propuesta': typeof PropuestaRoute
+  '/reglas': typeof ReglasRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/comics': typeof AdminComicsRoute
   '/admin/compras': typeof AdminComprasRoute
@@ -243,7 +257,9 @@ export interface FileRoutesByTo {
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
   '/entrar': typeof EntrarRoute
+  '/faqs': typeof FaqsRoute
   '/propuesta': typeof PropuestaRoute
+  '/reglas': typeof ReglasRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/comics': typeof AdminComicsRoute
   '/admin/compras': typeof AdminComprasRoute
@@ -278,7 +294,9 @@ export interface FileRoutesById {
   '/carrito': typeof CarritoRoute
   '/catalogo': typeof CatalogoRoute
   '/entrar': typeof EntrarRoute
+  '/faqs': typeof FaqsRoute
   '/propuesta': typeof PropuestaRoute
+  '/reglas': typeof ReglasRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/comics': typeof AdminComicsRoute
   '/admin/compras': typeof AdminComprasRoute
@@ -314,7 +332,9 @@ export interface FileRouteTypes {
     | '/carrito'
     | '/catalogo'
     | '/entrar'
+    | '/faqs'
     | '/propuesta'
+    | '/reglas'
     | '/admin/administradores'
     | '/admin/comics'
     | '/admin/compras'
@@ -346,7 +366,9 @@ export interface FileRouteTypes {
     | '/carrito'
     | '/catalogo'
     | '/entrar'
+    | '/faqs'
     | '/propuesta'
+    | '/reglas'
     | '/admin/administradores'
     | '/admin/comics'
     | '/admin/compras'
@@ -380,7 +402,9 @@ export interface FileRouteTypes {
     | '/carrito'
     | '/catalogo'
     | '/entrar'
+    | '/faqs'
     | '/propuesta'
+    | '/reglas'
     | '/admin/administradores'
     | '/admin/comics'
     | '/admin/compras'
@@ -415,7 +439,9 @@ export interface RootRouteChildren {
   CarritoRoute: typeof CarritoRoute
   CatalogoRoute: typeof CatalogoRoute
   EntrarRoute: typeof EntrarRoute
+  FaqsRoute: typeof FaqsRoute
   PropuestaRoute: typeof PropuestaRoute
+  ReglasRoute: typeof ReglasRoute
   AutoresSlugRoute: typeof AutoresSlugRoute
   ComicsComicIdRoute: typeof ComicsComicIdRoute
   CompraListaRoute: typeof CompraListaRoute
@@ -472,11 +498,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntrarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faqs': {
+      id: '/faqs'
+      path: '/faqs'
+      fullPath: '/faqs'
+      preLoaderRoute: typeof FaqsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/propuesta': {
       id: '/propuesta'
       path: '/propuesta'
       fullPath: '/propuesta'
       preLoaderRoute: typeof PropuestaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reglas': {
+      id: '/reglas'
+      path: '/reglas'
+      fullPath: '/reglas'
+      preLoaderRoute: typeof ReglasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -714,7 +754,9 @@ const rootRouteChildren: RootRouteChildren = {
   CarritoRoute: CarritoRoute,
   CatalogoRoute: CatalogoRoute,
   EntrarRoute: EntrarRoute,
+  FaqsRoute: FaqsRoute,
   PropuestaRoute: PropuestaRoute,
+  ReglasRoute: ReglasRoute,
   AutoresSlugRoute: AutoresSlugRoute,
   ComicsComicIdRoute: ComicsComicIdRoute,
   CompraListaRoute: CompraListaRoute,

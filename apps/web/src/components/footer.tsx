@@ -15,6 +15,13 @@ const linkGroups = [
       { to: "/entrar", label: "Entrar" },
     ],
   },
+  {
+    title: "Ayuda",
+    links: [
+      { to: "/faqs", label: "Preguntas frecuentes" },
+      { to: "/reglas", label: "Reglas" },
+    ],
+  },
 ] as const;
 
 // Evaluated once per Worker isolate; the year only lags until the next deploy or restart.
@@ -29,7 +36,7 @@ const Footer = () => (
       </p>
       <nav
         aria-label="Pie de página"
-        className="grid grid-cols-2 gap-x-16 gap-y-8 max-sm:gap-x-8"
+        className="grid grid-cols-2 gap-x-16 gap-y-8 max-sm:gap-x-8 sm:grid-cols-3"
       >
         {linkGroups.map((group) => (
           <div key={group.title} className="flex flex-col gap-3">

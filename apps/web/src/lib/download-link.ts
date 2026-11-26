@@ -1,7 +1,9 @@
 import { formatOrderNumber } from "./order-number";
 
 /** A Download Link works for 24 hours from when its email is sent, with no download limit (story 33). */
-const DOWNLOAD_LINK_TTL_MS = 24 * 60 * 60 * 1000;
+export const DOWNLOAD_LINK_HOURS = 24;
+
+const DOWNLOAD_LINK_TTL_MS = DOWNLOAD_LINK_HOURS * 60 * 60 * 1000;
 
 /** After this many hand-offs to the container a copy is given up on; an Admin resend starts a fresh set. */
 export const MAX_COPY_ATTEMPTS = 4;

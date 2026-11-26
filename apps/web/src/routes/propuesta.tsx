@@ -13,6 +13,7 @@ import { CalendarClock, PartyPopper } from "lucide-react";
 import { useState } from "react";
 import type { SubmitEvent } from "react";
 
+import { inlineLinkClass } from "@/components/help-page";
 import {
   PageIcon,
   SinglePage,
@@ -240,6 +241,13 @@ const ProposalPage = () => {
           <p className={pageLeadClass}>
             Cuéntanos quién eres y qué cómic quieres vender. Si tu propuesta es
             aceptada, te escribimos para que pagues tu Inscripción.
+          </p>
+          <p className="text-muted-foreground mt-4 leading-relaxed">
+            Antes de mandarla, lee las{" "}
+            <Link to="/reglas" className={inlineLinkClass}>
+              reglas para participar
+            </Link>
+            .
           </p>
           <dl className="mt-10 grid grid-cols-2 gap-3">
             <div className="panel p-4">
