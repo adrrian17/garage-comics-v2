@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { collaboratorNames } from "@/lib/credits";
 import { formatMxn } from "@/lib/format";
 import type { SellableComic } from "@/server/catalog";
 
@@ -43,6 +44,9 @@ export const ComicCover = ({
   );
 };
 
+// A card names this many Collaborators and counts the rest, so long credits never push the price down.
+const CARD_COLLABORATORS = 2;
+
 const ComicCard = ({
   comic,
   showAuthor,
@@ -73,13 +77,21 @@ const ComicCard = ({
       </Link>
     </h3>
     {showAuthor ? (
-      <Link
-        to="/autores/$slug"
-        params={{ slug: comic.author.slug }}
-        className="decoration-print mt-1 self-start text-sm font-medium decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
-      >
-        {comic.author.displayName}
-      </Link>
+      <p className="mt-1 text-sm">
+        <Link
+          to="/autores/$slug"
+          params={{ slug: comic.author.slug }}
+          className="decoration-print font-medium decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+        >
+          {comic.author.displayName}
+        </Link>
+        {comic.collaborators.length === 0 ? null : (
+          <span className="text-muted-foreground">
+            {" "}
+            con {collaboratorNames(comic.collaborators, CARD_COLLABORATORS)}
+          </span>
+        )}
+      </p>
     ) : null}
     <p className="text-muted-foreground mt-1 text-sm">
       {comic.genre} · {comic.pageCount} páginas
