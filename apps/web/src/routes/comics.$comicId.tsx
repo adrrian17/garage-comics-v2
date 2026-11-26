@@ -1,13 +1,69 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { ComicCover, ComicGrid } from "@/components/comic-grid";
 import { SectionRule } from "@/components/page-intro";
 import { getComicPage } from "@/functions/catalog";
+import { collaboratorNames, linkLabel } from "@/lib/credits";
 import { formatMxn } from "@/lib/format";
+import type { SellableComic } from "@/server/catalog";
 
 const DESCRIPTION_META_LENGTH = 160;
+
+/** Who made the comic: the Author first, then each Collaborator with their role and links. */
+const Credits = ({ comic }: { comic: SellableComic }) => (
+  <section aria-labelledby="creditos" className="mt-12">
+    <h2
+      id="creditos"
+      className="font-display text-xl font-semibold tracking-tight"
+    >
+      Créditos
+    </h2>
+    <ul className="mt-4 divide-y border-y">
+      <li className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-4">
+        <Link
+          to="/autores/$slug"
+          params={{ slug: comic.author.slug }}
+          className="decoration-print font-medium decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+        >
+          {comic.author.displayName}
+        </Link>
+        <span className="text-muted-foreground text-sm">Autor</span>
+      </li>
+      {comic.collaborators.map((collaborator) => (
+        <li
+          key={`${collaborator.name}-${collaborator.role}`}
+          className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 py-4"
+        >
+          <div className="min-w-0">
+            <p className="font-medium wrap-anywhere">{collaborator.name}</p>
+            {collaborator.links.length === 0 ? null : (
+              <ul className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                {collaborator.links.map((href) => (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="text-muted-foreground hover:text-foreground decoration-print inline-flex items-center gap-1 text-sm decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+                    >
+                      {linkLabel(href)}
+                      <ArrowUpRight aria-hidden className="size-3.5" />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <span className="text-muted-foreground text-sm wrap-anywhere">
+            {collaborator.role}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </section>
+);
 
 const ComicPage = () => {
   const { comic, moreByAuthor } = Route.useLoaderData();
@@ -29,13 +85,21 @@ const ComicPage = () => {
           />
         </div>
         <div className="flex flex-col">
-          <Link
-            to="/autores/$slug"
-            params={{ slug: comic.author.slug }}
-            className="decoration-print self-start font-medium decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
-          >
-            {comic.author.displayName}
-          </Link>
+          <p>
+            <Link
+              to="/autores/$slug"
+              params={{ slug: comic.author.slug }}
+              className="decoration-print font-medium decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+            >
+              {comic.author.displayName}
+            </Link>
+            {comic.collaborators.length === 0 ? null : (
+              <span className="text-muted-foreground">
+                {" "}
+                con {collaboratorNames(comic.collaborators)}
+              </span>
+            )}
+          </p>
           <h1 className="font-display mt-3 text-4xl leading-none font-semibold tracking-tight text-balance wrap-anywhere sm:text-6xl">
             {comic.title}
           </h1>
@@ -54,6 +118,7 @@ const ComicPage = () => {
               {comic.description}
             </p>
           )}
+          {comic.collaborators.length === 0 ? null : <Credits comic={comic} />}
         </div>
       </article>
       {moreByAuthor.length === 0 ? null : (
