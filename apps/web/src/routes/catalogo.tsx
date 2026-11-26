@@ -45,6 +45,8 @@ const SEARCH_URL_DELAY_MS = 300;
 // The menu's value for "no genre filter"; no genre is named with an empty string.
 const ALL_GENRES = "";
 
+const ALL_GENRES_LABEL = "Todos";
+
 // A malformed value in a shared link drops that filter instead of failing the page.
 const catalogSearch = z.object({
   buscar: z.string().optional().catch(undefined),
@@ -187,10 +189,21 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
           <DropdownMenu>
             <DropdownMenuTrigger
               render={<Button variant="outline" size="lg" />}
-              aria-label={`Filtrar por género: ${genre ?? "todos"}`}
+              aria-label={`Filtrar por género: ${genre ?? ALL_GENRES_LABEL}`}
             >
               <span className="text-muted-foreground">Género:</span>
-              {genre ?? "Todos"}
+              {/* Every label shares one grid cell, so the button keeps the width of the longest and never jumps. */}
+              <span className="grid justify-items-start">
+                {[ALL_GENRES_LABEL, ...genres].map((label) => (
+                  <span
+                    key={label}
+                    aria-hidden={label !== (genre ?? ALL_GENRES_LABEL)}
+                    className={`col-start-1 row-start-1 ${label === (genre ?? ALL_GENRES_LABEL) ? "" : "invisible"}`}
+                  >
+                    {label}
+                  </span>
+                ))}
+              </span>
               <ChevronDown data-icon="inline-end" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -200,11 +213,11 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
                   update({ genero: value === ALL_GENRES ? null : value });
                 }}
               >
-                <DropdownMenuRadioItem value={ALL_GENRES}>
-                  Todos
+                <DropdownMenuRadioItem value={ALL_GENRES} closeOnClick>
+                  {ALL_GENRES_LABEL}
                 </DropdownMenuRadioItem>
                 {genres.map((item) => (
-                  <DropdownMenuRadioItem key={item} value={item}>
+                  <DropdownMenuRadioItem key={item} value={item} closeOnClick>
                     {item}
                   </DropdownMenuRadioItem>
                 ))}
