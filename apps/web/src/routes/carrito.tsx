@@ -25,7 +25,7 @@ const Heading = ({ children }: { children: string }) => (
 );
 
 const BackToCatalog = () => (
-  <Link to="/" className={buttonVariants({ variant: "outline" })}>
+  <Link to="/catalogo" className={buttonVariants({ variant: "outline" })}>
     Ver el catálogo
   </Link>
 );

@@ -21,7 +21,7 @@ const SiteHeader = () => (
         />
       </Link>
       <nav aria-label="Principal" className="flex items-center gap-1 sm:gap-3">
-        <Link to="/" activeOptions={{ exact: true }} className={navLinkClass}>
+        <Link to="/catalogo" className={navLinkClass}>
           Catálogo
         </Link>
         <Link to="/propuesta" className={navLinkClass}>

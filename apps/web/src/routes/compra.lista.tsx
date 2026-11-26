@@ -31,7 +31,7 @@ const OrderPlacedPage = () => {
         en la tienda y se registre tu pago. Si no pagas a tiempo, la Compra se
         cancela y no se te cobra nada.
       </p>
-      <Link to="/" className={buttonVariants({ className: "mt-10" })}>
+      <Link to="/catalogo" className={buttonVariants({ className: "mt-10" })}>
         Volver al catálogo
       </Link>
     </SinglePage>

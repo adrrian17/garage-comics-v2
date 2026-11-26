@@ -1,6 +1,6 @@
 import { buttonVariants } from "@garage-comics/ui/components/button";
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowDown, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { ComicGrid } from "@/components/comic-grid";
@@ -127,22 +127,33 @@ const Hero = ({
   </>
 );
 
-const Catalogue = ({ comics }: { comics: SellableComic[] }) => (
+// One row of the catalog grid on wide screens.
+const PREVIEW_COUNT = 4;
+
+/** A first look at the catalog; the whole of it lives on /catalogo. */
+const CataloguePreview = ({ comics }: { comics: SellableComic[] }) => (
   <section
-    id="catalogo"
     aria-labelledby="catalogo-titulo"
-    className="mx-auto w-full max-w-6xl scroll-mt-20 px-4 pt-20 sm:px-6 lg:pt-28"
+    className="mx-auto w-full max-w-6xl px-4 pt-20 sm:px-6 lg:pt-28"
   >
-    <h2
-      id="catalogo-titulo"
-      className="font-display text-4xl font-semibold tracking-tight sm:text-5xl"
-    >
-      Catálogo
-    </h2>
+    <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+      <h2
+        id="catalogo-titulo"
+        className="font-display text-4xl font-semibold tracking-tight sm:text-5xl"
+      >
+        Catálogo
+      </h2>
+      {comics.length > PREVIEW_COUNT ? (
+        <Link to="/catalogo" className={buttonVariants({ variant: "outline" })}>
+          Ver los {comics.length} cómics
+          <ArrowRight data-icon="inline-end" />
+        </Link>
+      ) : null}
+    </div>
     <SectionRule />
     {comics.length > 0 ? (
       <div className="mt-10">
-        <ComicGrid comics={comics} />
+        <ComicGrid comics={comics.slice(0, PREVIEW_COUNT)} />
       </div>
     ) : (
       <p className="text-muted-foreground mt-8 text-lg">
@@ -255,12 +266,12 @@ const Landing = ({
               venta hasta el{" "}
               <strong>{formatDateTime(edition.salesCloseAt)}</strong>.
             </p>
-            <a href="#catalogo" className={buttonVariants({ size: "lg" })}>
+            <Link to="/catalogo" className={buttonVariants({ size: "lg" })}>
               Ver el catálogo
-              <ArrowDown data-icon="inline-end" />
-            </a>
+              <ArrowRight data-icon="inline-end" />
+            </Link>
           </Hero>
-          <Catalogue comics={comics} />
+          <CataloguePreview comics={comics} />
         </>
       );
     }
