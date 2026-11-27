@@ -12,7 +12,7 @@ import { CountdownBar } from "@/components/countdown-bar";
 import Footer from "@/components/footer";
 import SiteHeader from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
-import { getActiveEdition } from "@/functions/editions";
+import { getCountdownEdition } from "@/functions/editions";
 import { getSession } from "@/functions/session";
 import { useDashboardHome } from "@/lib/use-dashboard-home";
 
@@ -69,19 +69,7 @@ export const Route = createRootRoute({
   component: RootComponent,
   beforeLoad: async () => ({ session: await getSession() }),
   // The countdown on every public page needs the active Edition; a minute-old phase is close enough between navigations.
-  // Without it the bar just stays away: a failed read must not take down every page, the dashboards included.
-  loader: async () => {
-    try {
-      return await getActiveEdition();
-    } catch (error) {
-      console.error(
-        "Could not load the active Edition for the countdown",
-        error
-      );
-
-      return null;
-    }
-  },
+  loader: async () => await getCountdownEdition(),
   staleTime: EDITION_STALE_MS,
   head: () => ({
     meta: [

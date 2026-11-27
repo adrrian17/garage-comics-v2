@@ -1,4 +1,6 @@
+import { editionComic } from "@garage-comics/db/schema/comics";
 import { createServerFn } from "@tanstack/react-start";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { cartIds, droppedIds } from "@/lib/cart";
@@ -21,7 +23,16 @@ export const getComicPage = createServerFn({ method: "GET" })
     const found = await sellableComics(db, now, { ids: [data.id] });
 
     if (found.status === "closed") {
-      return found;
+      // Outside sales, only a link to an approved comic is a comic no longer on sale; any other id is a missing page.
+      const approved = await db
+        .select({ id: editionComic.id })
+        .from(editionComic)
+        .where(
+          and(eq(editionComic.id, data.id), eq(editionComic.status, "approved"))
+        )
+        .get();
+
+      return approved === undefined ? null : found;
     }
 
     const [comic] = found.comics;

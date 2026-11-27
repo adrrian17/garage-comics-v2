@@ -27,7 +27,7 @@ const Credits = ({ comic }: { comic: SellableComic }) => (
         <Link
           to="/autores/$slug"
           params={{ slug: comic.author.slug }}
-          className="decoration-print font-medium decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+          className="decoration-print font-medium wrap-anywhere decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
         >
           {comic.author.displayName}
         </Link>
@@ -98,7 +98,7 @@ const ComicPage = () => {
             className="ring-foreground/15 shadow-foreground/15 mx-auto max-w-md rounded-2xl shadow-2xl ring-1 lg:max-w-none"
           />
         </div>
-        <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col">
           <p className="wrap-anywhere">
             <Link
               to="/autores/$slug"
@@ -139,7 +139,7 @@ const ComicPage = () => {
         <section aria-labelledby="mas-del-autor" className="mt-20 lg:mt-28">
           <h2
             id="mas-del-autor"
-            className="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
+            className="font-display text-3xl font-semibold tracking-tight wrap-anywhere sm:text-4xl"
           >
             Más de {comic.author.displayName}
           </h2>

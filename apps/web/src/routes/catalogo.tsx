@@ -17,7 +17,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@garage-comics/ui/components/input-group";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
@@ -75,6 +75,7 @@ const CatalogPage = () => {
 const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
   const { buscar = "", genero } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const router = useRouter();
   const genres = catalogGenres(comics);
 
   // A genre from an old link may no longer be on sale; then the filter is off.
@@ -162,6 +163,16 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
               }
 
               urlTimer.current = setTimeout(() => {
+                // A link clicked while typing may still be loading; writing now would pull the Customer back here.
+                const latest = router.latestLocation;
+
+                if (
+                  latest.pathname !== Route.fullPath ||
+                  (latest.search.buscar ?? "") !== writtenBuscar.current
+                ) {
+                  return;
+                }
+
                 writtenBuscar.current = value;
                 update({ buscar: value });
               }, SEARCH_URL_DELAY_MS);
@@ -206,7 +217,7 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
                 </DropdownMenuRadioItem>
                 {genres.map((item) => (
                   <DropdownMenuRadioItem key={item} value={item} closeOnClick>
-                    {item}
+                    <span className="min-w-0 wrap-anywhere">{item}</span>
                   </DropdownMenuRadioItem>
                 ))}
               </DropdownMenuRadioGroup>
@@ -237,6 +248,7 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
                   clearTimeout(urlTimer.current);
                 }
 
+                writtenBuscar.current = "";
                 setSearch("");
                 update({ buscar: null, genero: null });
               }}

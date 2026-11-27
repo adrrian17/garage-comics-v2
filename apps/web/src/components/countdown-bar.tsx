@@ -133,7 +133,8 @@ export const CountdownBar = ({
 }: {
   edition: CountdownEdition | null;
 }) => {
-  if (edition === null) {
+  // A closed Edition has no window left to open, so there is no clock to keep.
+  if (edition === null || edition.phase === "closed") {
     return null;
   }
 
