@@ -1,66 +1,78 @@
 diff --git a/lib/WebhookEndpoint.js b/lib/WebhookEndpoint.js
-index 4b3015b29e29dd2b0c8a922e320befaaef1f7392..39e2efdb86941d255b678e5ce1ba0d75994bceb3 100644
+index 4b3015b29e29dd2b0c8a922e320befaaef1f7392..643212b745c7182a3664594d01bdfcf4271104bf 100644
 --- a/lib/WebhookEndpoint.js
 +++ b/lib/WebhookEndpoint.js
-@@ -147,23 +147,24 @@ const desiredMetadata = Effect.fn(function* (id, metadata) {
+@@ -147,23 +147,17 @@ const desiredMetadata = Effect.fn(function* (id, metadata) {
          ...(yield* createInternalMetadata(id)),
      };
  });
 -const shouldReplace = (news, output) => {
-+const shouldReplace = (news, olds, output) => {
-     if (output === undefined)
-         return false;
-     if (news.apiVersion !== undefined && news.apiVersion !== output.apiVersion) {
-         return true;
-     }
+-    if (output === undefined)
+-        return false;
+-    if (news.apiVersion !== undefined && news.apiVersion !== output.apiVersion) {
+-        return true;
+-    }
 -    if (news.connect !== undefined && news.connect !== output.connect) {
-+    // Stripe's nullable application ID does not reliably report the create-time connect flag.
-+    if (news.connect !== undefined && news.connect !== (olds.connect ?? false)) {
-         return true;
-     }
-     return false;
- };
+-        return true;
+-    }
+-    return false;
+-};
  export const WebhookEndpointProvider = () => Provider.succeed(WebhookEndpoint, {
      stables: ["id", "secret", "apiVersion", "connect", "application", "created", "livemode"],
 -    diff: Effect.fn(function* ({ news, output }) {
-+    diff: Effect.fn(function* ({ news, olds, output }) {
-         if (!isResolved(news))
+-        if (!isResolved(news))
++    diff: Effect.fn(function* ({ id, news, olds, output }) {
++        if (!isResolved(news) || output === undefined)
              return undefined;
 -        if (shouldReplace(news, output)) {
-+        if (shouldReplace(news, olds, output)) {
++        // Compare the create-time flags because Stripe's application ID is nullable.
++        if ((news.connect ?? false) !== (olds.connect ?? false)) {
++            // A replacement under the same ID can rediscover the old endpoint without its secret.
++            return yield* Effect.fail(new Error(`Stripe endpoint "${id}" needs a new logical ID to change connect mode.`));
++        }
++        if (news.apiVersion !== undefined && news.apiVersion !== output.apiVersion) {
              return { action: "replace" };
          }
          return undefined;
 diff --git a/src/WebhookEndpoint.ts b/src/WebhookEndpoint.ts
-index 031a081a9e2e7dc4c706716881e76bcc6893ac83..9b2d9cb09ba68659f548e1474fa773f2aef1f96d 100644
+index 031a081a9e2e7dc4c706716881e76bcc6893ac83..664d6f87d26808bb6826a7d472f586a2ae3605e2 100644
 --- a/src/WebhookEndpoint.ts
 +++ b/src/WebhookEndpoint.ts
-@@ -266,13 +266,15 @@ const desiredMetadata = Effect.fn(function* (
+@@ -264,27 +264,20 @@ const desiredMetadata = Effect.fn(function* (
+   };
+ });
  
- const shouldReplace = (
-   news: WebhookEndpointProps,
-+  olds: WebhookEndpointProps,
-   output: WebhookEndpoint["Attributes"] | undefined,
- ) => {
-   if (output === undefined) return false;
-   if (news.apiVersion !== undefined && news.apiVersion !== output.apiVersion) {
-     return true;
-   }
+-const shouldReplace = (
+-  news: WebhookEndpointProps,
+-  output: WebhookEndpoint["Attributes"] | undefined,
+-) => {
+-  if (output === undefined) return false;
+-  if (news.apiVersion !== undefined && news.apiVersion !== output.apiVersion) {
+-    return true;
+-  }
 -  if (news.connect !== undefined && news.connect !== output.connect) {
-+  // Stripe's nullable application ID does not reliably report the create-time connect flag.
-+  if (news.connect !== undefined && news.connect !== (olds.connect ?? false)) {
-     return true;
-   }
-   return false;
-@@ -282,9 +284,9 @@ export const WebhookEndpointProvider = () =>
+-    return true;
+-  }
+-  return false;
+-};
+-
+ export const WebhookEndpointProvider = () =>
    Provider.succeed(WebhookEndpoint, {
      stables: ["id", "secret", "apiVersion", "connect", "application", "created", "livemode"],
  
 -    diff: Effect.fn(function* ({ news, output }) {
-+    diff: Effect.fn(function* ({ news, olds, output }) {
-       if (!isResolved(news)) return undefined;
+-      if (!isResolved(news)) return undefined;
 -      if (shouldReplace(news, output)) {
-+      if (shouldReplace(news, olds, output)) {
++    diff: Effect.fn(function* ({ id, news, olds, output }) {
++      if (!isResolved(news) || output === undefined) return undefined;
++      // Compare the create-time flags because Stripe's application ID is nullable.
++      if ((news.connect ?? false) !== (olds.connect ?? false)) {
++        // A replacement under the same ID can rediscover the old endpoint without its secret.
++        return yield* Effect.fail(
++          new Error(`Stripe endpoint "${id}" needs a new logical ID to change connect mode.`),
++        );
++      }
++      if (news.apiVersion !== undefined && news.apiVersion !== output.apiVersion) {
          return { action: "replace" } as const;
        }
        return undefined;
