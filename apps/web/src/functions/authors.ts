@@ -1,11 +1,12 @@
 import { authorProfile } from "@garage-comics/db/schema/authors";
 import { edition, registration } from "@garage-comics/db/schema/editions";
 import { createServerFn } from "@tanstack/react-start";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import { z } from "zod";
 
 import { authorMiddleware } from "@/functions/author-middleware";
 import { authorProfileInput } from "@/lib/author";
+import { authorRoster } from "@/lib/author-roster";
 import { sellableComics } from "@/server/catalog";
 import { createDatabase } from "@/server/services";
 
@@ -105,3 +106,48 @@ export const getAuthorPage = createServerFn({ method: "GET" })
       comics: sellable.status === "open" ? sellable.comics : [],
     };
   });
+
+/** The Authors with comics on sale, by name, each with their role and the covers a list card shows. */
+export const getAuthorsPage = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const db = createDatabase();
+    const sellable = await sellableComics(db, new Date());
+
+    if (sellable.status === "closed") {
+      return sellable;
+    }
+
+    const roster = authorRoster(
+      sellable.comics.map(({ id, title, hasCover, author }) => ({
+        id,
+        title,
+        hasCover,
+        author,
+      }))
+    );
+
+    const roles =
+      roster.length === 0
+        ? []
+        : await db
+            .select({ slug: authorProfile.slug, role: authorProfile.role })
+            .from(authorProfile)
+            .where(
+              inArray(
+                authorProfile.slug,
+                roster.map((author) => author.slug)
+              )
+            );
+
+    const roleBySlug = new Map(roles.map((row) => [row.slug, row.role]));
+
+    return {
+      status: "open" as const,
+      edition: sellable.edition,
+      authors: roster.map((author) => ({
+        ...author,
+        role: roleBySlug.get(author.slug) ?? "",
+      })),
+    };
+  }
+);

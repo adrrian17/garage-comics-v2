@@ -5,6 +5,7 @@ const linkGroups = [
     title: "Tienda",
     links: [
       { to: "/catalogo", label: "Catálogo" },
+      { to: "/autores", label: "Autores" },
       { to: "/carrito", label: "Carrito" },
     ],
   },

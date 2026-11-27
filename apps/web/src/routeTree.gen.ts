@@ -33,6 +33,7 @@ import { Route as AutorComicsRouteImport } from './routes/autor/comics'
 import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
 import { Route as AutorVentasRouteImport } from './routes/autor/ventas'
+import { Route as AutoresIndexRouteImport } from './routes/autores.index'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
 import { Route as ComicsComicIdRouteImport } from './routes/comics.$comicId'
 import { Route as CompraListaRouteImport } from './routes/compra.lista'
@@ -164,6 +165,11 @@ const AutorVentasRoute = AutorVentasRouteImport.update({
   path: '/ventas',
   getParentRoute: () => AutorRouteRoute,
 } as any)
+const AutoresIndexRoute = AutoresIndexRouteImport.update({
+  id: '/autores/',
+  path: '/autores/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AutoresSlugRoute = AutoresSlugRouteImport.update({
   id: '/autores/$slug',
   path: '/autores/$slug',
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
+  '/autores/': typeof AutoresIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -281,6 +288,7 @@ export interface FileRoutesByTo {
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin': typeof AdminIndexRoute
   '/autor': typeof AutorIndexRoute
+  '/autores': typeof AutoresIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
+  '/autores/': typeof AutoresIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -356,6 +365,7 @@ export interface FileRouteTypes {
     | '/portadas/$comicId'
     | '/admin/'
     | '/autor/'
+    | '/autores/'
     | '/api/auth/$'
     | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
@@ -390,6 +400,7 @@ export interface FileRouteTypes {
     | '/portadas/$comicId'
     | '/admin'
     | '/autor'
+    | '/autores'
     | '/api/auth/$'
     | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
@@ -426,6 +437,7 @@ export interface FileRouteTypes {
     | '/portadas/$comicId'
     | '/admin/'
     | '/autor/'
+    | '/autores/'
     | '/api/auth/$'
     | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
@@ -448,6 +460,7 @@ export interface RootRouteChildren {
   DescargasDownloadLinkIdRoute: typeof DescargasDownloadLinkIdRoute
   InscripcionProposalIdRoute: typeof InscripcionProposalIdRoute
   PortadasComicIdRoute: typeof PortadasComicIdRoute
+  AutoresIndexRoute: typeof AutoresIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiStripeConnectWebhookRoute: typeof ApiStripeConnectWebhookRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
@@ -624,6 +637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutorVentasRouteImport
       parentRoute: typeof AutorRouteRoute
     }
+    '/autores/': {
+      id: '/autores/'
+      path: '/autores'
+      fullPath: '/autores/'
+      preLoaderRoute: typeof AutoresIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/autores/$slug': {
       id: '/autores/$slug'
       path: '/autores/$slug'
@@ -763,6 +783,7 @@ const rootRouteChildren: RootRouteChildren = {
   DescargasDownloadLinkIdRoute: DescargasDownloadLinkIdRoute,
   InscripcionProposalIdRoute: InscripcionProposalIdRoute,
   PortadasComicIdRoute: PortadasComicIdRoute,
+  AutoresIndexRoute: AutoresIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiStripeConnectWebhookRoute: ApiStripeConnectWebhookRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,

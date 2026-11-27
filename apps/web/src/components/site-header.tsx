@@ -12,6 +12,7 @@ import { CartLink } from "@/components/cart-link";
 
 const navLinks = [
   { to: "/catalogo", label: "Catálogo" },
+  { to: "/autores", label: "Autores" },
   { to: "/propuesta", label: "Participa" },
   { to: "/reglas", label: "Reglas" },
   { to: "/faqs", label: "Preguntas frecuentes" },
@@ -20,7 +21,7 @@ const navLinks = [
 const navLinkClass =
   "text-muted-foreground hover:text-foreground data-[status=active]:text-foreground data-[status=active]:decoration-print data-[status=active]:underline data-[status=active]:decoration-2 data-[status=active]:underline-offset-8 focus-visible:ring-ring/50 rounded-sm px-2 py-1 text-sm font-medium outline-none transition-colors focus-visible:ring-3";
 
-// Four links and the cart do not fit beside the logo on a phone, so there they live in a menu.
+// Five links and the cart do not fit beside the logo below a laptop width, so there they live in a menu.
 const MobileMenu = () => (
   <DropdownMenu>
     <DropdownMenuTrigger
@@ -54,8 +55,8 @@ const SiteHeader = () => (
           className="h-10 w-auto"
         />
       </Link>
-      <nav aria-label="Principal" className="flex items-center gap-2 md:gap-3">
-        <ul className="flex items-center gap-1 max-md:hidden lg:gap-2">
+      <nav aria-label="Principal" className="flex items-center gap-2 lg:gap-3">
+        <ul className="flex items-center gap-1 max-lg:hidden xl:gap-2">
           {navLinks.map((link) => (
             <li key={link.to}>
               <Link to={link.to} className={navLinkClass}>
@@ -64,9 +65,9 @@ const SiteHeader = () => (
             </li>
           ))}
         </ul>
-        <span aria-hidden className="bg-border mx-1 h-5 w-px max-md:hidden" />
+        <span aria-hidden className="bg-border mx-1 h-5 w-px max-lg:hidden" />
         <CartLink />
-        <div className="md:hidden">
+        <div className="lg:hidden">
           <MobileMenu />
         </div>
       </nav>

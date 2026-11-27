@@ -1,4 +1,4 @@
-import { Button, buttonVariants } from "@garage-comics/ui/components/button";
+import { Button } from "@garage-comics/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,26 +17,18 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@garage-comics/ui/components/input-group";
-import { Link, createFileRoute } from "@tanstack/react-router";
-import { CalendarClock, ChevronDown, Search } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { ChevronDown, Search } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 
 import { ComicGrid } from "@/components/comic-grid";
-import {
-  PageIcon,
-  SectionRule,
-  SinglePage,
-  pageHeadingClass,
-  pageLeadClass,
-} from "@/components/page-intro";
+import { SectionRule, pageHeadingClass } from "@/components/page-intro";
+import { SalesClosed } from "@/components/sales-closed";
 import { getCatalog } from "@/functions/catalog";
 import { getActiveEdition } from "@/functions/editions";
 import { catalogGenres, filterCatalog } from "@/lib/catalog-filter";
-import { formatDateTime } from "@/lib/format";
 import type { SellableComic } from "@/server/catalog";
-
-type ActiveEdition = Awaited<ReturnType<typeof getActiveEdition>>;
 
 const CATALOG_STALE_MS = 30_000;
 
@@ -58,36 +50,12 @@ type CatalogSearch = z.infer<typeof catalogSearch>;
 // With a single genre on sale the menu would filter nothing.
 const MIN_GENRES_TO_FILTER = 2;
 
-/** Why there is nothing to buy right now, and when there will be. */
-const closedMessage = (edition: ActiveEdition) => {
-  if (edition === null || edition.phase === "closed") {
-    return "La venta de esta Edición ya cerró. Vuelve pronto para conocer las fechas de la próxima.";
-  }
-
-  if (edition.phase === "sales") {
-    return "Todavía no hay cómics a la venta. Vuelve en un rato.";
-  }
-
-  return `La venta de ${edition.name} abre el ${formatDateTime(edition.salesOpenAt)}.`;
-};
-
 const CatalogPage = () => {
   const { edition, catalog } = Route.useLoaderData();
 
   if (catalog.status === "closed" || catalog.comics.length === 0) {
     return (
-      <SinglePage>
-        <PageIcon>
-          <CalendarClock />
-        </PageIcon>
-        <h1 className={pageHeadingClass}>El catálogo no está abierto</h1>
-        <p className={pageLeadClass}>{closedMessage(edition)}</p>
-        <div className="mt-10">
-          <Link to="/" className={buttonVariants({ variant: "outline" })}>
-            Volver al inicio
-          </Link>
-        </div>
-      </SinglePage>
+      <SalesClosed title="El catálogo no está abierto" edition={edition} />
     );
   }
 
