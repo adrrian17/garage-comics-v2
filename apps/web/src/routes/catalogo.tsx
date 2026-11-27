@@ -113,7 +113,7 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
   );
 
   // A link, Back or Forward lands on an entry with its own search: a pending write would overwrite it, and the box takes that search.
-  // The box's own writes are the only replaces.
+  // Replaces keep the same entry (this page's filter updates, router redirects), so they leave the box alone.
   useEffect(
     () =>
       router.history.subscribe(({ action, location }) => {
