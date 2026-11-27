@@ -70,7 +70,7 @@ export const CheckoutForm = ({
 
   return (
     <form
-      className="mt-8 flex flex-col gap-4"
+      className="mt-6 flex flex-col gap-4 border-t pt-6"
       onSubmit={(event) => {
         void handleSubmit(event);
       }}
@@ -98,7 +98,7 @@ export const CheckoutForm = ({
       <Button
         type="submit"
         size="lg"
-        className="w-fit"
+        className="w-full"
         disabled={isPending || ids.length === 0}
       >
         {isPending ? "Abriendo el pago…" : "Pagar con tarjeta u OXXO"}

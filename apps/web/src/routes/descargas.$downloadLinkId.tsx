@@ -1,8 +1,14 @@
 import { buttonVariants } from "@garage-comics/ui/components/button";
 import { createFileRoute, notFound, useRouter } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { CircleAlert, Download, Loader2, PackageOpen } from "lucide-react";
 import { useEffect } from "react";
 
+import {
+  PageIcon,
+  SinglePage,
+  pageHeadingClass,
+  pageLeadClass,
+} from "@/components/page-intro";
 import { PageMessage } from "@/components/page-message";
 import { getDownloadLink } from "@/functions/downloads";
 import type { CopyState } from "@/lib/download-link";
@@ -21,15 +27,16 @@ const CopyAction = ({
 }) => {
   if (state === "ready") {
     return (
-      <a href={href} className={buttonVariants()}>
-        Descargar
+      <a href={href} className={buttonVariants({ size: "sm" })}>
+        <Download data-icon="inline-start" />
+        Descargar PDF
       </a>
     );
   }
 
   if (state === "preparing") {
     return (
-      <span className="text-muted-foreground flex items-center gap-2 text-sm">
+      <span className="text-muted-foreground flex h-9 items-center gap-2 text-sm">
         <Loader2 aria-hidden className="size-4 animate-spin" />
         Preparando tu PDF…
       </span>
@@ -37,7 +44,8 @@ const CopyAction = ({
   }
 
   return (
-    <span className="text-destructive text-sm">
+    <span className="bg-destructive/8 text-destructive flex max-w-sm items-start gap-2 rounded-xl px-3 py-2 text-sm">
+      <CircleAlert aria-hidden className="mt-0.5 size-4 shrink-0" />
       No pudimos preparar este cómic. Responde al correo de tu Compra con tu
       Número de compra {orderNumber}.
     </span>
@@ -75,22 +83,28 @@ const DownloadLinkPage = () => {
   }
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-bold tracking-tight">
-        Tu Compra {view.orderNumber}
-      </h1>
-      <p className="text-muted-foreground mt-2">
+    <SinglePage>
+      <PageIcon>
+        <PackageOpen />
+      </PageIcon>
+      <p className="text-muted-foreground mb-2 font-medium">
+        Compra {view.orderNumber}
+      </p>
+      <h1 className={pageHeadingClass}>Tus cómics</h1>
+      <p className={pageLeadClass}>
         Tu Link de descarga funciona hasta el {formatDateTime(view.expiresAt)},
         sin límite de descargas. Cada PDF lleva tu correo y tu Número de compra
         al pie de cada página.
       </p>
-      <ul aria-live="polite" className="mt-8 flex flex-col gap-3">
+      <ul aria-live="polite" className="mt-10 flex flex-col border-t">
         {view.comics.map((comic) => (
           <li
             key={comic.orderItemId}
-            className="flex flex-wrap items-center justify-between gap-4 rounded-lg border p-4"
+            className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b py-5"
           >
-            <span className="font-medium">{comic.title}</span>
+            <span className="font-display text-lg leading-snug font-semibold tracking-tight wrap-anywhere">
+              {comic.title}
+            </span>
             <CopyAction
               state={comic.state}
               href={`/descargas/${downloadLinkId}/${comic.orderItemId}`}
@@ -99,7 +113,7 @@ const DownloadLinkPage = () => {
           </li>
         ))}
       </ul>
-    </main>
+    </SinglePage>
   );
 };
 

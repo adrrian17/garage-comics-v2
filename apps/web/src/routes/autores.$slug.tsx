@@ -5,9 +5,10 @@ import {
   EmptyTitle,
 } from "@garage-comics/ui/components/empty";
 import { createFileRoute, notFound } from "@tanstack/react-router";
+import { ArrowUpRight } from "lucide-react";
 
-import { CartLink } from "@/components/cart-link";
 import { ComicGrid } from "@/components/comic-grid";
+import { SectionRule } from "@/components/page-intro";
 import { getAuthorPage } from "@/functions/authors";
 import { initials, isBlankProfile } from "@/lib/author";
 
@@ -24,60 +25,73 @@ const AuthorPage = () => {
   ].flatMap(({ label, href }) => (href === null ? [] : [{ label, href }]));
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
-      <header className="flex items-center gap-4">
+    <main className="mx-auto w-full max-w-6xl px-4 pt-10 pb-20 sm:px-6 sm:pt-16 lg:pb-28">
+      <header className="grid gap-8 sm:grid-cols-[auto_1fr] sm:gap-10 lg:gap-14">
         <div
           aria-hidden
-          className="bg-muted text-muted-foreground flex size-20 shrink-0 items-center justify-center rounded-full text-2xl font-semibold"
+          className="seal bg-print text-print-foreground font-display grid size-28 place-items-center text-4xl font-semibold tracking-tight sm:size-40 sm:text-6xl lg:size-48"
         >
           {initials(author.displayName)}
         </div>
-        <div className="min-w-0">
-          <h1 className="text-3xl font-bold tracking-tight break-words">
-            {author.displayName}
-          </h1>
-          {author.role === "" ? null : (
-            <p className="text-muted-foreground mt-1 wrap-anywhere">
-              {author.role}
-            </p>
+        <div className="flex min-w-0 flex-col justify-end gap-5">
+          <div>
+            {author.role === "" ? null : (
+              <p className="text-muted-foreground mb-2 font-medium wrap-anywhere">
+                {author.role}
+              </p>
+            )}
+            <h1 className="font-display text-5xl leading-none font-semibold tracking-tight text-balance break-words sm:text-6xl lg:text-7xl">
+              {author.displayName}
+            </h1>
+          </div>
+          {links.length === 0 ? null : (
+            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+              {links.map((link) => (
+                <li key={link.label}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="decoration-print inline-flex items-center gap-1 font-medium decoration-2 underline-offset-4 hover:underline focus-visible:underline focus-visible:outline-none"
+                  >
+                    {link.label}
+                    <ArrowUpRight
+                      aria-hidden
+                      className="text-muted-foreground size-4"
+                    />
+                  </a>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
+        {author.bio === "" ? null : (
+          <p className="max-w-2xl text-lg leading-relaxed text-pretty wrap-anywhere whitespace-pre-line sm:col-start-2">
+            {author.bio}
+          </p>
+        )}
       </header>
-      {author.bio === "" ? null : (
-        <p className="mt-8 wrap-anywhere whitespace-pre-line">{author.bio}</p>
-      )}
-      {links.length === 0 ? null : (
-        <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2">
-          {links.map((link) => (
-            <li key={link.label}>
-              <a
-                href={link.href}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="underline"
-              >
-                {link.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-      <section className="mt-12">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-xl font-semibold">Cómics</h2>
-          {comics.length === 0 ? null : <CartLink />}
-        </div>
+      <section aria-labelledby="comics-del-autor" className="mt-20 lg:mt-28">
+        <h2
+          id="comics-del-autor"
+          className="font-display text-3xl font-semibold tracking-tight sm:text-4xl"
+        >
+          Cómics en esta Edición
+        </h2>
+        <SectionRule />
         {comics.length === 0 ? (
-          <Empty className="mt-4">
-            <EmptyHeader>
-              <EmptyTitle>Todavía no hay cómics</EmptyTitle>
-              <EmptyDescription>
-                Aquí aparecerán los cómics que venda en la Edición abierta.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
+          <div className="border-foreground/20 mt-10 rounded-2xl border border-dashed">
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>Todavía no hay cómics</EmptyTitle>
+                <EmptyDescription>
+                  Aquí aparecerán los cómics que venda en la Edición abierta.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
         ) : (
-          <div className="mt-4">
+          <div className="mt-10">
             <ComicGrid comics={comics} showAuthor={false} />
           </div>
         )}

@@ -7,12 +7,18 @@ import {
 } from "@garage-comics/ui/components/field";
 import { Input } from "@garage-comics/ui/components/input";
 import { createFileRoute } from "@tanstack/react-router";
-import { MailCheck } from "lucide-react";
+import { KeyRound, MailCheck } from "lucide-react";
 import { useState } from "react";
 import type { SubmitEvent } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import {
+  PageIcon,
+  SinglePage,
+  pageHeadingClass,
+  pageLeadClass,
+} from "@/components/page-intro";
 import { authClient } from "@/lib/auth-client";
 
 // Moves focus to the confirmation heading so screen readers announce it.
@@ -26,8 +32,6 @@ const linkErrorMessage = (code: string) =>
     ? "Ese correo no tiene cuenta en Garage Cómics."
     : "Ese link ya venció o ya se usó. Pide uno nuevo.";
 
-const headingClass = "text-3xl font-bold tracking-tight";
-
 const CheckEmail = ({
   email,
   onRetry,
@@ -36,19 +40,21 @@ const CheckEmail = ({
   onRetry: () => void;
 }) => (
   <>
-    <MailCheck aria-hidden className="mb-4 size-8" />
+    <PageIcon>
+      <MailCheck />
+    </PageIcon>
     <h1
       ref={focusOnMount}
       tabIndex={-1}
-      className={`${headingClass} outline-none`}
+      className={`${pageHeadingClass} outline-none`}
     >
       Revisa tu correo
     </h1>
-    <p className="text-muted-foreground mt-2">
+    <p className={pageLeadClass}>
       Te mandamos un link a <strong className="text-foreground">{email}</strong>
       . Ábrelo en este dispositivo para entrar. Vence en 5 minutos.
     </p>
-    <Button variant="outline" className="mt-8 w-full" onClick={onRetry}>
+    <Button variant="outline" className="mt-10" onClick={onRetry}>
       Usar otro correo
     </Button>
   </>
@@ -85,15 +91,19 @@ const SignInPage = () => {
   };
 
   return (
-    <main className="mx-auto w-full max-w-md px-4 py-12 sm:px-6">
+    <SinglePage>
       {sentTo === undefined ? (
         <>
-          <h1 className={headingClass}>Entrar</h1>
-          <p className="text-muted-foreground mt-2">
-            Sin contraseñas: te mandamos un link a tu correo.
+          <PageIcon>
+            <KeyRound />
+          </PageIcon>
+          <h1 className={pageHeadingClass}>Entrar</h1>
+          <p className={pageLeadClass}>
+            Para Autores y Administradores. Sin contraseñas: te mandamos un link
+            a tu correo.
           </p>
           <form
-            className="mt-8"
+            className="panel mt-10 p-6 sm:p-8"
             onSubmit={(event) => {
               void handleSubmit(event);
             }}
@@ -117,7 +127,7 @@ const SignInPage = () => {
                   }}
                 />
               </Field>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" size="lg" disabled={isPending}>
                 {isPending ? "Mandando…" : "Mandarme el link"}
               </Button>
             </FieldGroup>
@@ -131,7 +141,7 @@ const SignInPage = () => {
           }}
         />
       )}
-    </main>
+    </SinglePage>
   );
 };
 

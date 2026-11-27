@@ -13,8 +13,11 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AutorRouteRouteImport } from './routes/autor/route'
 import { Route as CarritoRouteImport } from './routes/carrito'
+import { Route as CatalogoRouteImport } from './routes/catalogo'
 import { Route as EntrarRouteImport } from './routes/entrar'
+import { Route as FaqsRouteImport } from './routes/faqs'
 import { Route as PropuestaRouteImport } from './routes/propuesta'
+import { Route as ReglasRouteImport } from './routes/reglas'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminAdministradoresRouteImport } from './routes/admin/administradores'
 import { Route as AdminComicsRouteImport } from './routes/admin/comics'
@@ -30,7 +33,9 @@ import { Route as AutorComicsRouteImport } from './routes/autor/comics'
 import { Route as AutorPagosRouteImport } from './routes/autor/pagos'
 import { Route as AutorPerfilRouteImport } from './routes/autor/perfil'
 import { Route as AutorVentasRouteImport } from './routes/autor/ventas'
+import { Route as AutoresIndexRouteImport } from './routes/autores.index'
 import { Route as AutoresSlugRouteImport } from './routes/autores.$slug'
+import { Route as ComicsComicIdRouteImport } from './routes/comics.$comicId'
 import { Route as CompraListaRouteImport } from './routes/compra.lista'
 import { Route as DescargasDownloadLinkIdRouteImport } from './routes/descargas.$downloadLinkId'
 import { Route as InscripcionProposalIdRouteImport } from './routes/inscripcion.$proposalId'
@@ -60,14 +65,29 @@ const CarritoRoute = CarritoRouteImport.update({
   path: '/carrito',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CatalogoRoute = CatalogoRouteImport.update({
+  id: '/catalogo',
+  path: '/catalogo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EntrarRoute = EntrarRouteImport.update({
   id: '/entrar',
   path: '/entrar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqsRoute = FaqsRouteImport.update({
+  id: '/faqs',
+  path: '/faqs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PropuestaRoute = PropuestaRouteImport.update({
   id: '/propuesta',
   path: '/propuesta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReglasRoute = ReglasRouteImport.update({
+  id: '/reglas',
+  path: '/reglas',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -145,9 +165,19 @@ const AutorVentasRoute = AutorVentasRouteImport.update({
   path: '/ventas',
   getParentRoute: () => AutorRouteRoute,
 } as any)
+const AutoresIndexRoute = AutoresIndexRouteImport.update({
+  id: '/autores/',
+  path: '/autores/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AutoresSlugRoute = AutoresSlugRouteImport.update({
   id: '/autores/$slug',
   path: '/autores/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComicsComicIdRoute = ComicsComicIdRouteImport.update({
+  id: '/comics/$comicId',
+  path: '/comics/$comicId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CompraListaRoute = CompraListaRouteImport.update({
@@ -197,8 +227,11 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/autor': typeof AutorRouteRouteWithChildren
   '/carrito': typeof CarritoRoute
+  '/catalogo': typeof CatalogoRoute
   '/entrar': typeof EntrarRoute
+  '/faqs': typeof FaqsRoute
   '/propuesta': typeof PropuestaRoute
+  '/reglas': typeof ReglasRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/comics': typeof AdminComicsRoute
   '/admin/compras': typeof AdminComprasRoute
@@ -213,12 +246,14 @@ export interface FileRoutesByFullPath {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autor/ventas': typeof AutorVentasRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/comics/$comicId': typeof ComicsComicIdRoute
   '/compra/lista': typeof CompraListaRoute
   '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
+  '/autores/': typeof AutoresIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -227,8 +262,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/carrito': typeof CarritoRoute
+  '/catalogo': typeof CatalogoRoute
   '/entrar': typeof EntrarRoute
+  '/faqs': typeof FaqsRoute
   '/propuesta': typeof PropuestaRoute
+  '/reglas': typeof ReglasRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/comics': typeof AdminComicsRoute
   '/admin/compras': typeof AdminComprasRoute
@@ -243,12 +281,14 @@ export interface FileRoutesByTo {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autor/ventas': typeof AutorVentasRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/comics/$comicId': typeof ComicsComicIdRoute
   '/compra/lista': typeof CompraListaRoute
   '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin': typeof AdminIndexRoute
   '/autor': typeof AutorIndexRoute
+  '/autores': typeof AutoresIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -260,8 +300,11 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/autor': typeof AutorRouteRouteWithChildren
   '/carrito': typeof CarritoRoute
+  '/catalogo': typeof CatalogoRoute
   '/entrar': typeof EntrarRoute
+  '/faqs': typeof FaqsRoute
   '/propuesta': typeof PropuestaRoute
+  '/reglas': typeof ReglasRoute
   '/admin/administradores': typeof AdminAdministradoresRoute
   '/admin/comics': typeof AdminComicsRoute
   '/admin/compras': typeof AdminComprasRoute
@@ -276,12 +319,14 @@ export interface FileRoutesById {
   '/autor/perfil': typeof AutorPerfilRoute
   '/autor/ventas': typeof AutorVentasRoute
   '/autores/$slug': typeof AutoresSlugRoute
+  '/comics/$comicId': typeof ComicsComicIdRoute
   '/compra/lista': typeof CompraListaRoute
   '/descargas/$downloadLinkId': typeof DescargasDownloadLinkIdRoute
   '/inscripcion/$proposalId': typeof InscripcionProposalIdRoute
   '/portadas/$comicId': typeof PortadasComicIdRoute
   '/admin/': typeof AdminIndexRoute
   '/autor/': typeof AutorIndexRoute
+  '/autores/': typeof AutoresIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/stripe/connect-webhook': typeof ApiStripeConnectWebhookRoute
   '/api/stripe/webhook': typeof ApiStripeWebhookRoute
@@ -294,8 +339,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/autor'
     | '/carrito'
+    | '/catalogo'
     | '/entrar'
+    | '/faqs'
     | '/propuesta'
+    | '/reglas'
     | '/admin/administradores'
     | '/admin/comics'
     | '/admin/compras'
@@ -310,12 +358,14 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autor/ventas'
     | '/autores/$slug'
+    | '/comics/$comicId'
     | '/compra/lista'
     | '/descargas/$downloadLinkId'
     | '/inscripcion/$proposalId'
     | '/portadas/$comicId'
     | '/admin/'
     | '/autor/'
+    | '/autores/'
     | '/api/auth/$'
     | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
@@ -324,8 +374,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/carrito'
+    | '/catalogo'
     | '/entrar'
+    | '/faqs'
     | '/propuesta'
+    | '/reglas'
     | '/admin/administradores'
     | '/admin/comics'
     | '/admin/compras'
@@ -340,12 +393,14 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autor/ventas'
     | '/autores/$slug'
+    | '/comics/$comicId'
     | '/compra/lista'
     | '/descargas/$downloadLinkId'
     | '/inscripcion/$proposalId'
     | '/portadas/$comicId'
     | '/admin'
     | '/autor'
+    | '/autores'
     | '/api/auth/$'
     | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
@@ -356,8 +411,11 @@ export interface FileRouteTypes {
     | '/admin'
     | '/autor'
     | '/carrito'
+    | '/catalogo'
     | '/entrar'
+    | '/faqs'
     | '/propuesta'
+    | '/reglas'
     | '/admin/administradores'
     | '/admin/comics'
     | '/admin/compras'
@@ -372,12 +430,14 @@ export interface FileRouteTypes {
     | '/autor/perfil'
     | '/autor/ventas'
     | '/autores/$slug'
+    | '/comics/$comicId'
     | '/compra/lista'
     | '/descargas/$downloadLinkId'
     | '/inscripcion/$proposalId'
     | '/portadas/$comicId'
     | '/admin/'
     | '/autor/'
+    | '/autores/'
     | '/api/auth/$'
     | '/api/stripe/connect-webhook'
     | '/api/stripe/webhook'
@@ -389,13 +449,18 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AutorRouteRoute: typeof AutorRouteRouteWithChildren
   CarritoRoute: typeof CarritoRoute
+  CatalogoRoute: typeof CatalogoRoute
   EntrarRoute: typeof EntrarRoute
+  FaqsRoute: typeof FaqsRoute
   PropuestaRoute: typeof PropuestaRoute
+  ReglasRoute: typeof ReglasRoute
   AutoresSlugRoute: typeof AutoresSlugRoute
+  ComicsComicIdRoute: typeof ComicsComicIdRoute
   CompraListaRoute: typeof CompraListaRoute
   DescargasDownloadLinkIdRoute: typeof DescargasDownloadLinkIdRoute
   InscripcionProposalIdRoute: typeof InscripcionProposalIdRoute
   PortadasComicIdRoute: typeof PortadasComicIdRoute
+  AutoresIndexRoute: typeof AutoresIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiStripeConnectWebhookRoute: typeof ApiStripeConnectWebhookRoute
   ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
@@ -432,6 +497,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CarritoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/catalogo': {
+      id: '/catalogo'
+      path: '/catalogo'
+      fullPath: '/catalogo'
+      preLoaderRoute: typeof CatalogoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/entrar': {
       id: '/entrar'
       path: '/entrar'
@@ -439,11 +511,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EntrarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faqs': {
+      id: '/faqs'
+      path: '/faqs'
+      fullPath: '/faqs'
+      preLoaderRoute: typeof FaqsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/propuesta': {
       id: '/propuesta'
       path: '/propuesta'
       fullPath: '/propuesta'
       preLoaderRoute: typeof PropuestaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reglas': {
+      id: '/reglas'
+      path: '/reglas'
+      fullPath: '/reglas'
+      preLoaderRoute: typeof ReglasRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -551,11 +637,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AutorVentasRouteImport
       parentRoute: typeof AutorRouteRoute
     }
+    '/autores/': {
+      id: '/autores/'
+      path: '/autores'
+      fullPath: '/autores/'
+      preLoaderRoute: typeof AutoresIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/autores/$slug': {
       id: '/autores/$slug'
       path: '/autores/$slug'
       fullPath: '/autores/$slug'
       preLoaderRoute: typeof AutoresSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comics/$comicId': {
+      id: '/comics/$comicId'
+      path: '/comics/$comicId'
+      fullPath: '/comics/$comicId'
+      preLoaderRoute: typeof ComicsComicIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compra/lista': {
@@ -672,13 +772,18 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AutorRouteRoute: AutorRouteRouteWithChildren,
   CarritoRoute: CarritoRoute,
+  CatalogoRoute: CatalogoRoute,
   EntrarRoute: EntrarRoute,
+  FaqsRoute: FaqsRoute,
   PropuestaRoute: PropuestaRoute,
+  ReglasRoute: ReglasRoute,
   AutoresSlugRoute: AutoresSlugRoute,
+  ComicsComicIdRoute: ComicsComicIdRoute,
   CompraListaRoute: CompraListaRoute,
   DescargasDownloadLinkIdRoute: DescargasDownloadLinkIdRoute,
   InscripcionProposalIdRoute: InscripcionProposalIdRoute,
   PortadasComicIdRoute: PortadasComicIdRoute,
+  AutoresIndexRoute: AutoresIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiStripeConnectWebhookRoute: ApiStripeConnectWebhookRoute,
   ApiStripeWebhookRoute: ApiStripeWebhookRoute,

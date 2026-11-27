@@ -13,6 +13,7 @@
   "scripts": {},
   "dependencies": {
     "@base-ui/react": "^1.8.0",
+    "@fontsource-variable/bricolage-grotesque": "catalog:",
     "@fontsource-variable/figtree": "catalog:",
     "@shadcn/react": "^0.3.1",
     "class-variance-authority": "^0.7.1",

@@ -1,6 +1,7 @@
 import { edition } from "@garage-comics/db/schema/editions";
 import { createServerFn } from "@tanstack/react-start";
 import { desc, eq } from "drizzle-orm";
+import { log } from "evlog";
 import { z } from "zod";
 
 import { adminMiddleware } from "@/functions/admin-middleware";
@@ -8,15 +9,34 @@ import { editionInput, editionPhase } from "@/lib/edition";
 import { findActiveEdition } from "@/server/editions";
 import { createDatabase } from "@/server/services";
 
-export const getActiveEdition = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const active = await findActiveEdition(createDatabase());
+const loadActiveEdition = async () => {
+  const active = await findActiveEdition(createDatabase());
 
-    if (active === undefined) {
+  if (active === undefined) {
+    return null;
+  }
+
+  return { ...active, phase: editionPhase(active, new Date()) };
+};
+
+export const getActiveEdition = createServerFn({ method: "GET" }).handler(
+  loadActiveEdition
+);
+
+/** The active Edition for the countdown on every page, or null when it cannot be read: a failed read hides the bar instead of taking down the page, the dashboards included. */
+export const getCountdownEdition = createServerFn({ method: "GET" }).handler(
+  async () => {
+    try {
+      return await loadActiveEdition();
+    } catch (error) {
+      log.warn({
+        action: "load_countdown_edition",
+        reason: "edition_read_failed",
+        error: error instanceof Error ? error.message : String(error),
+      });
+
       return null;
     }
-
-    return { ...active, phase: editionPhase(active, new Date()) };
   }
 );
 

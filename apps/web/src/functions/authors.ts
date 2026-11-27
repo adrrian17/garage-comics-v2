@@ -6,6 +6,7 @@ import { z } from "zod";
 
 import { authorMiddleware } from "@/functions/author-middleware";
 import { authorProfileInput } from "@/lib/author";
+import { authorRoster } from "@/lib/author-roster";
 import { sellableComics } from "@/server/catalog";
 import { createDatabase } from "@/server/services";
 
@@ -105,3 +106,27 @@ export const getAuthorPage = createServerFn({ method: "GET" })
       comics: sellable.status === "open" ? sellable.comics : [],
     };
   });
+
+/** The Authors with comics on sale, by name, each with their role and the covers a list card shows. */
+export const getAuthorsPage = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const sellable = await sellableComics(createDatabase(), new Date());
+
+    if (sellable.status === "closed") {
+      return sellable;
+    }
+
+    return {
+      status: "open" as const,
+      edition: sellable.edition,
+      authors: authorRoster(
+        sellable.comics.map(({ id, title, hasCover, author }) => ({
+          id,
+          title,
+          hasCover,
+          author,
+        }))
+      ),
+    };
+  }
+);

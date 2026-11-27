@@ -1,5 +1,6 @@
 import type { Database } from "@garage-comics/db";
 import { authorProfile } from "@garage-comics/db/schema/authors";
+import type { Collaborator } from "@garage-comics/db/schema/comics";
 import { editionComic } from "@garage-comics/db/schema/comics";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 
@@ -15,7 +16,9 @@ export interface SellableComic {
   priceMxn: number;
   pageCount: number;
   hasCover: boolean;
-  author: { slug: string; displayName: string };
+  author: { slug: string; displayName: string; role: string };
+  /** Credited people without an account; the Author enters their names, roles and links for the public to see. */
+  collaborators: Collaborator[];
 }
 
 type Sellable =
@@ -49,9 +52,11 @@ export const sellableComics = async (
       genre: editionComic.genre,
       priceMxn: editionComic.priceMxn,
       pageCount: editionComic.pageCount,
+      collaborators: editionComic.collaborators,
       hasCover: sql<number>`${editionComic.coverKey} is not null`,
       slug: authorProfile.slug,
       displayName: authorProfile.displayName,
+      role: authorProfile.role,
     })
     .from(editionComic)
     // No join on `registration`: Admins sell without one.
@@ -74,10 +79,10 @@ export const sellableComics = async (
   return {
     status: "open",
     edition: { id: edition.id, name: edition.name },
-    comics: rows.map(({ hasCover, slug, displayName, ...comic }) => ({
+    comics: rows.map(({ hasCover, slug, displayName, role, ...comic }) => ({
       ...comic,
       hasCover: Boolean(hasCover),
-      author: { slug, displayName },
+      author: { slug, displayName, role },
     })),
   };
 };
