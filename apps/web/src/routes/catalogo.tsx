@@ -112,6 +112,21 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
     []
   );
 
+  // Back and Forward land on an entry that already has its search; a pending write would replace that entry with this one.
+  useEffect(
+    () =>
+      router.history.subscribe(({ action }) => {
+        if (
+          action.type !== "PUSH" &&
+          action.type !== "REPLACE" &&
+          urlTimer.current !== null
+        ) {
+          clearTimeout(urlTimer.current);
+        }
+      }),
+    [router]
+  );
+
   const results = filterCatalog(comics, { search, genre });
 
   // Clearing a filter passes null; empty filters stay out of the URL.
