@@ -245,6 +245,7 @@ overrides:
 
 patchedDependencies:
   '@alchemy.run/cloudflare@2.0.0-beta.85': ddcd2d7942ce1036dda070e60d9fa4a4106c110b822029efd71678bb3bbb45b6
+  '@alchemy.run/stripe@2.0.0-beta.85': da0b998404265f0e4a15906fb796a56dade16fbff52d9df7d99c5d9c487a875b
 
 importers:
 
@@ -461,7 +462,7 @@ importers:
         version: 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-bun@4.1.2(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(@types/react@19.3.0)(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(effect@4.1.2)(ws@8.22.2))(effect@4.1.2)
       '@alchemy.run/stripe':
         specifier: 2.0.0-beta.85
-        version: 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-bun@4.1.2(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(@types/react@19.3.0)(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(effect@4.1.2)(ws@8.22.2))(effect@4.1.2)
+        version: 2.0.0-beta.85(patch_hash=da0b998404265f0e4a15906fb796a56dade16fbff52d9df7d99c5d9c487a875b)(alchemy@2.0.0-beta.85(@effect/platform-bun@4.1.2(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(@types/react@19.3.0)(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(effect@4.1.2)(ws@8.22.2))(effect@4.1.2)
       '@effect/platform-bun':
         specifier: 4.1.2
         version: 4.1.2(effect@4.1.2)
@@ -6377,7 +6378,7 @@ snapshots:
       alchemy: 2.0.0-beta.85(@effect/platform-bun@4.1.2(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(@types/react@19.3.0)(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(effect@4.1.2)(ws@8.22.2)
       effect: 4.1.2
 
-  '@alchemy.run/stripe@2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-bun@4.1.2(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(@types/react@19.3.0)(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(effect@4.1.2)(ws@8.22.2))(effect@4.1.2)':
+  '@alchemy.run/stripe@2.0.0-beta.85(patch_hash=da0b998404265f0e4a15906fb796a56dade16fbff52d9df7d99c5d9c487a875b)(alchemy@2.0.0-beta.85(@effect/platform-bun@4.1.2(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1))(@types/react@19.3.0)(@voidzero-dev/vite-plus-core@1.5.1(@types/node@26.6.6)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(effect@4.1.2)(ws@8.22.2))(effect@4.1.2)':
     dependencies:
       '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.2)
       '@distilled.cloud/stripe': 1.0.0-rc.18(effect@4.1.2)

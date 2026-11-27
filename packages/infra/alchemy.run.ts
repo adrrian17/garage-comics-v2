@@ -144,7 +144,9 @@ const deployedWorker = Effect.gen(function* deployedWorker() {
     enabledEvents: checkoutEvents,
   });
 
-  const connectWebhook = yield* Stripe.WebhookEndpoint("account-webhook", {
+  const connectWebhookId = "connect-webhook";
+
+  const connectWebhook = yield* Stripe.WebhookEndpoint(connectWebhookId, {
     url: `${url}/api/stripe/connect-webhook`,
     description: "Garage Cómics: cuentas de Autores",
     enabledEvents: ["account.updated"],
@@ -156,7 +158,7 @@ const deployedWorker = Effect.gen(function* deployedWorker() {
     STRIPE_WEBHOOK_SECRET: Output.map(requireSecret("checkout-webhook"))(
       webhook.secret
     ),
-    STRIPE_CONNECT_WEBHOOK_SECRET: Output.map(requireSecret("account-webhook"))(
+    STRIPE_CONNECT_WEBHOOK_SECRET: Output.map(requireSecret(connectWebhookId))(
       connectWebhook.secret
     ),
   };

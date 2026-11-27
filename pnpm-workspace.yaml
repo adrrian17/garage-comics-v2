@@ -58,3 +58,4 @@ permissions:
     skills: false
 patchedDependencies:
   "@alchemy.run/cloudflare@2.0.0-beta.85": patches/@alchemy.run__cloudflare@2.0.0-beta.85.patch
+  "@alchemy.run/stripe@2.0.0-beta.85": patches/@alchemy.run__stripe@2.0.0-beta.85.patch
