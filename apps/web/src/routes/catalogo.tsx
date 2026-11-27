@@ -112,17 +112,28 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
     []
   );
 
-  // Back and Forward land on an entry that already has its search; a pending write would replace that entry with this one.
+  // Back and Forward land on an entry with its own search: a pending write would overwrite it, and the box takes that search.
   useEffect(
     () =>
-      router.history.subscribe(({ action }) => {
-        if (
-          action.type !== "PUSH" &&
-          action.type !== "REPLACE" &&
-          urlTimer.current !== null
-        ) {
+      router.history.subscribe(({ action, location }) => {
+        if (action.type === "PUSH" || action.type === "REPLACE") {
+          return;
+        }
+
+        if (urlTimer.current !== null) {
           clearTimeout(urlTimer.current);
         }
+
+        const landing = router.parseLocation(location);
+
+        if (landing.pathname !== Route.fullPath) {
+          return;
+        }
+
+        const landingBuscar = catalogSearch.parse(landing.search).buscar ?? "";
+
+        writtenBuscar.current = landingBuscar;
+        setSearch(landingBuscar);
       }),
     [router]
   );
