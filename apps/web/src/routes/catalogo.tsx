@@ -163,12 +163,10 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
               }
 
               urlTimer.current = setTimeout(() => {
-                // A link clicked while typing may still be loading; writing now would pull the Customer back here.
-                const latest = router.latestLocation;
-
+                // A link to another page clicked while typing may still be loading; writing now would pull the Customer back here.
                 if (
-                  latest.pathname !== Route.fullPath ||
-                  (latest.search.buscar ?? "") !== writtenBuscar.current
+                  router.latestLocation.pathname !==
+                  router.state.resolvedLocation?.pathname
                 ) {
                   return;
                 }
