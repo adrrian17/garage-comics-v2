@@ -114,7 +114,7 @@ const authorQuestions: Question[] = [
   },
   {
     question: "¿Cuánto dinero me toca de cada venta?",
-    answer: `El ${100 - COMMISSION_PERCENT}% del precio de cada cómic vendido. Garage Cómics se queda con una Comisión del ${COMMISSION_PERCENT}%, que ya cubre las comisiones de pago de Stripe. Tú pones el precio, en pesos enteros y desde ${formatMxn(COMIC_MIN_PRICE_MXN)}.`,
+    answer: `El ${100 - COMMISSION_PERCENT}% del precio de cada cómic vendido. Garage Cómics se queda con una Comisión del ${COMMISSION_PERCENT}%, que ya cubre las tarifas de pago de Stripe. Tú pones el precio, en pesos enteros y desde ${formatMxn(COMIC_MIN_PRICE_MXN)}.`,
   },
   {
     question: "¿Cuándo recibo mi dinero?",

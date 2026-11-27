@@ -3,7 +3,7 @@ import { z } from "zod";
 
 type Edition = typeof edition.$inferSelect;
 
-type EditionWindows = Pick<
+export type EditionWindows = Pick<
   Edition,
   "proposalsOpenAt" | "proposalsCloseAt" | "salesOpenAt" | "salesCloseAt"
 >;

@@ -4,7 +4,8 @@ import { useSyncExternalStore } from "react";
 
 import type { CountdownWindow, TimeLeft } from "@/lib/countdown";
 import { countdownTarget, timeLeft } from "@/lib/countdown";
-import type { EditionPhase } from "@/lib/edition";
+import type { EditionPhase, EditionWindows } from "@/lib/edition";
+import { editionPhase } from "@/lib/edition";
 import { formatDateTime } from "@/lib/format";
 
 const TICK_MS = 1000;
@@ -67,34 +68,25 @@ const Clock = ({ left }: { left: TimeLeft }) => (
   </span>
 );
 
-/** Counts down, on every public page, to the close of whichever window is open: Proposals or sales. */
-export const CountdownBar = ({
-  edition,
-}: {
-  edition: {
-    phase: EditionPhase;
-    proposalsCloseAt: Date;
-    salesCloseAt: Date;
-  } | null;
-}) => {
+type CountdownEdition = EditionWindows & { phase: EditionPhase };
+
+const EditionCountdown = ({ edition }: { edition: CountdownEdition }) => {
   const nowSeconds = useNowSeconds();
-  const target = countdownTarget(edition);
+  const now = nowSeconds === null ? null : new Date(nowSeconds * TICK_MS);
+
+  // The server's phase until hydration, so the markup matches; then the phase follows the clock, so a window that opens or closes while the page is open shows up without a navigation.
+  const target = countdownTarget({
+    ...edition,
+    phase: now === null ? edition.phase : editionPhase(edition, now),
+  });
 
   if (target === null) {
     return null;
   }
 
-  const left =
-    nowSeconds === null
-      ? null
-      : timeLeft(target.deadline, new Date(nowSeconds * TICK_MS));
-
-  // The window closed while the page was open; the next navigation brings the new phase.
-  if (nowSeconds !== null && left === null) {
-    return null;
-  }
-
+  const left = now === null ? null : timeLeft(target.deadline, now);
   const text = copy[target.window];
+  const deadline = formatDateTime(target.deadline);
 
   return (
     <aside
@@ -102,24 +94,27 @@ export const CountdownBar = ({
       className="bg-foreground text-background"
     >
       <div className="mx-auto flex min-h-10 w-full max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-1 px-4 py-2 text-sm sm:justify-between sm:px-6">
-        <p className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
-          <span className="flex items-center gap-2">
-            <span aria-hidden className="bg-print size-2 rounded-full" />
-            {left === null ? text.ends : text.endsIn}
-          </span>
-          {left === null ? (
-            <span className="font-semibold">
-              el {formatDateTime(target.deadline)}
+        {left === null ? (
+          <p className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
+            <span className="flex items-center gap-2">
+              <span aria-hidden className="bg-print size-2 rounded-full" />
+              {text.ends}
             </span>
-          ) : (
-            <>
-              <Clock left={left} />
-              <span className="sr-only">
-                el {formatDateTime(target.deadline)}
-              </span>
-            </>
-          )}
-        </p>
+            <span className="font-semibold">el {deadline}</span>
+          </p>
+        ) : (
+          <p className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
+            {/* The ticking clock is for the eye; a screen reader gets the deadline once, as a sentence. */}
+            <span aria-hidden className="flex items-center gap-2">
+              <span className="bg-print size-2 rounded-full" />
+              {text.endsIn}
+            </span>
+            <Clock left={left} />
+            <span className="sr-only">
+              {text.ends} el {deadline}
+            </span>
+          </p>
+        )}
         <Link
           to={text.action.to}
           className="hover:text-print focus-visible:ring-print/60 inline-flex items-center gap-1 rounded-sm font-medium underline-offset-4 transition-colors outline-none hover:underline focus-visible:ring-3 max-sm:hidden"
@@ -130,4 +125,17 @@ export const CountdownBar = ({
       </div>
     </aside>
   );
+};
+
+/** Counts down, on every public page, to the close of whichever window is open: Proposals or sales. */
+export const CountdownBar = ({
+  edition,
+}: {
+  edition: CountdownEdition | null;
+}) => {
+  if (edition === null) {
+    return null;
+  }
+
+  return <EditionCountdown edition={edition} />;
 };

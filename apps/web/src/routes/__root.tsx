@@ -69,7 +69,19 @@ export const Route = createRootRoute({
   component: RootComponent,
   beforeLoad: async () => ({ session: await getSession() }),
   // The countdown on every public page needs the active Edition; a minute-old phase is close enough between navigations.
-  loader: async () => await getActiveEdition(),
+  // Without it the bar just stays away: a failed read must not take down every page, the dashboards included.
+  loader: async () => {
+    try {
+      return await getActiveEdition();
+    } catch (error) {
+      console.error(
+        "Could not load the active Edition for the countdown",
+        error
+      );
+
+      return null;
+    }
+  },
   staleTime: EDITION_STALE_MS,
   head: () => ({
     meta: [

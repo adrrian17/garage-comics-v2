@@ -23,8 +23,9 @@ interface RuleSection {
 const proposalWindow = (edition: ActiveEdition): ReactNode => {
   if (
     edition === null ||
-    edition.phase === "closed" ||
-    edition.phase === "sales"
+    edition.phase === "preparation" ||
+    edition.phase === "sales" ||
+    edition.phase === "closed"
   ) {
     return "Cada Edición tiene su propia convocatoria. Anunciamos sus fechas en la página de inicio.";
   }
@@ -108,7 +109,7 @@ const ruleSections = (edition: ActiveEdition): RuleSection[] => [
 const terms = [
   {
     id: "share",
-    text: `Recibes el ${100 - COMMISSION_PERCENT}% de cada venta. La Comisión del ${COMMISSION_PERCENT}% que se queda Garage Cómics ya cubre las comisiones de pago de Stripe.`,
+    text: `Recibes el ${100 - COMMISSION_PERCENT}% de cada venta. La Comisión del ${COMMISSION_PERCENT}% que se queda Garage Cómics ya cubre las tarifas de pago de Stripe.`,
   },
   {
     id: "payee",

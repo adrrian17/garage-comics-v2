@@ -85,6 +85,23 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
   const [search, setSearch] = useState(buscar);
   const urlTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
+  // The search this box last put in the URL. Any other value came from outside (a link, Back): the box takes it and drops its pending write.
+  const writtenBuscar = useRef(buscar);
+
+  useEffect(() => {
+    if (buscar === writtenBuscar.current) {
+      return;
+    }
+
+    writtenBuscar.current = buscar;
+
+    if (urlTimer.current !== null) {
+      clearTimeout(urlTimer.current);
+    }
+
+    setSearch(buscar);
+  }, [buscar]);
+
   useEffect(
     () => () => {
       if (urlTimer.current !== null) {
@@ -145,6 +162,7 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
               }
 
               urlTimer.current = setTimeout(() => {
+                writtenBuscar.current = value;
                 update({ buscar: value });
               }, SEARCH_URL_DELAY_MS);
             }}
@@ -156,17 +174,19 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
         {genres.length < MIN_GENRES_TO_FILTER ? null : (
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={<Button variant="outline" size="lg" />}
+              render={
+                <Button variant="outline" size="lg" className="max-w-full" />
+              }
               aria-label={`Filtrar por género: ${genre ?? ALL_GENRES_LABEL}`}
             >
               <span className="text-muted-foreground">Género:</span>
               {/* Every label shares one grid cell, so the button keeps the width of the longest and never jumps. */}
-              <span className="grid justify-items-start">
+              <span className="grid min-w-0 justify-items-start">
                 {[ALL_GENRES_LABEL, ...genres].map((label) => (
                   <span
                     key={label}
                     aria-hidden={label !== (genre ?? ALL_GENRES_LABEL)}
-                    className={`col-start-1 row-start-1 ${label === (genre ?? ALL_GENRES_LABEL) ? "" : "invisible"}`}
+                    className={`col-start-1 row-start-1 max-w-full truncate ${label === (genre ?? ALL_GENRES_LABEL) ? "" : "invisible"}`}
                   >
                     {label}
                   </span>

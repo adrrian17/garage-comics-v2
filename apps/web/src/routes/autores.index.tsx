@@ -47,7 +47,7 @@ const AuthorRow = ({ author }: { author: ListedAuthor }) => {
               : `${author.role} · ${comicCount(author.comics.length)}`}
           </span>
         </span>
-        <span
+        <div
           aria-hidden
           className="col-start-2 flex items-center gap-2 sm:col-start-auto"
         >
@@ -63,7 +63,7 @@ const AuthorRow = ({ author }: { author: ListedAuthor }) => {
               +{hiddenCovers}
             </span>
           ) : null}
-        </span>
+        </div>
         <ArrowRight
           aria-hidden
           className="text-muted-foreground group-hover/author:text-foreground size-5 transition-transform duration-300 group-hover/author:translate-x-1 motion-reduce:transition-none max-sm:hidden"

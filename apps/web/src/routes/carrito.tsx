@@ -177,6 +177,7 @@ const CartPage = () => {
             >
               <ComicCover
                 comic={comic}
+                decorative
                 className="ring-foreground/15 w-16 shrink-0 rounded-md ring-1 sm:w-24"
               />
               <div className="min-w-0 flex-1">

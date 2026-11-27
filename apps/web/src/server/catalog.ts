@@ -16,7 +16,7 @@ export interface SellableComic {
   priceMxn: number;
   pageCount: number;
   hasCover: boolean;
-  author: { slug: string; displayName: string };
+  author: { slug: string; displayName: string; role: string };
   /** Credited people without an account; the Author enters their names, roles and links for the public to see. */
   collaborators: Collaborator[];
 }
@@ -56,6 +56,7 @@ export const sellableComics = async (
       hasCover: sql<number>`${editionComic.coverKey} is not null`,
       slug: authorProfile.slug,
       displayName: authorProfile.displayName,
+      role: authorProfile.role,
     })
     .from(editionComic)
     // No join on `registration`: Admins sell without one.
@@ -78,10 +79,10 @@ export const sellableComics = async (
   return {
     status: "open",
     edition: { id: edition.id, name: edition.name },
-    comics: rows.map(({ hasCover, slug, displayName, ...comic }) => ({
+    comics: rows.map(({ hasCover, slug, displayName, role, ...comic }) => ({
       ...comic,
       hasCover: Boolean(hasCover),
-      author: { slug, displayName },
+      author: { slug, displayName, role },
     })),
   };
 };

@@ -7,13 +7,18 @@ import { collaboratorNames } from "@/lib/credits";
 import { formatMxn } from "@/lib/format";
 import type { SellableComic } from "@/server/catalog";
 
-/** A cover, or the title set as type when the Author has not uploaded one. The title beside it names the comic, so the stand-in is hidden. */
+/**
+ * A cover, or the title set as type when the Author has not uploaded one. The title beside it names the comic, so the stand-in is hidden.
+ * `decorative` hides the image too, where the title already sits right next to it.
+ */
 export const ComicCover = ({
   comic,
   className,
+  decorative = false,
 }: {
   comic: Pick<SellableComic, "id" | "title" | "hasCover">;
   className?: string;
+  decorative?: boolean;
 }) => {
   if (!comic.hasCover) {
     return (
@@ -35,7 +40,7 @@ export const ComicCover = ({
   return (
     <img
       src={`/portadas/${comic.id}`}
-      alt={`Portada de ${comic.title}`}
+      alt={decorative ? "" : `Portada de ${comic.title}`}
       width={400}
       height={600}
       loading="lazy"
@@ -56,7 +61,7 @@ const ComicCard = ({
   showAuthor: boolean;
   action?: ReactNode;
 }) => (
-  <article className="group/comic flex w-full flex-col">
+  <article className="group/comic flex w-full min-w-0 flex-col">
     {/* The title link below is the one keyboards and screen readers use; the cover is a larger target for the pointer. */}
     <Link
       to="/comics/$comicId"
@@ -77,7 +82,7 @@ const ComicCard = ({
       </Link>
     </h3>
     {showAuthor ? (
-      <p className="mt-1 text-sm">
+      <p className="mt-1 text-sm wrap-anywhere">
         <Link
           to="/autores/$slug"
           params={{ slug: comic.author.slug }}
@@ -93,7 +98,7 @@ const ComicCard = ({
         )}
       </p>
     ) : null}
-    <p className="text-muted-foreground mt-1 text-sm">
+    <p className="text-muted-foreground mt-1 text-sm wrap-anywhere">
       {comic.genre} · {comic.pageCount} páginas
     </p>
     <div className="mt-auto flex flex-wrap items-center justify-between gap-x-2 gap-y-3 pt-4">
@@ -115,7 +120,7 @@ export const ComicGrid = ({
 }) => (
   <ul className="grid grid-cols-2 gap-x-4 gap-y-12 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-4 lg:gap-x-8">
     {comics.map((comic) => (
-      <li key={comic.id} className="flex">
+      <li key={comic.id} className="flex min-w-0">
         <ComicCard
           comic={comic}
           showAuthor={showAuthor}

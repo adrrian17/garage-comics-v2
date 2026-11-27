@@ -7,10 +7,7 @@ const byName = new Intl.Collator("es-MX", { sensitivity: "base" });
 
 /** The Authors behind a list of comics, each once with their comics in the order given, sorted by name. */
 export const authorRoster = <Comic extends RosterComic>(comics: Comic[]) => {
-  const authors = new Map<
-    string,
-    { slug: string; displayName: string; comics: Comic[] }
-  >();
+  const authors = new Map<string, Comic["author"] & { comics: Comic[] }>();
 
   for (const comic of comics) {
     const entry = authors.get(comic.author.slug);

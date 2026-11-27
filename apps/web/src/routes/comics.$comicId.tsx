@@ -4,7 +4,9 @@ import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { AddToCartButton } from "@/components/add-to-cart-button";
 import { ComicCover, ComicGrid } from "@/components/comic-grid";
 import { SectionRule } from "@/components/page-intro";
-import { getComicPage } from "@/functions/catalog";
+import { SalesClosed } from "@/components/sales-closed";
+import { COMIC_ID_MAX_LENGTH, getComicPage } from "@/functions/catalog";
+import { getActiveEdition } from "@/functions/editions";
 import { collaboratorNames, linkLabel } from "@/lib/credits";
 import { formatMxn } from "@/lib/format";
 import type { SellableComic } from "@/server/catalog";
@@ -66,7 +68,19 @@ const Credits = ({ comic }: { comic: SellableComic }) => (
 );
 
 const ComicPage = () => {
-  const { comic, moreByAuthor } = Route.useLoaderData();
+  const page = Route.useLoaderData();
+
+  // The link was right while the comic was on sale; it is not a missing page.
+  if (page.status === "closed") {
+    return (
+      <SalesClosed
+        title="Este cómic ya no está a la venta"
+        edition={page.edition}
+      />
+    );
+  }
+
+  const { comic, moreByAuthor } = page;
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:pb-28">
@@ -85,7 +99,7 @@ const ComicPage = () => {
           />
         </div>
         <div className="flex flex-col">
-          <p>
+          <p className="wrap-anywhere">
             <Link
               to="/autores/$slug"
               params={{ slug: comic.author.slug }}
@@ -103,7 +117,7 @@ const ComicPage = () => {
           <h1 className="font-display mt-3 text-4xl leading-none font-semibold tracking-tight text-balance wrap-anywhere sm:text-6xl">
             {comic.title}
           </h1>
-          <p className="text-muted-foreground mt-4 text-lg">
+          <p className="text-muted-foreground mt-4 text-lg wrap-anywhere">
             {comic.genre} · {comic.pageCount} páginas
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-4">
@@ -141,28 +155,37 @@ const ComicPage = () => {
 
 export const Route = createFileRoute("/comics/$comicId")({
   loader: async ({ params }) => {
-    const page = await getComicPage({ data: { id: params.comicId } });
+    const page =
+      params.comicId.length > COMIC_ID_MAX_LENGTH
+        ? null
+        : await getComicPage({ data: { id: params.comicId } });
 
     if (page === null) {
       // oxlint-disable-next-line typescript/only-throw-error -- TanStack Router signals a missing page by throwing notFound().
       throw notFound();
     }
 
+    if (page.status === "closed") {
+      return { ...page, edition: await getActiveEdition() };
+    }
+
     return page;
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      {
-        title: `${loaderData?.comic.title ?? "Cómic"} · Garage Cómics`,
-      },
-      {
-        name: "description",
-        content:
-          loaderData === undefined || loaderData.comic.description === ""
-            ? `Cómic digital de ${loaderData?.comic.author.displayName ?? "un autor mexicano"} a la venta en Garage Cómics.`
-            : loaderData.comic.description.slice(0, DESCRIPTION_META_LENGTH),
-      },
-    ],
-  }),
+  head: ({ loaderData }) => {
+    const comic = loaderData?.status === "open" ? loaderData.comic : null;
+
+    return {
+      meta: [
+        { title: `${comic?.title ?? "Cómic"} · Garage Cómics` },
+        {
+          name: "description",
+          content:
+            comic === null || comic.description === ""
+              ? `Cómic digital de ${comic?.author.displayName ?? "un autor mexicano"} en Garage Cómics.`
+              : comic.description.slice(0, DESCRIPTION_META_LENGTH),
+        },
+      ],
+    };
+  },
   component: ComicPage,
 });
