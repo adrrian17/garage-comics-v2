@@ -86,7 +86,7 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
   const [search, setSearch] = useState(buscar);
   const urlTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
-  // The search this box last put in the URL. Any other value came from outside (a link, Back): the box takes it and drops its pending write.
+  // The search this box last put in the URL. Any other value came from outside: the box takes it and drops its pending write.
   const writtenBuscar = useRef(buscar);
 
   useEffect(() => {
@@ -112,11 +112,12 @@ const FilteredCatalog = ({ comics }: { comics: SellableComic[] }) => {
     []
   );
 
-  // Back and Forward land on an entry with its own search: a pending write would overwrite it, and the box takes that search.
+  // A link, Back or Forward lands on an entry with its own search: a pending write would overwrite it, and the box takes that search.
+  // The box's own writes are the only replaces.
   useEffect(
     () =>
       router.history.subscribe(({ action, location }) => {
-        if (action.type === "PUSH" || action.type === "REPLACE") {
+        if (action.type === "REPLACE") {
           return;
         }
 
